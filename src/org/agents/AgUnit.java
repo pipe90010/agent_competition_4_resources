@@ -21,7 +21,7 @@ public class AgUnit extends Agent{
 	
 	protected void setup()
 	{
-		System.out.println(getLocalName()+": has entered into the system");
+		System.out.println(getLocalName()+": has entered into the system ");
 		
 		
 		
