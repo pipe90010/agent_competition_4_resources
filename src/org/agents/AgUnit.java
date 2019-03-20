@@ -10,10 +10,23 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 
+import org.ontology.GameOntology;
+
+import jade.content.lang.Codec;
+import jade.content.lang.Codec.*;
+import jade.content.onto.*;
+import jade.content.lang.sl.*;
+
 public class AgUnit extends Agent{
 
 	public final static String WORLD = "World";
-	public final static String CREATE = "Create";
+	public final static String UNIT = "Unit";
+	public final static String CREATE = "Create Unit";
+	
+	// Codec for the SL language used and instance of the ontology
+	// GameOntology that we have created
+    private Codec codec = new SLCodec();
+    private Ontology ontology = GameOntology.getInstance();
 	
 	public AgUnit() {
 		// TODO Auto-generated constructor stub
@@ -22,6 +35,23 @@ public class AgUnit extends Agent{
 	protected void setup()
 	{
 		System.out.println(getLocalName()+": has entered into the system ");
+		
+		//Register of the codec and the ontology to be used in the ContentManager
+        getContentManager().registerLanguage(codec);
+        getContentManager().registerOntology(ontology);
+        
+		try {
+			DFAgentDescription dfd = new DFAgentDescription();
+			ServiceDescription sd = new ServiceDescription();
+			sd.setName(this.getName());
+			sd.setType(UNIT);
+			dfd.addServices(sd);
+			// Registers its description in the DF
+			DFService.register(this, dfd);
+			System.out.println(getLocalName()+": registered in the DF");
+		} catch (FIPAException e) {
+			e.printStackTrace();
+		}
 		
 		
 		
@@ -42,7 +72,7 @@ public class AgUnit extends Agent{
 				msg.setContent(CREATE);
 				msg.addReceiver(ag);
 				send(msg);
-				
+				System.out.println(getLocalName()+": REQUEST CREATION TO THE WORLD");
 			}
 
 			@Override
@@ -69,5 +99,9 @@ public class AgUnit extends Agent{
 			}
 			
 		});
+	}
+	protected void takeDown() {
+		// Printout a dismissal message
+		System.out.println("Agent "+getLocalName()+" has terminating");
 	}
 }
