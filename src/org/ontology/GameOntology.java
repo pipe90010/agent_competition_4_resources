@@ -9,7 +9,7 @@ import jade.core.CaseInsensitiveString;
 
 /** file: GameOntology.java
  * @author ontology bean generator
- * @version 2019/03/19, 16:00:20
+ * @version 2019/03/22, 10:37:19
  */
 public class GameOntology extends jade.content.onto.Ontology  {
   //NAME
@@ -23,15 +23,15 @@ public class GameOntology extends jade.content.onto.Ontology  {
 
 
    // VOCABULARY
+    public static final String CREATEUNIT="CreateUnit";
+    public static final String NOTIFYNEWUNIT_LOCATION="location";
+    public static final String NOTIFYNEWUNIT_NEWUNIT="newUnit";
+    public static final String NOTIFYNEWUNIT="NotifyNewUnit";
     public static final String CELL_X="x";
     public static final String CELL_Y="y";
     public static final String CELL_CONTENT="content";
     public static final String CELL_OWNER="owner";
     public static final String CELL="Cell";
-    public static final String CREATEUNIT="CreateUnit";
-    public static final String NOTIFYNEWUNIT_LOCATION="location";
-    public static final String NOTIFYNEWUNIT_NEWUNIT="newUnit";
-    public static final String NOTIFYNEWUNIT="NotifyNewUnit";
 
   /**
    * Constructor
@@ -41,14 +41,14 @@ public class GameOntology extends jade.content.onto.Ontology  {
     try { 
 
     // adding Concept(s)
-    ConceptSchema notifyNewUnitSchema = new ConceptSchema(NOTIFYNEWUNIT);
-    add(notifyNewUnitSchema, org.ontology.NotifyNewUnit.class);
-    ConceptSchema createUnitSchema = new ConceptSchema(CREATEUNIT);
-    add(createUnitSchema, org.ontology.CreateUnit.class);
     ConceptSchema cellSchema = new ConceptSchema(CELL);
     add(cellSchema, org.ontology.Cell.class);
 
     // adding AgentAction(s)
+    AgentActionSchema notifyNewUnitSchema = new AgentActionSchema(NOTIFYNEWUNIT);
+    add(notifyNewUnitSchema, org.ontology.NotifyNewUnit.class);
+    AgentActionSchema createUnitSchema = new AgentActionSchema(CREATEUNIT);
+    add(createUnitSchema, org.ontology.CreateUnit.class);
 
     // adding AID(s)
 
@@ -56,12 +56,12 @@ public class GameOntology extends jade.content.onto.Ontology  {
 
 
     // adding fields
-    notifyNewUnitSchema.add(NOTIFYNEWUNIT_NEWUNIT, (ConceptSchema)getSchema(BasicOntology.AID), ObjectSchema.MANDATORY);
-    notifyNewUnitSchema.add(NOTIFYNEWUNIT_LOCATION, cellSchema, ObjectSchema.MANDATORY);
     cellSchema.add(CELL_OWNER, (TermSchema)getSchema(BasicOntology.INTEGER), ObjectSchema.MANDATORY);
     cellSchema.add(CELL_CONTENT, (TermSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
     cellSchema.add(CELL_Y, (TermSchema)getSchema(BasicOntology.INTEGER), ObjectSchema.MANDATORY);
     cellSchema.add(CELL_X, (TermSchema)getSchema(BasicOntology.INTEGER), ObjectSchema.MANDATORY);
+    notifyNewUnitSchema.add(NOTIFYNEWUNIT_NEWUNIT, (ConceptSchema)getSchema(BasicOntology.AID), ObjectSchema.MANDATORY);
+    notifyNewUnitSchema.add(NOTIFYNEWUNIT_LOCATION, cellSchema, ObjectSchema.MANDATORY);
 
     // adding name mappings
 

@@ -8,9 +8,9 @@ import jade.core.*;
 /**
 * Protege name: NotifyNewUnit
 * @author ontology bean generator
-* @version 2019/03/19, 16:00:20
+* @version 2019/03/22, 10:37:19
 */
-public class NotifyNewUnit implements Concept {
+public class NotifyNewUnit implements AgentAction {
 
    /**
 * Protege name: newUnit
