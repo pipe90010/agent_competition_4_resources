@@ -10,18 +10,19 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 
+import org.ontology.CreateUnit;
 import org.ontology.GameOntology;
 
 import jade.content.lang.Codec;
 import jade.content.lang.Codec.*;
 import jade.content.onto.*;
+import jade.content.onto.basic.Action;
 import jade.content.lang.sl.*;
 
 public class AgUnit extends Agent{
 
 	public final static String WORLD = "World";
 	public final static String UNIT = "Unit";
-	public final static String CREATE = "Create Unit";
 	
 	// Codec for the SL language used and instance of the ontology
 	// GameOntology that we have created
@@ -69,10 +70,25 @@ public class AgUnit extends Agent{
 				AID ag= dfd.getName();
 				
 				ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
-				msg.setContent(CREATE);
 				msg.addReceiver(ag);
-				send(msg);
-				System.out.println(getLocalName()+": REQUEST CREATION TO THE WORLD");
+				msg.setLanguage(codec.getName());
+				msg.setOntology(ontology.getName());
+				
+				CreateUnit create = new CreateUnit();
+				Action agAction = new Action(ag,create);
+				
+				try {
+					getContentManager().fillContent(msg, agAction);
+					send(msg);
+					System.out.println(getLocalName()+": REQUEST CREATION TO THE WORLD");
+				} catch (CodecException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (OntologyException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
 			}
 
 			@Override
