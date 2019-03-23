@@ -7,66 +7,70 @@ import jade.util.leap.HashMap;
 import jade.content.lang.Codec;
 import jade.core.CaseInsensitiveString;
 
-/** file: GameOntology.java
+/**
+ * file: GameOntology.java
+ * 
  * @author ontology bean generator
  * @version 2019/03/22, 10:37:19
  */
-public class GameOntology extends jade.content.onto.Ontology  {
-  //NAME
-  public static final String ONTOLOGY_NAME = "game";
-  // The singleton instance of this ontology
-  private static ReflectiveIntrospector introspect = new ReflectiveIntrospector();
-  private static Ontology theInstance = new GameOntology();
-  public static Ontology getInstance() {
-     return theInstance;
-  }
+public class GameOntology extends jade.content.onto.Ontology {
+	// NAME
+	public static final String ONTOLOGY_NAME = "game";
+	// The singleton instance of this ontology
+	private static ReflectiveIntrospector introspect = new ReflectiveIntrospector();
+	private static Ontology theInstance = new GameOntology();
 
+	public static Ontology getInstance() {
+		return theInstance;
+	}
 
-   // VOCABULARY
-    public static final String CREATEUNIT="CreateUnit";
-    public static final String NOTIFYNEWUNIT_LOCATION="location";
-    public static final String NOTIFYNEWUNIT_NEWUNIT="newUnit";
-    public static final String NOTIFYNEWUNIT="NotifyNewUnit";
-    public static final String CELL_X="x";
-    public static final String CELL_Y="y";
-    public static final String CELL_CONTENT="content";
-    public static final String CELL_OWNER="owner";
-    public static final String CELL="Cell";
+	// VOCABULARY
+	public static final String CREATEUNIT = "CreateUnit";
+	public static final String NOTIFYNEWUNIT_LOCATION = "location";
+	public static final String NOTIFYNEWUNIT_NEWUNIT = "newUnit";
+	public static final String NOTIFYNEWUNIT = "NotifyNewUnit";
+	public static final String CELL_X = "x";
+	public static final String CELL_Y = "y";
+	public static final String CELL_CONTENT = "content";
+	public static final String CELL_OWNER = "owner";
+	public static final String CELL = "Cell";
 
-  /**
-   * Constructor
-  */
-  private GameOntology(){ 
-    super(ONTOLOGY_NAME, BasicOntology.getInstance());
-    try { 
+	/**
+	 * Constructor
+	 */
+	private GameOntology() {
+		super(ONTOLOGY_NAME, BasicOntology.getInstance());
+		try {
 
-    // adding Concept(s)
-    ConceptSchema cellSchema = new ConceptSchema(CELL);
-    add(cellSchema, org.ontology.Cell.class);
+			// adding Concept(s)
+			ConceptSchema cellSchema = new ConceptSchema(CELL);
+			add(cellSchema, org.ontology.Cell.class);
 
-    // adding AgentAction(s)
-    AgentActionSchema notifyNewUnitSchema = new AgentActionSchema(NOTIFYNEWUNIT);
-    add(notifyNewUnitSchema, org.ontology.NotifyNewUnit.class);
-    AgentActionSchema createUnitSchema = new AgentActionSchema(CREATEUNIT);
-    add(createUnitSchema, org.ontology.CreateUnit.class);
+			// adding AgentAction(s)
+			AgentActionSchema notifyNewUnitSchema = new AgentActionSchema(NOTIFYNEWUNIT);
+			add(notifyNewUnitSchema, org.ontology.NotifyNewUnit.class);
+			AgentActionSchema createUnitSchema = new AgentActionSchema(CREATEUNIT);
+			add(createUnitSchema, org.ontology.CreateUnit.class);
 
-    // adding AID(s)
+			// adding AID(s)
 
-    // adding Predicate(s)
+			// adding Predicate(s)
 
+			// adding fields
+			cellSchema.add(CELL_OWNER, (TermSchema) getSchema(BasicOntology.INTEGER), ObjectSchema.MANDATORY);
+			cellSchema.add(CELL_CONTENT, (TermSchema) getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
+			cellSchema.add(CELL_Y, (TermSchema) getSchema(BasicOntology.INTEGER), ObjectSchema.MANDATORY);
+			cellSchema.add(CELL_X, (TermSchema) getSchema(BasicOntology.INTEGER), ObjectSchema.MANDATORY);
+			notifyNewUnitSchema.add(NOTIFYNEWUNIT_NEWUNIT, (ConceptSchema) getSchema(BasicOntology.AID),
+					ObjectSchema.MANDATORY);
+			notifyNewUnitSchema.add(NOTIFYNEWUNIT_LOCATION, cellSchema, ObjectSchema.MANDATORY);
 
-    // adding fields
-    cellSchema.add(CELL_OWNER, (TermSchema)getSchema(BasicOntology.INTEGER), ObjectSchema.MANDATORY);
-    cellSchema.add(CELL_CONTENT, (TermSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
-    cellSchema.add(CELL_Y, (TermSchema)getSchema(BasicOntology.INTEGER), ObjectSchema.MANDATORY);
-    cellSchema.add(CELL_X, (TermSchema)getSchema(BasicOntology.INTEGER), ObjectSchema.MANDATORY);
-    notifyNewUnitSchema.add(NOTIFYNEWUNIT_NEWUNIT, (ConceptSchema)getSchema(BasicOntology.AID), ObjectSchema.MANDATORY);
-    notifyNewUnitSchema.add(NOTIFYNEWUNIT_LOCATION, cellSchema, ObjectSchema.MANDATORY);
+			// adding name mappings
 
-    // adding name mappings
+			// adding inheritance
 
-    // adding inheritance
-
-   }catch (java.lang.Exception e) {e.printStackTrace();}
-  }
-  }
+		} catch (java.lang.Exception e) {
+			e.printStackTrace();
+		}
+	}
+}
