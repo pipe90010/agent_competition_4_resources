@@ -25,7 +25,7 @@ public class AgUnit extends Agent{
 	public final static String UNIT = "Unit";
 	
 	// Codec for the SL language used and instance of the ontology
-	// GameOntology that we have created
+	// GameOntology that we have created this part always goes
     private Codec codec = new SLCodec();
     private Ontology ontology = GameOntology.getInstance();
 	
@@ -38,6 +38,7 @@ public class AgUnit extends Agent{
 		System.out.println(getLocalName()+": has entered into the system ");
 		
 		//Register of the codec and the ontology to be used in the ContentManager
+		//Register language and ontology this part always goes
         getContentManager().registerLanguage(codec);
         getContentManager().registerOntology(ontology);
         
@@ -53,7 +54,9 @@ public class AgUnit extends Agent{
 		} catch (FIPAException e) {
 			e.printStackTrace();
 		}
-		
+		/*
+         * BEHAVIORS------------------------------------------------------------------------------------------
+         */
 		
 		
 		addBehaviour(new SimpleBehaviour(this)
@@ -78,6 +81,7 @@ public class AgUnit extends Agent{
 				Action agAction = new Action(ag,create);
 				
 				try {
+					// Here you pass in arguments the message and the content that it will be filled with
 					getContentManager().fillContent(msg, agAction);
 					send(msg);
 					System.out.println(getLocalName()+": REQUEST CREATION TO THE WORLD");
