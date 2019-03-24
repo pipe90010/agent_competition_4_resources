@@ -88,6 +88,10 @@ public class AgWorld extends Agent{
 									{
 										System.out.println(myAgent.getLocalName()+": received creation request from "+(msg.getSender()).getLocalName());
 										ACLMessage reply = msg.createReply();
+										reply.setLanguage(codec.getName());
+										reply.setOntology(ontology.getName());
+										reply.setPerformative(ACLMessage.AGREE);
+										myAgent.send(reply);
 									}
 								}
 							}
