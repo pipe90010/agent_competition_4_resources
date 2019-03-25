@@ -22,6 +22,9 @@ import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
+import jade.wrapper.AgentController;
+import jade.wrapper.ContainerController;
+import jade.wrapper.StaleProxyException;
 
 public class AgWorld extends Agent{
 
@@ -156,6 +159,19 @@ public class AgWorld extends Agent{
 				}
 						
 		});
+        
+        //AGENTS ARE NOW CREATED FROM THE WORLD
+        ContainerController cc = getContainerController();
+        AgentController ac1,ac2;
+		try {
+			ac1 = cc.createNewAgent("Tribe", "es.upm.woa.agent.group2.AgTribe", new Object[0]);
+			ac2 = cc.createNewAgent("Unit", "es.upm.woa.agent.group2.AgUnit", new Object[0]);
+			ac1.start();
+			ac2.start();
+		} catch (StaleProxyException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     	}
 
 }
