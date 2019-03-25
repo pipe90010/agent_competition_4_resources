@@ -70,25 +70,37 @@ public class AgUnit extends Agent{
 				ServiceDescription sd = new ServiceDescription();
 				sd.setType(WORLD);
 				dfd.addServices(sd);
-				AID ag= dfd.getName();
-				
-				ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
-				msg.addReceiver(ag);
-				msg.setLanguage(codec.getName());
-				msg.setOntology(ontology.getName());
-				
-				CreateUnit create = new CreateUnit();
-				Action agAction = new Action(ag,create);
 				
 				try {
-					// Here you pass in arguments the message and the content that it will be filled with
-					getContentManager().fillContent(msg, agAction);
-					send(msg);
-					System.out.println(getLocalName()+": REQUEST CREATION TO THE WORLD");
+					// It finds agents of the required type
+					DFAgentDescription[] res = new DFAgentDescription[1];
+					res = DFService.search(myAgent, dfd);
+					// Gets the first occurrence, if there was success
+					if (res.length > 0)
+					{
+						AID ag = (AID)res[0].getName();
+					
+						ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
+						msg.addReceiver(ag);
+						msg.setLanguage(codec.getName());
+						msg.setOntology(ontology.getName());
+						
+						CreateUnit create = new CreateUnit();
+						Action agAction = new Action(ag,create);
+						// Here you pass in arguments the message and the content that it will be filled with
+						getContentManager().fillContent(msg, agAction);
+						send(msg);
+						System.out.println(getLocalName()+": REQUEST CREATION TO THE WORLD");
+					}
+					else
+						System.out.println("THERE ARE NO AGENTS REGISTERED WITH TYPE: "+sd.getType());
 				} catch (CodecException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (OntologyException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (FIPAException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
@@ -103,13 +115,14 @@ public class AgUnit extends Agent{
 			
 		});
 		
+		// Adds a behavior to process the answer to a creation request
 		addBehaviour(new SimpleBehaviour(this)
 		{
 
 			@Override
 			public void action() {
 				// TODO Auto-generated method stub
-				
+				ACLMessage msg = receive(MessageTemplate.MatchPerformative(ACLMessage.PROPOSE));
 			}
 
 			@Override
