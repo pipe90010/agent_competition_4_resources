@@ -110,7 +110,7 @@ public class AgUnit extends Agent{
 			@Override
 			public boolean done() {
 				// TODO Auto-generated method stub
-				return false;
+				return true;
 			}
 			
 		});
@@ -122,7 +122,11 @@ public class AgUnit extends Agent{
 			@Override
 			public void action() {
 				// TODO Auto-generated method stub
-				ACLMessage msg = receive(MessageTemplate.MatchPerformative(ACLMessage.PROPOSE));
+				ACLMessage msg = receive(MessageTemplate.MatchPerformative(ACLMessage.AGREE));
+				if (msg != null)
+	            {
+					System.out.println("WORLD REPLIED SUCCESFULL CREATION OF UNIT");
+	            }
 			}
 
 			@Override
