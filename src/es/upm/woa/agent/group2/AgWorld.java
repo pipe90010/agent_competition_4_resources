@@ -1,9 +1,9 @@
-package org.agents;
+package es.upm.woa.agent.group2;
 
-import org.ontology.Cell;
-import org.ontology.CreateUnit;
-import org.ontology.GameOntology;
-import org.ontology.NotifyNewUnit;
+import es.upm.woa.ontology.Cell;
+import es.upm.woa.ontology.CreateUnit;
+import es.upm.woa.ontology.GameOntology;
+import es.upm.woa.ontology.NotifyNewUnit;
 
 import jade.content.Concept;
 import jade.content.ContentElement;

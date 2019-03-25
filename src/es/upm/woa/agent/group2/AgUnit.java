@@ -1,4 +1,4 @@
-package org.agents;
+package es.upm.woa.agent.group2;
 
 import jade.core.AID;
 import jade.core.Agent;
@@ -10,8 +10,8 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 
-import org.ontology.CreateUnit;
-import org.ontology.GameOntology;
+import es.upm.woa.ontology.CreateUnit;
+import es.upm.woa.ontology.GameOntology;
 
 import jade.content.lang.Codec;
 import jade.content.lang.Codec.*;

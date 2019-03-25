@@ -1,4 +1,4 @@
-package org.ontology;
+package es.upm.woa.ontology;
 
 import jade.content.*;
 import jade.util.leap.*;
