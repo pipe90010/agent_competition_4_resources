@@ -1,4 +1,4 @@
-package es.upm.woa.agent.group2;
+package es.upm.woa.agent.group2.agents;
 
 
 import es.upm.woa.ontology.GameOntology;

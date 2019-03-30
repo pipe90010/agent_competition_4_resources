@@ -1,4 +1,4 @@
-package es.upm.woa.agent.group2;
+package es.upm.woa.agent.group2.beans;
 
 import java.util.ArrayList;
 

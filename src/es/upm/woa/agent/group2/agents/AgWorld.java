@@ -1,8 +1,11 @@
-package es.upm.woa.agent.group2;
+package es.upm.woa.agent.group2.agents;
 
 import java.util.ArrayList;
 import java.util.Random;
 
+import es.upm.woa.agent.group2.beans.Tribe;
+import es.upm.woa.agent.group2.beans.Unit;
+import es.upm.woa.agent.group2.rules.AgWorldRules;
 import es.upm.woa.ontology.Cell;
 import es.upm.woa.ontology.CreateUnit;
 import es.upm.woa.ontology.GameOntology;
@@ -55,6 +58,7 @@ public class AgWorld extends Agent {
 	private Codec codec = new SLCodec();
 	private Ontology ontology = GameOntology.getInstance();
 	private ArrayList<Tribe> tribes;
+	private AgWorldRules worldRules;
 	private Cell[][] map;
 	// -----------------------------------------------------------------
 	// Constructor
@@ -141,12 +145,12 @@ public class AgWorld extends Agent {
 									Tribe tribe = tribes.get(indexTribe);
 									Unit senderUnit = findUnitByAID(sender, tribe);
 									Integer code = canCreateUnit(tribe, senderUnit.getPosition());
-									String newUnitName= "UnitY";
+									String newUnitName = "UnitY";
 
 									switch (code) {
 									case 1:
-										
-										System.out.println("creating unit:" + newUnitName );
+
+										System.out.println("creating unit:" + newUnitName);
 										Unit u = createUnit(newUnitName);
 										tribes.get(indexTribe).addUnit(u, 150, 50);
 										DFAgentDescription dfd2 = new DFAgentDescription();
@@ -218,6 +222,7 @@ public class AgWorld extends Agent {
 
 	private void initialize() {
 		tribes = new ArrayList<Tribe>();
+		worldRules = new AgWorldRules();
 		this.initializeMap();
 	}
 
@@ -268,29 +273,17 @@ public class AgWorld extends Agent {
 	}
 
 	private Integer canCreateUnit(Tribe t, Cell position) {
-		
-		if (hasEnoughGold(t.getGold())) {
+
+		if (worldRules.hasEnoughGold(t.getGold())) {
 			return 2;
 		}
-		if (hasEnoughFood(t.getFood())) {
+		if (worldRules.hasEnoughFood(t.getFood())) {
 			return 3;
 		}
-		if (isInTownhall(t.getTownhall().getX(), t.getTownhall().getY(), position)) {
-			return  4;
+		if (worldRules.isInTownhall(t.getTownhall().getX(), t.getTownhall().getY(), position)) {
+			return 4;
 		}
 		return 1;
-	}
-
-	private boolean hasEnoughGold(Integer gold) {
-		return gold >= 150;
-	}
-
-	private boolean hasEnoughFood(Integer food) {
-		return food >= 50;
-	}
-
-	private boolean isInTownhall(Integer X, Integer Y, Cell position) {
-		return X == position.getX() && Y == position.getY();
 	}
 
 	private Unit createUnit(String nickname) {
@@ -309,14 +302,12 @@ public class AgWorld extends Agent {
 		return null;
 	}
 
-	
 	private int findTribePositionByUnitAID(AID aid) {
 		for (int i = 0; i < tribes.size(); i++) {
 			for (int j = 0; j < tribes.get(i).getUnits().size(); j++) {
 				if (tribes.get(i).getUnits().get(j).getId().getName().equals(aid.getName()))
 					return i;
 			}
-
 		}
 		return -1;
 	}
