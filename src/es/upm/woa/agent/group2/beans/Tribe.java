@@ -20,6 +20,7 @@ public class Tribe {
 	private int food;
 	private Cell townhall;
 	private ArrayList<Unit> units;
+	private int memberSize;
 	private AID id;
 	
 	// -----------------------------------------------------------------
@@ -33,6 +34,7 @@ public class Tribe {
 		this.food = food;
 		this.townhall = townhall;
 		this.units = new ArrayList<Unit>();
+		this.memberSize = 0;
 	}
 	
 	// -----------------------------------------------------------------
@@ -70,6 +72,7 @@ public class Tribe {
 	
 	public void addUnit(Unit u, int goldCost, int foodCost) {
 		units.add(u);
+		setMemberSize(this.memberSize+1);
 		setGold(getGold()-goldCost);
 		setFood(getFood()-foodCost);
 	}
@@ -85,4 +88,14 @@ public class Tribe {
 	public void setId(AID id) {
 		this.id = id;
 	}
+
+	public int getMemberSize() {
+		return memberSize;
+	}
+
+	public void setMemberSize(int memberSize) {
+		this.memberSize = memberSize;
+	}
+	
+	
 }
