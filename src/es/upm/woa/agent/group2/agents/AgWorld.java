@@ -88,15 +88,17 @@ public class AgWorld extends Agent {
 		/**
 		 * TRIBE IS CREATED FROM THE WORLD
 		 */
-		Tribe t = createTribe("TribeX");
+		Tribe tx = createTribe("TribeX");
+		Tribe ty = createTribe("TribeY");
 
 		/**
 		 * TEST UNIT IS CREATED FROM THE WORLD
 		 */
 		Unit u = createUnit("UnitX");
-		u.setPosition(t.getTownhall());
-		t.addUnit(u, 0, 0);
-		tribes.add(t);
+		u.setPosition(tx.getTownhall());
+		tx.addUnit(u, 0, 0);
+		tribes.add(tx);
+		tribes.add(ty);
 		try {
 			// Creates its own description
 			DFAgentDescription dfd = new DFAgentDescription();
@@ -142,9 +144,9 @@ public class AgWorld extends Agent {
 									// TODO CONDITION FOR AGREEING
 									AID sender = msg.getSender();
 									int indexTribe = findTribePositionByUnitAID(sender);
-									Tribe tribe = tribes.get(indexTribe);
-									Unit senderUnit = findUnitByAID(sender, tribe);
-									Integer code = canCreateUnit(tribe, senderUnit.getPosition());
+									Tribe tribeSender = tribes.get(indexTribe);
+									Unit senderUnit = findUnitByAID(sender, tribeSender);
+									Integer code = canCreateUnit(tribeSender, senderUnit.getPosition(),indexTribe);
 									String newUnitName = "UnitY";
 
 									switch (code) {
@@ -190,6 +192,10 @@ public class AgWorld extends Agent {
 										break;
 									case 4:
 										System.out.println("unit" + newUnitName + "not positioned in the townhall");
+										reply.setPerformative(ACLMessage.REFUSE);
+										break;
+									case 5:
+										System.out.println("unit" + newUnitName + "not positioned in the right townhall");
 										reply.setPerformative(ACLMessage.REFUSE);
 										break;
 									default:
@@ -253,7 +259,6 @@ public class AgWorld extends Agent {
 		} else {
 			return bookNextRandomCell(owner, content);
 		}
-
 	}
 
 	private Tribe createTribe(String nickname) {
@@ -272,16 +277,19 @@ public class AgWorld extends Agent {
 		return null;
 	}
 
-	private Integer canCreateUnit(Tribe t, Cell position) {
+	private Integer canCreateUnit(Tribe t, Cell position, Integer index) {
 
-		if (worldRules.hasEnoughGold(t.getGold())) {
+		if (worldRules.isItsOwnTownhall(t.getTownhall(), tribes.get(index).getTownhall())) {
 			return 2;
 		}
-		if (worldRules.hasEnoughFood(t.getFood())) {
+		if (worldRules.isInTownhall(t.getTownhall().getX(), t.getTownhall().getY(), position)) {
 			return 3;
 		}
-		if (worldRules.isInTownhall(t.getTownhall().getX(), t.getTownhall().getY(), position)) {
+		if (worldRules.hasEnoughGold(t.getGold())) {
 			return 4;
+		}
+		if (worldRules.hasEnoughFood(t.getFood())){
+			return 5;
 		}
 		return 1;
 	}
