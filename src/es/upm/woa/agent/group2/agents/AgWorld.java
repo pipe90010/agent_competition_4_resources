@@ -146,10 +146,16 @@ public class AgWorld extends Agent {
 									reply.setLanguage(codec.getName());
 									reply.setOntology(ontology.getName());
 									// TODO CONDITION FOR AGREEING
+									
+									//Getting AID of message sender
 									AID sender = msg.getSender();
+
+									//Finding Unit by AID
 									int indexTribe = findTribePositionByUnitAID(sender);
 									Tribe tribeSender = tribes.get(indexTribe);
 									Unit senderUnit = findUnitByAID(sender, tribeSender);
+									
+									//Validate unit creation
 									Integer code = canCreateUnit(tribeSender, senderUnit.getPosition(),indexTribe);
 									String newUnitName = "UnitY";
 
@@ -248,19 +254,29 @@ public class AgWorld extends Agent {
 	                    if (movementRequest instanceof Action) {
 	                        Action action = (Action) movementRequest;
 	                        Concept concept = action.getAction();
-
+	                        
+	                        
+	                        //Validate that a cell exists: 5.2.2 Scenario 3
 	                        if (concept instanceof Cell) {
 	                        	
+	                        	//ACLMessage reply;
 	                        	ACLMessage reply = msg.createReply();
 								reply.setLanguage(codec.getName());
 								reply.setOntology(ontology.getName());
 								
 								
+								AID sender = reply.getSender();
 	                        	Cell requestedPosition = (Cell) concept;
-	                        	Cell currentPosition = null; //TODO: DANIEL findUnitFromAnyTribe(unitAID).getPosition();
-
-	                            //ACLMessage reply;
-
+	                        	
+	                        	
+	                        	int indexTribe = findTribePositionByUnitAID(sender);
+								Tribe tribeSender = tribes.get(indexTribe);
+								Unit senderUnit = findUnitByAID(sender, tribeSender);
+								
+								Cell currentPosition = senderUnit.getPosition(); //TODO: DANIEL findUnitFromAnyTribe(unitAID).getPosition();
+								
+								//validate that are adjacents 5.2.2 SCENARIO 1 & 2								
+																
 	                            if (!areAdjacentPositions(currentPosition, requestedPosition)) {
 	                                System.out.println(platformName + "Unit " + senderName + " can't move there...");
 	                                reply = MessageFormatter.createReplyMessage(msg, ACLMessage.REFUSE, "move");
@@ -470,6 +486,7 @@ public class AgWorld extends Agent {
         int y = position.getY();
 
         // If the coordinates are outside of map
+        
         if(x > readIntProp("map.width") || y > readIntProp("map.height")) return false;
 
         // If the coordinates are negative
