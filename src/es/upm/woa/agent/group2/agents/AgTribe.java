@@ -77,6 +77,7 @@ public class AgTribe extends Agent {
 								if (conc instanceof NotifyNewUnit) {
 									System.out.println(myAgent.getLocalName() + ": received unit creation from "
 											+ (msg.getSender()).getLocalName());
+									//casting
 									NotifyNewUnit agActionN = (NotifyNewUnit)agAction.getAction();
 
 									//agActionN.getLocation()

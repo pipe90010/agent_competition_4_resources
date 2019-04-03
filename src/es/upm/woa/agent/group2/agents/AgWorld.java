@@ -275,7 +275,7 @@ public class AgWorld extends Agent {
 								
 								Cell currentPosition = senderUnit.getPosition(); //TODO: DANIEL findUnitFromAnyTribe(unitAID).getPosition();
 								
-								//validate that are adjacents 5.2.2 SCENARIO 1 & 2								
+								//validate that are adjacents 5.2.2 SCENARIO 1 & 2 ready								
 																
 	                            if (!areAdjacentPositions(currentPosition, requestedPosition)) {
 	                                System.out.println(platformName + "Unit " + senderName + " can't move there...");
