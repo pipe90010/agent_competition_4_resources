@@ -1,6 +1,7 @@
 package es.upm.woa.agent.group2.agents;
 
 
+import es.upm.woa.ontology.Cell;
 import es.upm.woa.ontology.GameOntology;
 import es.upm.woa.ontology.NotifyNewUnit;
 import jade.content.Concept;
@@ -11,6 +12,7 @@ import jade.content.lang.sl.SLCodec;
 import jade.content.onto.Ontology;
 import jade.content.onto.OntologyException;
 import jade.content.onto.basic.Action;
+import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.domain.DFService;
@@ -75,12 +77,14 @@ public class AgTribe extends Agent {
 								Concept conc = agAction.getAction();
 								// If the action is NotifyNewUnit
 								if (conc instanceof NotifyNewUnit) {
-									System.out.println(myAgent.getLocalName() + ": received unit creation from "
-											+ (msg.getSender()).getLocalName());
+									
 									//casting
 									NotifyNewUnit agActionN = (NotifyNewUnit)agAction.getAction();
 
-									//agActionN.getLocation()
+									Cell cell= agActionN.getLocation();
+									AID aid = agActionN.getNewUnit();
+									System.out.println(myAgent.getLocalName() + ": received unit creation from "
+											+ (msg.getSender()).getLocalName()+" with AID: "+aid.getName()+" and its location is "+cell.getX()+" and "+cell.getY());
 								}
 							}
 						}

@@ -250,8 +250,14 @@ public class AgWorld extends Agent {
 
 	                try {
 	                    ContentElement movementRequest = getContentManager().extractContent(msg);
-
+	                    
 	                    if (movementRequest instanceof Action) {
+	                    	/*
+		                     * TODO: UPDATE this with
+									Concept conc = agAction.getAction();
+									// If the action is MovementRequest
+									if (conc instanceof MovementRequest) {
+		                     */
 	                        Action action = (Action) movementRequest;
 	                        Concept concept = action.getAction();
 	                        
@@ -266,7 +272,8 @@ public class AgWorld extends Agent {
 								
 								
 								AID sender = reply.getSender();
-	                        	Cell requestedPosition = (Cell) concept;
+							//TODO: Need to get the position from the request, wait for ontology
+	                        	Cell requestedPosition = null;
 	                        	
 	                        	
 	                        	int indexTribe = findTribePositionByUnitAID(sender);
@@ -283,7 +290,7 @@ public class AgWorld extends Agent {
 	                                send(reply);
 	                            } else {
 	                                // Next, we'll have to store the new position for this unit
-	                            	//TODO: DANIEL moveUnitToPosition(unitAID, requestedPosition);
+	                            		moveUnitToPosition(unitAID, requestedPosition);
 
 	                                reply = MessageFormatter.createReplyMessage(msg, ACLMessage.AGREE, "move");
 	                                send(reply);
@@ -308,7 +315,7 @@ public class AgWorld extends Agent {
 	                                }
 
 	                                //try {
-	                                    // Inform all subscribers
+	                                    // Inform all subscribers, NIcolas: we are not handling suscribers for this 
 	                                    ArrayList<AID> subscribers = null; //TODO: DANIEL getSubscribers();
 	                                    ArrayList<Tribe> tribes = null; //TODO: DANIEL getTribes();
 
@@ -497,5 +504,10 @@ public class AgWorld extends Agent {
     // TODO: Move to another class
     private Integer readIntProp(String property) {
         return Integer.parseInt(properties.getProperty(property));
+    }
+    private void moveUnitToPosition(AID aid, Cell cell) {
+    			map[cell.getX()][cell.getY()]= cell;
+    			//TODO: UPDATE WITH THE NEW ONTOLOGY
+    			map[cell.getX()][cell.getY()].setContent(aid.getName());
     }
 }
