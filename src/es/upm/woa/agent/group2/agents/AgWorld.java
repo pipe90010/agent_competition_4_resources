@@ -31,6 +31,7 @@ import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
+import jade.util.leap.List;
 import jade.wrapper.AgentController;
 import jade.wrapper.ContainerController;
 import jade.wrapper.StaleProxyException;
@@ -371,7 +372,7 @@ public class AgWorld extends Agent {
 			for (int j = 0; j < Y_BOUNDARY; j++) {
 				map[i][j] = new Cell();
 				map[i][j].setContent(null);
-				map[i][j].setOwner(-1);
+				map[i][j].setOwner(null);
 				map[i][j].setX(i);
 				map[i][j].setY(j);
 			}
@@ -381,11 +382,13 @@ public class AgWorld extends Agent {
 	// -----------------------------------------------------------------
 	// Regular Methods
 	// -----------------------------------------------------------------
-
-	private Cell bookNextRandomCell(int owner, String content) {
+	
+	//Reservar la siguiente celda aleatoriamente
+	private Cell bookNextRandomCell(AID owner, List content) {
 		int x = new Random().nextInt(X_BOUNDARY);
 		int y = new Random().nextInt(Y_BOUNDARY);
-		if (map[x][y].getOwner() == -1) {
+		//validate if it doesn't
+		if (map[x][y].getOwner() == null) {
 			map[x][y].setOwner(owner);
 			map[x][y].setContent(content);
 			return map[x][y];
@@ -400,7 +403,7 @@ public class AgWorld extends Agent {
 		AgTribe agentTribe = new AgTribe();
 		try {
 			cc.acceptNewAgent(nickname, agentTribe).start();
-			Cell townhall = bookNextRandomCell(1, "townhall");
+			Cell townhall = bookNextRandomCell(agentTribe.getAID(), "townhall");
 			Tribe tribe = new Tribe(agentTribe.getAID(), GOLD, FOOD, townhall);
 			return tribe;
 		} catch (StaleProxyException e) {
