@@ -6,6 +6,7 @@ import java.util.Random;
 
 import es.upm.woa.agent.group2.beans.Tribe;
 import es.upm.woa.agent.group2.beans.Unit;
+import es.upm.woa.agent.group2.behaviours.MovementRequestBehaviour;
 import es.upm.woa.agent.group2.common.MessageFormatter;
 import es.upm.woa.agent.group2.rules.AgWorldRules;
 import es.upm.woa.ontology.Cell;
@@ -25,6 +26,7 @@ import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.CyclicBehaviour;
+import jade.core.behaviours.SequentialBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
@@ -61,10 +63,11 @@ public class AgWorld extends Agent {
 	// loads the map
 	private Codec codec = new SLCodec();
 	private Ontology ontology = GameOntology.getInstance();
-	private ArrayList<Tribe> tribes;
+	public static ArrayList<Tribe> tribes;
 	private AgWorldRules worldRules;
-	private Cell[][] map;
-	private Properties properties = new Properties();
+	public static Cell[][] map;
+	public static Properties properties = new Properties();
+	public static ACLMessage msgMovement;
 	// -----------------------------------------------------------------
 	// Constructor
 	// -----------------------------------------------------------------
@@ -231,7 +234,21 @@ public class AgWorld extends Agent {
 
 		});
 
+		SequentialBehaviour handleMovementReq =  new SequentialBehaviour(this);
 		
+		
+		handleMovementReq.addSubBehaviour(new CyclicBehaviour(this) {
+			
+			public void action() {
+				msgMovement = receive(
+		                MessageTemplate.and(
+		                    MessageTemplate.MatchProtocol("move"),
+		                    MessageTemplate.MatchPerformative(ACLMessage.REQUEST)
+		                )
+		            );
+			}
+			} );		
+		handleMovementReq.addSubBehaviour(new MovementRequestBehaviour(this,msgMovement));
 
 	    Behaviour handleMovementRequests = new CyclicBehaviour() {
 	        @Override
@@ -511,6 +528,6 @@ public class AgWorld extends Agent {
     private void moveUnitToPosition(AID aid, Cell cell) {
     			map[cell.getX()][cell.getY()]= cell;
     			//TODO: UPDATE WITH THE NEW ONTOLOGY
-    			map[cell.getX()][cell.getY()].setContent(aid.getName());
+    			//map[cell.getX()][cell.getY()].setContent(aid.getName());
     }
 }
