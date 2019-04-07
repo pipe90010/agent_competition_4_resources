@@ -7,10 +7,14 @@ import java.util.Random;
 import es.upm.woa.agent.group2.beans.Tribe;
 import es.upm.woa.agent.group2.beans.Unit;
 import es.upm.woa.agent.group2.common.MessageFormatter;
+import es.upm.woa.agent.group2.common.WorldTimer;
 import es.upm.woa.agent.group2.rules.AgWorldRules;
+import es.upm.woa.ontology.Building;
 import es.upm.woa.ontology.Cell;
 import es.upm.woa.ontology.CreateUnit;
+import es.upm.woa.ontology.Empty;
 import es.upm.woa.ontology.GameOntology;
+import es.upm.woa.ontology.MoveToCell;
 import es.upm.woa.ontology.NotifyNewUnit;
 
 import jade.content.Concept;
@@ -51,6 +55,13 @@ public class AgWorld extends Agent {
 
 	private final static int X_BOUNDARY = 100;
 	private final static int Y_BOUNDARY = 100;
+	
+	// -----------------------------------------------------------------
+	// Building Constants
+	// -----------------------------------------------------------------
+	
+	public final static String TOWNHALL = "Townhall";
+	
 	// -----------------------------------------------------------------
 	// Atributes
 	// -----------------------------------------------------------------
@@ -63,8 +74,11 @@ public class AgWorld extends Agent {
 	private Ontology ontology = GameOntology.getInstance();
 	private ArrayList<Tribe> tribes;
 	private AgWorldRules worldRules;
+	private WorldTimer worldTimer;
 	private Cell[][] map;
 	private Properties properties = new Properties();
+	
+	private boolean gameOver;
 	// -----------------------------------------------------------------
 	// Constructor
 	// -----------------------------------------------------------------
@@ -94,7 +108,7 @@ public class AgWorld extends Agent {
 		 * TRIBE IS CREATED FROM THE WORLD
 		 */
 		Tribe tx = createTribe("TribeX");
-		Tribe ty = createTribe("TribeY");
+		//Tribe ty = createTribe("TribeY");
 
 		/**
 		 * TEST UNIT IS CREATED FROM THE WORLD
@@ -103,7 +117,7 @@ public class AgWorld extends Agent {
 		u.setPosition(tx.getTownhall());
 		tx.addUnit(u, 0, 0);
 		tribes.add(tx);
-		tribes.add(ty);
+		//tribes.add(ty);
 		try {
 			// Creates its own description
 			DFAgentDescription dfd = new DFAgentDescription();
@@ -166,17 +180,20 @@ public class AgWorld extends Agent {
 										System.out.println("creating unit:" + newUnitName);
 										Unit u = createUnit(newUnitName);
 										tribes.get(indexTribe).addUnit(u, 150, 50);
-										DFAgentDescription dfd2 = new DFAgentDescription();
+										/*DFAgentDescription dfd2 = new DFAgentDescription();
 										ServiceDescription sd2 = new ServiceDescription();
 										sd2.setType(TRIBE);
 										dfd2.addServices(sd2);
 
 										DFAgentDescription[] res = new DFAgentDescription[1];
 										res = DFService.search(myAgent, dfd2);
-										if (res.length > 0) {
-											AID ag = (AID) res[0].getName();
-											res = DFService.search(myAgent, dfd2);
+										if (res.length > 0) {*/
+										if(tribeSender.getId()!=null)
+										{
+											//AID ag = (AID) res[0].getName();
+											//res = DFService.search(myAgent, dfd2);
 											ACLMessage msgInform = new ACLMessage(ACLMessage.INFORM);
+											AID ag = tribeSender.getId();
 											msgInform.addReceiver(ag);
 											msgInform.setLanguage(codec.getName());
 											msgInform.setOntology(ontology.getName());
@@ -222,9 +239,6 @@ public class AgWorld extends Agent {
 						e.printStackTrace();
 					} catch (OntologyException oe) {
 						oe.printStackTrace();
-					} catch (FIPAException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
 					}
 				}
 			}
@@ -233,49 +247,37 @@ public class AgWorld extends Agent {
 
 		
 
-	    Behaviour handleMovementRequests = new CyclicBehaviour() {
+		addBehaviour(new CyclicBehaviour(this) {
 	        @Override
 	        public void action() {
 	            // Wait for a units request to move to a new position
-	            ACLMessage msg = receive(
-	                MessageTemplate.and(
-	                    MessageTemplate.MatchProtocol("move"),
-	                    MessageTemplate.MatchPerformative(ACLMessage.REQUEST)
-	                )
-	            );
+	        	ACLMessage msg = receive(MessageTemplate.and(MessageTemplate.MatchLanguage(codec.getName()),
+						MessageTemplate.MatchOntology(ontology.getName())));
 
-	            if(msg != null) {
+	            if(msg != null && msg.getPerformative() == ACLMessage.REQUEST) {
 	                AID unitAID = msg.getSender();
 	                String senderName = (unitAID).getLocalName();
 	                String platformName = getLocalName();
 
 	                try {
+	                	
 	                    ContentElement movementRequest = getContentManager().extractContent(msg);
 	                    
 	                    if (movementRequest instanceof Action) {
-	                    	/*
-		                     * TODO: UPDATE this with
-									Concept conc = agAction.getAction();
-									// If the action is MovementRequest
-									if (conc instanceof MovementRequest) {
-		                     */
-	                        Action action = (Action) movementRequest;
-	                        Concept concept = action.getAction();
+	                    	Concept conc = ((Action) movementRequest).getAction();
+	                    	if(conc instanceof MoveToCell)
+	                    	{
+	                    		MoveToCell moveAction = ((MoveToCell) conc);
+	                        	Cell requestedPosition = moveAction.getTarget();
 	                        
-	                        
-	                        //Validate that a cell exists: 5.2.2 Scenario 3
-	                        if (concept instanceof Cell) {
-	                        	
+	                        	if(requestedPosition!=null)
+	                        	{
 	                        	//ACLMessage reply;
 	                        	ACLMessage reply = msg.createReply();
 								reply.setLanguage(codec.getName());
 								reply.setOntology(ontology.getName());
 								
-								
-								AID sender = reply.getSender();
-							//TODO: Need to get the position from the request, wait for ontology
-	                        	Cell requestedPosition = null;
-	                        	
+								AID sender = msg.getSender();
 	                        	
 	                        	int indexTribe = findTribePositionByUnitAID(sender);
 								Tribe tribeSender = tribes.get(indexTribe);
@@ -290,9 +292,8 @@ public class AgWorld extends Agent {
 	                                reply = MessageFormatter.createReplyMessage(msg, ACLMessage.REFUSE, "move");
 	                                send(reply);
 	                            } else {
-	                                // Next, we'll have to store the new position for this unit
-	                            		moveUnitToPosition(unitAID, requestedPosition);
-
+	                            		
+	                            		System.out.println(platformName + "Unit " + senderName + " IS ABLE TO MOVE TO NEW POSITION, START WAIT TIME");
 	                                reply = MessageFormatter.createReplyMessage(msg, ACLMessage.AGREE, "move");
 	                                send(reply);
 
@@ -301,14 +302,25 @@ public class AgWorld extends Agent {
 
 	                                try {
 	                                    // Send an INFORM with its new position
-	                                    Long gameHour = null; //TODO: DANIEL readFloatProp("game.hour.length").longValue();
-	                                    Long movementDuration = null; //TODO: DANIEL readIntProp("unit.movement.duration").longValue();
 
-	                                    // This should be read from the properties file but the format chosen in there is really weird
-	                                    // and casting the types didn't work as expected...
-	                                    doWait(2000);
-	                                    ACLMessage informMsg = MessageFormatter.createMessage(ACLMessage.INFORM, "move", unitAID);
-	                                    getContentManager().fillContent(informMsg, new Action(unitAID, cell));
+	                                    long waitTime= worldTimer.getMovementTime();
+	                                    
+	                                    doWait(waitTime);
+	                                    
+	                                    System.out.println(platformName + "Unit " + senderName + " WAIT TIME FINISHED");
+	                                    // Find the unit based on sender AID
+		                            		Unit unit = findUnitByAID(unitAID, tribeSender);
+		                            		ACLMessage informMsg =null;
+		                            		if(!gameOver)
+		                            		{
+		                            			//Move the unit 
+			                            		moveUnitToPosition(unit, requestedPosition);
+			                            		System.out.println(platformName + "Unit " + senderName + "POSITION UPDATED");
+			                            		informMsg = MessageFormatter.createMessage(ACLMessage.INFORM, "move", unitAID);
+		                                    getContentManager().fillContent(informMsg, new Action(unitAID, cell));
+		                            		}
+		                            		else 
+		                            			informMsg = MessageFormatter.createMessage(ACLMessage.FAILURE, null, null);
 
 	                                    send(informMsg);
 	                                } catch (Codec.CodecException | OntologyException e) {
@@ -316,7 +328,13 @@ public class AgWorld extends Agent {
 	                                }
 
 	                                //try {
-	                                    // Inform all subscribers, NIcolas: we are not handling suscribers for this 
+	                                
+	                                
+		                                ACLMessage informMsgUnit = MessageFormatter.createMessage(ACLMessage.INFORM, "inform", tribeSender.getId());
+	                                    //TODO: DANIEL getContentManager().fillContent(informMsgUnit, new Action(unit.getUnitID(), cell));
+	                                      send(informMsgUnit);
+	                                
+	                                    /*// Inform all subscribers, NIcolas: we are not handling suscribers for this 
 	                                    ArrayList<AID> subscribers = null; //TODO: DANIEL getSubscribers();
 	                                    ArrayList<Tribe> tribes = null; //TODO: DANIEL getTribes();
 
@@ -341,8 +359,13 @@ public class AgWorld extends Agent {
 	                                //}
 	                                //catch (Codec.CodecException | OntologyException e) {
 	                                //    e.printStackTrace();
-	                                //}
+	                                //}*/
 	                            }
+	                    			}
+	                        	else {
+	                        		ACLMessage reply = MessageFormatter.createReplyMessage(null, ACLMessage.NOT_UNDERSTOOD,null);
+	                             send(reply);
+	                        	}
 	                        } else { System.out.println("Wrong position."); }
 	                    } else { System.out.println("You lost"); }
 	                } catch (Codec.CodecException | OntologyException e) {
@@ -353,7 +376,7 @@ public class AgWorld extends Agent {
 	                block();
 	            }
 	        }
-	    };
+	    });
 	}
 
 	// -----------------------------------------------------------------
@@ -363,7 +386,10 @@ public class AgWorld extends Agent {
 	private void initialize() {
 		tribes = new ArrayList<Tribe>();
 		worldRules = new AgWorldRules();
+		//PASS ATRIBUTE IN MILISECONDS
+		worldTimer= new WorldTimer(1000);
 		this.initializeMap();
+		gameOver=false;
 	}
 
 	private void initializeMap() {
@@ -371,7 +397,7 @@ public class AgWorld extends Agent {
 		for (int i = 0; i < X_BOUNDARY; i++) {
 			for (int j = 0; j < Y_BOUNDARY; j++) {
 				map[i][j] = new Cell();
-				map[i][j].setContent(null);
+				map[i][j].addContent(new Empty());
 				map[i][j].setOwner(null);
 				map[i][j].setX(i);
 				map[i][j].setY(j);
@@ -384,16 +410,16 @@ public class AgWorld extends Agent {
 	// -----------------------------------------------------------------
 	
 	//Reservar la siguiente celda aleatoriamente
-	private Cell bookNextRandomCell(AID owner, List content) {
+	private Cell bookNextRandomCell(Concept conc) {
 		int x = new Random().nextInt(X_BOUNDARY);
 		int y = new Random().nextInt(Y_BOUNDARY);
 		//validate if it doesn't
 		if (map[x][y].getOwner() == null) {
-			map[x][y].setOwner(owner);
-			map[x][y].setContent(content);
+			//map[x][y].setContent(content);
+			map[x][y].addContent(conc);
 			return map[x][y];
 		} else {
-			return bookNextRandomCell(owner, content);
+			return bookNextRandomCell(conc);
 		}
 	}
 
@@ -403,8 +429,17 @@ public class AgWorld extends Agent {
 		AgTribe agentTribe = new AgTribe();
 		try {
 			cc.acceptNewAgent(nickname, agentTribe).start();
-			Cell townhall = bookNextRandomCell(agentTribe.getAID(), "townhall");
-			Tribe tribe = new Tribe(agentTribe.getAID(), GOLD, FOOD, townhall);
+			
+			//Cell townhall = bookNextRandomCell(agentTribe.getAID(), "townhall");
+			Building townhall = new Building();
+			townhall.setOwner(agentTribe.getAID());
+			List types =  new jade.util.leap.ArrayList();
+			
+			types.add(TOWNHALL);
+			townhall.setType(types);
+			Cell townhallCell = bookNextRandomCell(townhall);
+			map[townhallCell.getX()][townhallCell.getY()].setOwner(agentTribe.getAID());
+			Tribe tribe = new Tribe(agentTribe.getAID(), GOLD, FOOD, townhallCell);
 			return tribe;
 		} catch (StaleProxyException e) {
 			// TODO Auto-generated catch block
@@ -435,9 +470,17 @@ public class AgWorld extends Agent {
 		ContainerController cc = getContainerController();
 		AgUnit agentUnit = new AgUnit();
 		try {
-			cc.acceptNewAgent(nickname, agentUnit).start();
-			Cell position = bookNextRandomCell(1, "Unit");
+			//cc.acceptNewAgent(nickname, agentUnit).start();
+			Cell position = bookNextRandomCell(new Empty());
+			Object [] args= new Object[1];
+			args[0]= position.getX();
+			args[1]= position.getY();
+			cc.createNewAgent(nickname, "AgUnit", args);
+			//TODO: CHECK IF WE NEED TO ADD THE UNIT AS A CONTENT FOR THE CELL
 			Unit newUnit = new Unit(agentUnit.getAID(), position);
+			map[position.getX()][position.getY()].setOwner(agentUnit.getAID());
+			agentUnit.setCurrentPosition(position);
+			
 			return newUnit;
 		} catch (StaleProxyException e) {
 			// TODO: handle exception
@@ -497,8 +540,7 @@ public class AgWorld extends Agent {
 
         // If the coordinates are outside of map
         
-        if(x > readIntProp("map.width") || y > readIntProp("map.height")) return false;
-
+        if(x > X_BOUNDARY || y > Y_BOUNDARY) return false;
         // If the coordinates are negative
         if(x < 0 || y < 0) return false;
         return ((x % 2 == 0 && y % 2 == 0) || (x % 2 != 0 && y % 2 != 0));
@@ -508,9 +550,9 @@ public class AgWorld extends Agent {
     private Integer readIntProp(String property) {
         return Integer.parseInt(properties.getProperty(property));
     }
-    private void moveUnitToPosition(AID aid, Cell cell) {
+    private void moveUnitToPosition(Unit unit, Cell cell) {
     			map[cell.getX()][cell.getY()]= cell;
     			//TODO: UPDATE WITH THE NEW ONTOLOGY
-    			map[cell.getX()][cell.getY()].setContent(aid.getName());
+    			map[cell.getX()][cell.getY()].addContent(unit);
     }
 }
