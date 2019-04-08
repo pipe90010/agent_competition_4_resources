@@ -10,6 +10,7 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import es.upm.woa.agent.group2.beans.Tribe;
+import es.upm.woa.agent.group2.common.MessageFormatter;
 import es.upm.woa.ontology.Cell;
 import es.upm.woa.ontology.CreateUnit;
 import es.upm.woa.ontology.GameOntology;
@@ -158,11 +159,12 @@ public class AgUnit extends Agent{
 					{
 						AID ag = (AID)res[0].getName();
 					
-						ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
-						msg.addReceiver(ag);
+						/*ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
+						  msg.addReceiver(ag);
 						msg.setLanguage(codec.getName());
-						msg.setOntology(ontology.getName());
+						msg.setOntology(ontology.getName());*/
 						
+						ACLMessage createMsg =	MessageFormatter.createMessage(ACLMessage.REQUEST, "move",ag);
 						MoveToCell create = new MoveToCell();
 						
 						Cell targetPosition = new Cell();
@@ -172,8 +174,8 @@ public class AgUnit extends Agent{
 						create.setTarget(targetPosition);
 						Action agAction = new Action(ag,create);
 						// Here you pass in arguments the message and the content that it will be filled with
-						getContentManager().fillContent(msg, agAction);
-						send(msg);
+						getContentManager().fillContent(createMsg, agAction);
+						send(createMsg);
 						System.out.println(getLocalName()+": REQUEST MOVEMENT TO THE WORLD");
 					}
 					else

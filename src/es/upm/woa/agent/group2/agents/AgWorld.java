@@ -251,9 +251,9 @@ public class AgWorld extends Agent {
 	        @Override
 	        public void action() {
 	            // Wait for a units request to move to a new position
-	        	ACLMessage msg = receive(MessageTemplate.and(MessageTemplate.MatchLanguage(codec.getName()),
-						MessageTemplate.MatchOntology(ontology.getName())));
-
+	        	/*ACLMessage msg = receive(MessageTemplate.and(MessageTemplate.MatchLanguage(codec.getName()),
+						MessageTemplate.MatchOntology(ontology.getName())));*/
+	        	ACLMessage msg = receive(MessageTemplate.and(MessageTemplate.MatchPerformative(ACLMessage.REQUEST), MessageTemplate.MatchProtocol("move")));
 	            if(msg != null ) {//&& msg.getPerformative() == ACLMessage.REQUEST) {
 	                AID unitAID = msg.getSender();
 	                String senderName = (unitAID).getLocalName();
