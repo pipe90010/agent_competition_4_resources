@@ -397,7 +397,7 @@ public class AgWorld extends Agent {
 		for (int i = 0; i < X_BOUNDARY; i++) {
 			for (int j = 0; j < Y_BOUNDARY; j++) {
 				map[i][j] = new Cell();
-				map[i][j].addContent(new Empty());
+				map[i][j].setContent(new Empty());
 				map[i][j].setOwner(null);
 				map[i][j].setX(i);
 				map[i][j].setY(j);
@@ -416,7 +416,7 @@ public class AgWorld extends Agent {
 		//validate if it doesn't
 		if (map[x][y].getOwner() == null) {
 			//map[x][y].setContent(content);
-			map[x][y].addContent(conc);
+			map[x][y].setContent(conc);
 			return map[x][y];
 		} else {
 			return bookNextRandomCell(conc);
@@ -553,6 +553,6 @@ public class AgWorld extends Agent {
     private void moveUnitToPosition(Unit unit, Cell cell) {
     			map[cell.getX()][cell.getY()]= cell;
     			//TODO: UPDATE WITH THE NEW ONTOLOGY
-    			map[cell.getX()][cell.getY()].addContent(unit);
+    			map[cell.getX()][cell.getY()].setContent(unit);
     }
 }
