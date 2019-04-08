@@ -48,14 +48,14 @@ public class AgUnit extends Agent{
         getContentManager().registerOntology(ontology);
         
         Object[] args = getArguments();
-        String x,y;
+        int x,y;
         if (args != null) {
             if (args.length==2) {
-                x = (String) args[0];
-                y = (String) args[1];
+                x = (Integer)args[0];
+                y =  (Integer)args[1];
                 Cell cell= new Cell();
-                cell.setX(Integer.parseInt(x));
-                cell.setY(Integer.parseInt(y));
+                cell.setX(x);
+                cell.setY(y);
                 cell.setOwner(this.getAID());
                 setCurrentPosition(cell);
                 System.out.println("CURRENT POSITION IS SET FOR X: "+x+" and Y: "+y);

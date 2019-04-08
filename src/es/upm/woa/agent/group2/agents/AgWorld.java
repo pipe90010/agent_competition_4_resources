@@ -254,7 +254,7 @@ public class AgWorld extends Agent {
 	        	ACLMessage msg = receive(MessageTemplate.and(MessageTemplate.MatchLanguage(codec.getName()),
 						MessageTemplate.MatchOntology(ontology.getName())));
 
-	            if(msg != null && msg.getPerformative() == ACLMessage.REQUEST) {
+	            if(msg != null ) {//&& msg.getPerformative() == ACLMessage.REQUEST) {
 	                AID unitAID = msg.getSender();
 	                String senderName = (unitAID).getLocalName();
 	                String platformName = getLocalName();
@@ -472,12 +472,13 @@ public class AgWorld extends Agent {
 		try {
 			//cc.acceptNewAgent(nickname, agentUnit).start();
 			Cell position = bookNextRandomCell(new Empty());
-			Object [] args= new Object[1];
+			Object [] args= new Object[2];
 			args[0]= position.getX();
 			args[1]= position.getY();
-			cc.createNewAgent(nickname, "AgUnit", args);
+			AgentController ac =cc.createNewAgent(nickname, AgUnit.class.getName(), args);
+			ac.start();
 			//TODO: CHECK IF WE NEED TO ADD THE UNIT AS A CONTENT FOR THE CELL
-			Unit newUnit = new Unit(agentUnit.getAID(), position);
+			Unit newUnit = new Unit(getAID(nickname), position);
 			map[position.getX()][position.getY()].setOwner(agentUnit.getAID());
 			agentUnit.setCurrentPosition(position);
 			
