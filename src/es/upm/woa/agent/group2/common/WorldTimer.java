@@ -6,7 +6,7 @@ public class WorldTimer {
 	// Constants
 	// -----------------------------------------------------------------
 		//REAL HOURS
-		private final static long MOVE_CELL_TIME = 6000; 
+		private final static long MOVE_CELL_TIME = 6; 
 		
 	// -----------------------------------------------------------------
 	// Atributes
@@ -17,7 +17,7 @@ public class WorldTimer {
 	// Constructor
 	// -----------------------------------------------------------------	
 	
-	public WorldTimer(long simulationHour) {
+	public WorldTimer(long simulationMiliseconds) {
 		this.simulationMiliseconds = simulationMiliseconds;
 	}
 	

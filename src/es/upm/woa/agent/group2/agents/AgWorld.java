@@ -15,6 +15,7 @@ import es.upm.woa.ontology.CreateUnit;
 import es.upm.woa.ontology.Empty;
 import es.upm.woa.ontology.GameOntology;
 import es.upm.woa.ontology.MoveToCell;
+import es.upm.woa.ontology.NotifyNewCellDiscovery;
 import es.upm.woa.ontology.NotifyNewUnit;
 
 import jade.content.Concept;
@@ -304,7 +305,7 @@ public class AgWorld extends Agent {
 	                                send(reply);
 
 	                                // TODO (MAYBE): I'm not sure, but maybe we should inform all subscribers about this change?
-	                                Cell cell = null; //TODO: DANIEL getCellInfo(requestedPosition);
+	                                //Cell cell = null; //TODO: DANIEL getCellInfo(requestedPosition);
 
 	                                try {
 	                                    // Send an INFORM with its new position
@@ -320,15 +321,26 @@ public class AgWorld extends Agent {
 		                            		if(!gameOver)
 		                            		{
 		                            			//Move the unit 
-			                            		moveUnitToPosition(unit, requestedPosition);
+			                            		Cell cell = moveUnitToPosition(unit, requestedPosition);
 			                            		System.out.println(platformName + "Unit " + senderName + "POSITION UPDATED");
-			                            		informMsg = MessageFormatter.createReplyMessage(msg,ACLMessage.INFORM, "move");
-		                                    getContentManager().fillContent(informMsg, new Action(unitAID, cell));
+			                            		informMsg = MessageFormatter.createReplyMessage(msg,ACLMessage.INFORM, "moveDone");
+			                            		getContentManager().fillContent(informMsg,  new Action(unit.getId(), cell));
+			                            		send(informMsg);
+			                            		
+			                            		ACLMessage informMsgTribe = MessageFormatter.createMessage(ACLMessage.INFORM, "informMove", tribeSender.getId());
+			                            		NotifyNewCellDiscovery notify = new NotifyNewCellDiscovery();
+			                            		notify.setNewCell(cell);
+			                            		getContentManager().fillContent(informMsg, notify);
+			                            		send(informMsgTribe);
 		                            		}
 		                            		else 
-		                            			informMsg = MessageFormatter.createReplyMessage(msg,ACLMessage.FAILURE, "move");
+		                            		{
+		                            			informMsg = MessageFormatter.createReplyMessage(msg,ACLMessage.FAILURE, "moveDone");
+		                            			send(informMsg);
+		                            		}
 
-	                                    send(informMsg);
+	                                    
+	                                    
 	                                } catch (Codec.CodecException | OntologyException e) {
 	                                    e.printStackTrace();
 	                                }
@@ -336,11 +348,11 @@ public class AgWorld extends Agent {
 	                                //try {
 	                                
 	                                
-		                                ACLMessage informMsgUnit = MessageFormatter.createMessage(ACLMessage.INFORM, "inform", tribeSender.getId());
+		                                /*ACLMessage informMsgUnit = MessageFormatter.createMessage(ACLMessage.INFORM, "inform", tribeSender.getId());
 	                                    //TODO: DANIEL getContentManager().fillContent(informMsgUnit, new Action(unit.getUnitID(), cell));
 	                                      send(informMsgUnit);
 	                                
-	                                    /*// Inform all subscribers, NIcolas: we are not handling suscribers for this 
+	                                    // Inform all subscribers, NIcolas: we are not handling suscribers for this 
 	                                    ArrayList<AID> subscribers = null; //TODO: DANIEL getSubscribers();
 	                                    ArrayList<Tribe> tribes = null; //TODO: DANIEL getTribes();
 
@@ -528,6 +540,20 @@ public class AgWorld extends Agent {
 		}
 		return -1;
 	}
+	
+	private boolean updateUnitInTribeByUnitAID(Unit unit) {
+		for (int i = 0; i < tribes.size(); i++) {
+			for (int j = 0; j < tribes.get(i).getUnits().size(); j++) {
+				if (tribes.get(i).getUnits().get(j).getId().getName().equals(unit.getId().getName()))
+				{
+					tribes.get(i).getUnits().get(j).setPosition(unit.getPosition());
+					tribes.get(i).getUnits().get(j).setId(unit.getId());
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 
 	private Unit findUnitByAID(AID aid, Tribe tribe) {
 		ArrayList<Unit> units = tribe.getUnits();
@@ -580,9 +606,13 @@ public class AgWorld extends Agent {
     private Integer readIntProp(String property) {
         return Integer.parseInt(properties.getProperty(property));
     }
-    private void moveUnitToPosition(Unit unit, Cell cell) {
+    private Cell moveUnitToPosition(Unit unit, Cell cell) {
     			map[cell.getX()][cell.getY()]= cell;
     			//TODO: UPDATE WITH THE NEW ONTOLOGY
-    			map[cell.getX()][cell.getY()].setContent(unit);
+    			map[cell.getX()][cell.getY()].setContent(new Empty());
+    			
+    			updateUnitInTribeByUnitAID(unit);
+  			
+    			return map[cell.getX()][cell.getY()];
     }
 }

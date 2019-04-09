@@ -3,6 +3,7 @@ package es.upm.woa.agent.group2.agents;
 
 import es.upm.woa.ontology.Cell;
 import es.upm.woa.ontology.GameOntology;
+import es.upm.woa.ontology.NotifyNewCellDiscovery;
 import es.upm.woa.ontology.NotifyNewUnit;
 import jade.content.Concept;
 import jade.content.ContentElement;
@@ -15,6 +16,7 @@ import jade.content.onto.basic.Action;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
+import jade.core.behaviours.SimpleBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
@@ -47,8 +49,9 @@ public class AgTribe extends Agent {
 
 			public void action() {
 				// Waits for units creation
-				ACLMessage msg = receive(MessageTemplate.and(MessageTemplate.MatchLanguage(codec.getName()),
-						MessageTemplate.MatchOntology(ontology.getName())));
+				/*ACLMessage msg = receive(MessageTemplate.and(MessageTemplate.MatchLanguage(codec.getName()),
+						MessageTemplate.MatchOntology(ontology.getName())));*/
+				ACLMessage msg = receive(MessageTemplate.and(MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.INFORM),MessageTemplate.MatchPerformative(ACLMessage.FAILURE)), MessageTemplate.MatchProtocol("informCreation")));
 				if (msg != null) {
 
 					try {
@@ -98,6 +101,52 @@ public class AgTribe extends Agent {
 
 			}
 		});
+		// Adds a behavior after a movement has done
+		addBehaviour(new CyclicBehaviour(this)
+		{
+
+			@Override
+			public void action() {
+					
+				ACLMessage msg = receive(MessageTemplate.and(MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.INFORM),MessageTemplate.MatchPerformative(ACLMessage.FAILURE)), MessageTemplate.MatchProtocol("informMove")));
+				if (msg != null)
+			    {
+					if(msg.getPerformative()==ACLMessage.INFORM)
+					{
+						System.out.println(getLocalName()+" Movement has been received by Tribe");
+						try {
+							ContentElement ce = getContentManager().extractContent(msg);
+							if (ce instanceof Action) {
+								Action agAction = (Action) ce;
+								Concept conc = agAction.getAction();
+								// If the action is NotifyNewUnit
+								if (conc instanceof NotifyNewCellDiscovery) {
+									
+									//casting
+									NotifyNewCellDiscovery agActionN = (NotifyNewCellDiscovery)agAction.getAction();
+
+									Cell cell= agActionN.getNewCell();
+									System.out.println(myAgent.getLocalName() + ": received unit creation from "
+											+ (msg.getSender()).getLocalName()+" and its location is "+cell.getX()+" and "+cell.getY());
+								}
+							}
+						} catch (CodecException | OntologyException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+						
+					else
+						System.out.println(getLocalName()+" Movement failure");
+			     }
+				else
+					block();
+			}
+
+					
+		});
+		
+		
 
 	}
 

@@ -2,6 +2,7 @@ package es.upm.woa.agent.group2.agents;
 
 import jade.core.AID;
 import jade.core.Agent;
+import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.SimpleBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
@@ -214,7 +215,7 @@ public class AgUnit extends Agent{
 			
 		});
 		
-		// Adds a behavior to process the answer to a creation request
+		// Adds a behavior to process the answer to a movement request
 		addBehaviour(new SimpleBehaviour(this)
 		{
 
@@ -239,7 +240,28 @@ public class AgUnit extends Agent{
 				return false;
 			}
 					
-		});		
+		});	
+		
+		// Adds a behavior after a movement has done
+		addBehaviour(new CyclicBehaviour(this)
+		{
+
+			public void action() {
+					
+				ACLMessage msg = receive(MessageTemplate.and(MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.INFORM),MessageTemplate.MatchPerformative(ACLMessage.FAILURE)), MessageTemplate.MatchProtocol("moveDone")));
+				if (msg != null)
+			    {
+					if(msg.getPerformative()==ACLMessage.INFORM)
+						System.out.println(getLocalName()+" Movement has been made");
+					else
+						System.out.println(getLocalName()+" Movement failure");
+			     }
+				else
+					block();
+			}
+					
+		});
+		
 	}
 	protected void takeDown() {
 		// Printout a dismissal message
