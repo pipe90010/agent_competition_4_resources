@@ -40,22 +40,6 @@ public class AgTribe extends Agent {
 //      Register of the codec and the ontology to be used in the ContentManager
 		getContentManager().registerLanguage(codec);
 		getContentManager().registerOntology(ontology);
-		try {
-			// Creates its own description
-			DFAgentDescription dfd = new DFAgentDescription();
-			ServiceDescription sd = new ServiceDescription();
-			sd.setName(this.getName());
-			sd.setType(TRIBE);
-			dfd.addServices(sd);
-			// Registers its description in the DF
-			DFService.register(this, dfd);
-			System.out.println(getLocalName() + ": registered in the DF");
-			dfd = null;
-			sd = null;
-			doWait(10000);
-		} catch (FIPAException e) {
-			e.printStackTrace();
-		}
 
 //		BEHAVIOURS ****************************************************************
 
@@ -70,7 +54,7 @@ public class AgTribe extends Agent {
 					try {
 						ContentElement ce = null;
 						if (msg.getPerformative() == ACLMessage.INFORM) {
-							System.out.println(msg);
+							System.out.println("INFORM TRIBE"+msg);
 							ce = getContentManager().extractContent(msg);
 							if (ce instanceof Action) {
 								Action agAction = (Action) ce;

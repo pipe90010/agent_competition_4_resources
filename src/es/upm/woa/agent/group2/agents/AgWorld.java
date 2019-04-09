@@ -98,26 +98,7 @@ public class AgWorld extends Agent {
 		// Register language and ontology this part always goes
 		getContentManager().registerLanguage(codec);
 		getContentManager().registerOntology(ontology);
-
-		/**
-		 * Initialize everything
-		 */
-		initialize();
-
-		/**
-		 * TRIBE IS CREATED FROM THE WORLD
-		 */
-		Tribe tx = createTribe("TribeX");
-		//Tribe ty = createTribe("TribeY");
-
-		/**
-		 * TEST UNIT IS CREATED FROM THE WORLD
-		 */
-		Unit u = createUnit("UnitX");
-		u.setPosition(tx.getTownhall());
-		tx.addUnit(u, 0, 0);
-		tribes.add(tx);
-		//tribes.add(ty);
+		
 		try {
 			// Creates its own description
 			DFAgentDescription dfd = new DFAgentDescription();
@@ -128,9 +109,29 @@ public class AgWorld extends Agent {
 			// Registers its description in the DF
 			DFService.register(this, dfd);
 			System.out.println(getLocalName() + ": registered in the DF");
+			/**
+			 * Initialize everything
+			 */
+			initialize();
+
+			/**
+			 * TRIBE IS CREATED FROM THE WORLD
+			 */
+			Tribe tx = createTribe("TribeX");
+			//Tribe ty = createTribe("TribeY");
+
+			/**
+			 * TEST UNIT IS CREATED FROM THE WORLD
+			 */
+			Unit u = createUnit("UnitX",tx);
+			u.setPosition(tx.getTownhall());
+			tx.addUnit(u, 150, 50);
+			tribes.add(tx);
+			//tribes.add(ty);
 		} catch (FIPAException e) {
 			e.printStackTrace();
 		}
+		
 
 		/*
 		 * BEHAVIORS--------------------------------------------------------------------
@@ -142,8 +143,9 @@ public class AgWorld extends Agent {
 			public void action() {
 				// TODO Auto-generated method stub
 				// Waits for creation requests
-				ACLMessage msg = receive(MessageTemplate.and(MessageTemplate.MatchLanguage(codec.getName()),
-						MessageTemplate.MatchOntology(ontology.getName())));
+				/*ACLMessage msg = receive(MessageTemplate.and(MessageTemplate.MatchLanguage(codec.getName()),
+						MessageTemplate.MatchOntology(ontology.getName())));*/
+				ACLMessage msg = receive(MessageTemplate.and(MessageTemplate.MatchPerformative(ACLMessage.REQUEST), MessageTemplate.MatchProtocol("createUnit")));
 				if (msg != null) {
 					try {
 						ContentElement ce = null;
@@ -178,7 +180,7 @@ public class AgWorld extends Agent {
 									case 1:
 
 										System.out.println("creating unit:" + newUnitName);
-										Unit u = createUnit(newUnitName);
+										Unit u = createUnit(newUnitName,tribeSender);
 										tribes.get(indexTribe).addUnit(u, 150, 50);
 										/*DFAgentDescription dfd2 = new DFAgentDescription();
 										ServiceDescription sd2 = new ServiceDescription();
@@ -187,7 +189,7 @@ public class AgWorld extends Agent {
 
 										DFAgentDescription[] res = new DFAgentDescription[1];
 										res = DFService.search(myAgent, dfd2);
-										if (res.length > 0) {*/
+										if (res.length > 0) {
 										if(tribeSender.getId()!=null)
 										{
 											//AID ag = (AID) res[0].getName();
@@ -206,7 +208,7 @@ public class AgWorld extends Agent {
 											getContentManager().fillContent(msgInform, agActionNotification);
 											send(msgInform);
 											System.out.println("INFORM CREATION TO TRIBE");
-										}
+										}*/
 
 										reply.setPerformative(ACLMessage.AGREE);
 										break;
@@ -241,6 +243,10 @@ public class AgWorld extends Agent {
 						oe.printStackTrace();
 					}
 				}
+				else {
+	                // If no message arrives
+	                block();
+	            }
 			}
 
 		});
@@ -287,7 +293,7 @@ public class AgWorld extends Agent {
 								
 								//validate that are adjacents 5.2.2 SCENARIO 1 & 2 ready								
 																
-	                            if (!areAdjacentPositions(currentPosition, requestedPosition)) {
+	                            if (false) {//!areAdjacentPositions(currentPosition, requestedPosition)) {
 	                                System.out.println(platformName + "Unit " + senderName + " can't move there...");
 	                                reply = MessageFormatter.createReplyMessage(msg, ACLMessage.REFUSE, "move");
 	                                send(reply);
@@ -316,11 +322,11 @@ public class AgWorld extends Agent {
 		                            			//Move the unit 
 			                            		moveUnitToPosition(unit, requestedPosition);
 			                            		System.out.println(platformName + "Unit " + senderName + "POSITION UPDATED");
-			                            		informMsg = MessageFormatter.createMessage(ACLMessage.INFORM, "move", unitAID);
+			                            		informMsg = MessageFormatter.createReplyMessage(msg,ACLMessage.INFORM, "move");
 		                                    getContentManager().fillContent(informMsg, new Action(unitAID, cell));
 		                            		}
 		                            		else 
-		                            			informMsg = MessageFormatter.createMessage(ACLMessage.FAILURE, null, null);
+		                            			informMsg = MessageFormatter.createReplyMessage(msg,ACLMessage.FAILURE, "move");
 
 	                                    send(informMsg);
 	                                } catch (Codec.CodecException | OntologyException e) {
@@ -465,26 +471,49 @@ public class AgWorld extends Agent {
 		return 1;
 	}
 
-	private Unit createUnit(String nickname) {
+	private Unit createUnit(String nickname,Tribe tribe) {
 
 		ContainerController cc = getContainerController();
 		AgUnit agentUnit = new AgUnit();
 		try {
 			//cc.acceptNewAgent(nickname, agentUnit).start();
 			Cell position = bookNextRandomCell(new Empty());
+			
 			Object [] args= new Object[2];
 			args[0]= position.getX();
 			args[1]= position.getY();
 			AgentController ac =cc.createNewAgent(nickname, AgUnit.class.getName(), args);
 			ac.start();
 			//TODO: CHECK IF WE NEED TO ADD THE UNIT AS A CONTENT FOR THE CELL
+			position.setOwner(tribe.getId());
 			Unit newUnit = new Unit(getAID(nickname), position);
-			map[position.getX()][position.getY()].setOwner(agentUnit.getAID());
+			map[position.getX()][position.getY()].setOwner(tribe.getId());
 			agentUnit.setCurrentPosition(position);
-			
+
+			if(tribe!=null)
+			{
+				AID ag = tribe.getId();
+
+				ACLMessage msgInform = MessageFormatter.createMessage(ACLMessage.INFORM, "informCreation", ag);
+				// Creates a notifyNewUnit action
+				NotifyNewUnit notify = new NotifyNewUnit();
+
+				notify.setLocation(position);
+				notify.setNewUnit(getAID(nickname));
+				Action agActionNotification = new Action(ag, notify);
+				getContentManager().fillContent(msgInform, agActionNotification);
+				send(msgInform);
+				System.out.println("INFORM CREATION TO TRIBE");
+			}
 			return newUnit;
 		} catch (StaleProxyException e) {
 			// TODO: handle exception
+			e.printStackTrace();
+		} catch (CodecException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (OntologyException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;

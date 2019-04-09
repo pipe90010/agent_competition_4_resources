@@ -13,6 +13,7 @@ import es.upm.woa.agent.group2.beans.Tribe;
 import es.upm.woa.agent.group2.common.MessageFormatter;
 import es.upm.woa.ontology.Cell;
 import es.upm.woa.ontology.CreateUnit;
+import es.upm.woa.ontology.Empty;
 import es.upm.woa.ontology.GameOntology;
 import es.upm.woa.ontology.MoveToCell;
 import jade.content.lang.Codec;
@@ -64,24 +65,12 @@ public class AgUnit extends Agent{
 
         }
         
-		try {
-			DFAgentDescription dfd = new DFAgentDescription();
-			ServiceDescription sd = new ServiceDescription();
-			sd.setName(this.getName());
-			sd.setType(UNIT);
-			dfd.addServices(sd);
-			// Registers its description in the DF
-			DFService.register(this, dfd);
-			System.out.println(getLocalName()+": registered in the DF");
-		} catch (FIPAException e) {
-			e.printStackTrace();
-		}
 		/*
          * BEHAVIORS------------------------------------------------------------------------------------------
          */
 		
 		
-		addBehaviour(new SimpleBehaviour(this)
+		/*addBehaviour(new SimpleBehaviour(this)
 		{
 			
 			@Override
@@ -102,10 +91,11 @@ public class AgUnit extends Agent{
 					{
 						AID ag = (AID)res[0].getName();
 					
-						ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
+						/*ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
 						msg.addReceiver(ag);
 						msg.setLanguage(codec.getName());
-						msg.setOntology(ontology.getName());
+						msg.setOntology(ontology.getName());*/
+        					/*ACLMessage msg =	MessageFormatter.createMessage(ACLMessage.REQUEST, "createUnit",ag);
 						
 						CreateUnit create = new CreateUnit();
 						Action agAction = new Action(ag,create);
@@ -135,7 +125,7 @@ public class AgUnit extends Agent{
 				return true;
 			}
 			
-		});
+		});*/
 		
 		//Behavior for moving
 		addBehaviour(new SimpleBehaviour(this)
@@ -165,21 +155,22 @@ public class AgUnit extends Agent{
 						msg.setOntology(ontology.getName());*/
 						
 						ACLMessage createMsg =	MessageFormatter.createMessage(ACLMessage.REQUEST, "move",ag);
-						MoveToCell create = new MoveToCell();
+						MoveToCell createAction = new MoveToCell();
 						
 						Cell targetPosition = new Cell();
 						targetPosition.setX(currentPosition.getX()+1);
 						targetPosition.setY(currentPosition.getY()+1);
-						targetPosition.setOwner(this.getAgent().getAID());
-						create.setTarget(targetPosition);
-						Action agAction = new Action(ag,create);
+						targetPosition.setOwner(getAID());
+						targetPosition.setContent(new Empty());
+						createAction.setTarget(targetPosition);
+						Action agAction = new Action(ag,createAction);
 						// Here you pass in arguments the message and the content that it will be filled with
 						getContentManager().fillContent(createMsg, agAction);
 						send(createMsg);
 						System.out.println(getLocalName()+": REQUEST MOVEMENT TO THE WORLD");
 					}
 					else
-						System.out.println("THERE ARE NO AGENTS REGISTERED WITH TYPE: "+sd.getType());
+						System.out.println(getLocalName()+"THERE ARE NO AGENTS REGISTERED WITH TYPE: "+sd.getType());
 				} catch (CodecException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -207,11 +198,11 @@ public class AgUnit extends Agent{
 
 			@Override
 			public void action() {
-				// TODO Auto-generated method stub
-				ACLMessage msg = receive(MessageTemplate.MatchPerformative(ACLMessage.AGREE));
+				
+				ACLMessage msg = receive(MessageTemplate.and(MessageTemplate.MatchPerformative(ACLMessage.AGREE), MessageTemplate.MatchProtocol("createUnit")));
 				if (msg != null)
 	            {
-					System.out.println("WORLD REPLIED SUCCESFULL CREATION OF UNIT");
+					System.out.println(getLocalName()+"WORLD REPLIED SUCCESFULL CREATION OF UNIT");
 	            }
 			}
 
@@ -222,10 +213,37 @@ public class AgUnit extends Agent{
 			}
 			
 		});
+		
+		// Adds a behavior to process the answer to a creation request
+		addBehaviour(new SimpleBehaviour(this)
+		{
+
+			@Override
+			public void action() {
+					
+				ACLMessage msg = receive(MessageTemplate.and(MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.AGREE), MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.NOT_UNDERSTOOD), MessageTemplate.MatchPerformative(ACLMessage.REFUSE))), MessageTemplate.MatchProtocol("move")));
+				if (msg != null)
+			    {
+					if(msg.getPerformative()==ACLMessage.AGREE )
+						System.out.println(getLocalName()+"MOVEMENT ACCEPTED");
+					else if(msg.getPerformative()==ACLMessage.REFUSE )
+						System.out.println(getLocalName()+"MOVEMENT REFUSED");
+					if(msg.getPerformative()==ACLMessage.NOT_UNDERSTOOD )
+						System.out.println(getLocalName()+"MOVEMENT NOT_UNDERSTOOD");
+			     }
+			}
+
+			@Override
+			public boolean done() {
+				// TODO Auto-generated method stub
+				return false;
+			}
+					
+		});		
 	}
 	protected void takeDown() {
 		// Printout a dismissal message
-		System.out.println("Agent "+getLocalName()+" has terminating");
+		System.out.println(getLocalName()+"Agent "+getLocalName()+" has terminating");
 	}
 
 	public Cell getCurrentPosition() {
