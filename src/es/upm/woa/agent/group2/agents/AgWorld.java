@@ -330,7 +330,8 @@ public class AgWorld extends Agent {
 			                            		ACLMessage informMsgTribe = MessageFormatter.createMessage(ACLMessage.INFORM, "informMove", tribeSender.getId());
 			                            		NotifyNewCellDiscovery notify = new NotifyNewCellDiscovery();
 			                            		notify.setNewCell(cell);
-			                            		getContentManager().fillContent(informMsg, notify);
+			                            		Action notifyCellDiscovery = new Action(tribeSender.getId(), notify);
+			                            		getContentManager().fillContent(informMsgTribe, notifyCellDiscovery);
 			                            		send(informMsgTribe);
 		                            		}
 		                            		else 
