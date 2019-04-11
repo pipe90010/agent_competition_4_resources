@@ -22,6 +22,7 @@ import jade.content.lang.Codec.*;
 import jade.content.onto.*;
 import jade.content.onto.basic.Action;
 import jade.content.lang.sl.*;
+//import es.upm.woa.agent.group5.AgWorld;
 
 public class AgUnit extends Agent{
 
@@ -43,7 +44,7 @@ public class AgUnit extends Agent{
 	
 	protected void setup()
 	{
-		System.out.println(getLocalName()+": has entered into the system ");
+		System.out.println("Group2 - " + getLocalName()+": has entered into the system ");
 		
 		//Register of the codec and the ontology to be used in the ContentManager
 		//Register language and ontology this part always goes
@@ -61,7 +62,7 @@ public class AgUnit extends Agent{
                 cell.setY(y);
                 cell.setOwner(this.getAID());
                 setCurrentPosition(cell);
-                System.out.println("CURRENT POSITION IS SET FOR X: "+x+" and Y: "+y);
+                System.out.println("Group2 - " + "CURRENT POSITION IS SET FOR X: "+x+" and Y: "+y);
             }            
 
         }
@@ -155,7 +156,7 @@ public class AgUnit extends Agent{
 						msg.setLanguage(codec.getName());
 						msg.setOntology(ontology.getName());*/
 						
-						ACLMessage createMsg =	MessageFormatter.createMessage(ACLMessage.REQUEST, "move",ag);
+						ACLMessage createMsg =	MessageFormatter.createMessage(ACLMessage.REQUEST, "MoveToCell",ag);
 						MoveToCell createAction = new MoveToCell();
 						
 						Cell targetPosition = new Cell();
@@ -168,10 +169,10 @@ public class AgUnit extends Agent{
 						// Here you pass in arguments the message and the content that it will be filled with
 						getContentManager().fillContent(createMsg, agAction);
 						send(createMsg);
-						System.out.println(getLocalName()+": REQUEST MOVEMENT TO THE WORLD");
+						System.out.println("Group2 - " + getLocalName()+": REQUEST MOVEMENT TO THE WORLD");
 					}
 					else
-						System.out.println(getLocalName()+"THERE ARE NO AGENTS REGISTERED WITH TYPE: "+sd.getType());
+						System.out.println("Group2 - " + getLocalName()+"THERE ARE NO AGENTS REGISTERED WITH TYPE: "+sd.getType());
 				} catch (CodecException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -203,7 +204,7 @@ public class AgUnit extends Agent{
 				ACLMessage msg = receive(MessageTemplate.and(MessageTemplate.MatchPerformative(ACLMessage.AGREE), MessageTemplate.MatchProtocol("createUnit")));
 				if (msg != null)
 	            {
-					System.out.println(getLocalName()+"WORLD REPLIED SUCCESFULL CREATION OF UNIT");
+					System.out.println("Group2 - " + getLocalName()+"WORLD REPLIED SUCCESFULL CREATION OF UNIT");
 	            }
 			}
 
@@ -222,15 +223,15 @@ public class AgUnit extends Agent{
 			@Override
 			public void action() {
 					
-				ACLMessage msg = receive(MessageTemplate.and(MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.AGREE), MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.NOT_UNDERSTOOD), MessageTemplate.MatchPerformative(ACLMessage.REFUSE))), MessageTemplate.MatchProtocol("move")));
+				ACLMessage msg = receive(MessageTemplate.and(MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.AGREE), MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.NOT_UNDERSTOOD), MessageTemplate.MatchPerformative(ACLMessage.REFUSE))), MessageTemplate.MatchProtocol("MoveToCell")));
 				if (msg != null)
 			    {
 					if(msg.getPerformative()==ACLMessage.AGREE )
-						System.out.println(getLocalName()+"MOVEMENT ACCEPTED");
+						System.out.println("Group2 - " + getLocalName()+"MOVEMENT ACCEPTED");
 					else if(msg.getPerformative()==ACLMessage.REFUSE )
-						System.out.println(getLocalName()+"MOVEMENT REFUSED");
+						System.out.println("Group2 - " + getLocalName()+"MOVEMENT REFUSED");
 					if(msg.getPerformative()==ACLMessage.NOT_UNDERSTOOD )
-						System.out.println(getLocalName()+"MOVEMENT NOT_UNDERSTOOD");
+						System.out.println("Group2 - " + getLocalName()+"MOVEMENT NOT_UNDERSTOOD");
 			     }
 			}
 
@@ -248,13 +249,13 @@ public class AgUnit extends Agent{
 
 			public void action() {
 					
-				ACLMessage msg = receive(MessageTemplate.and(MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.INFORM),MessageTemplate.MatchPerformative(ACLMessage.FAILURE)), MessageTemplate.MatchProtocol("moveDone")));
+				ACLMessage msg = receive(MessageTemplate.and(MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.INFORM),MessageTemplate.MatchPerformative(ACLMessage.FAILURE)), MessageTemplate.MatchProtocol("NotifyNewCellDiscovery")));
 				if (msg != null)
 			    {
 					if(msg.getPerformative()==ACLMessage.INFORM)
-						System.out.println(getLocalName()+" Movement has been made");
+						System.out.println("Group2 - " + getLocalName()+" Movement has been made");
 					else
-						System.out.println(getLocalName()+" Movement failure");
+						System.out.println("Group2 - " + getLocalName()+" Movement failure");
 			     }
 				else
 					block();
@@ -265,7 +266,7 @@ public class AgUnit extends Agent{
 	}
 	protected void takeDown() {
 		// Printout a dismissal message
-		System.out.println(getLocalName()+"Agent "+getLocalName()+" has terminating");
+		System.out.println("Group2 - " + getLocalName()+"Agent "+getLocalName()+" has terminating");
 	}
 
 	public Cell getCurrentPosition() {

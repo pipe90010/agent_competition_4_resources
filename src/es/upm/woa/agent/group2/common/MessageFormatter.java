@@ -1,5 +1,7 @@
 package es.upm.woa.agent.group2.common;
 
+import java.util.UUID;
+
 import es.upm.woa.ontology.GameOntology;
 import jade.content.lang.Codec;
 import jade.content.lang.sl.SLCodec;
@@ -16,6 +18,7 @@ public class MessageFormatter {
         msg.setProtocol(protocol);
         msg.setLanguage(codec.getName());
         msg.setOntology(ontology.getName());
+        msg.setConversationId(UUID.randomUUID().toString());
         msg.addReceiver(receiver);
 
         return msg;

@@ -50,8 +50,8 @@ public class AgWorld extends Agent {
 	public final static String WORLD = "World";
 	public final static String TRIBE = "Tribe";
 
-	private final static int GOLD = 150;
-	private final static int FOOD = 50;
+	private final static int GOLD = 1500;
+	private final static int FOOD = 500;
 	private final static int HOURS = 150;
 
 	private final static int X_BOUNDARY = 100;
@@ -79,6 +79,19 @@ public class AgWorld extends Agent {
 	private Cell[][] map;
 	private Properties properties = new Properties();
 	
+	public ArrayList<Tribe> getTribes() {
+		return tribes;
+	}
+
+
+	public Cell[][] getMap() {
+		return map;
+	}
+
+	public Properties getProperties() {
+		return properties;
+	}
+
 	private boolean gameOver;
 	// -----------------------------------------------------------------
 	// Constructor
@@ -93,7 +106,7 @@ public class AgWorld extends Agent {
 	// -----------------------------------------------------------------
 
 	protected void setup() {
-		System.out.println(getLocalName() + ": has entered into the system ");
+		System.out.println("Group2 - " + getLocalName() + ": has entered into the system ");
 
 		// Register of the codec and the ontology to be used in the ContentManager
 		// Register language and ontology this part always goes
@@ -109,7 +122,7 @@ public class AgWorld extends Agent {
 			dfd.addServices(sd);
 			// Registers its description in the DF
 			DFService.register(this, dfd);
-			System.out.println(getLocalName() + ": registered in the DF");
+			System.out.println("Group2 - " + getLocalName() + ": registered in the DF");
 			/**
 			 * Initialize everything
 			 */
@@ -126,7 +139,8 @@ public class AgWorld extends Agent {
 			 */
 			Unit u = createUnit("UnitX",tx);
 			u.setPosition(tx.getTownhall());
-			tx.addUnit(u, 150, 50);
+			//TODO: Change amount of gold and food - TEST Integration
+			tx.addUnit(u, 100, 10);
 			tribes.add(tx);
 			//tribes.add(ty);
 		} catch (FIPAException e) {
@@ -158,7 +172,7 @@ public class AgWorld extends Agent {
 								Concept conc = agAction.getAction();
 								// If the action is CreateUnit...
 								if (conc instanceof CreateUnit) {
-									System.out.println(myAgent.getLocalName() + ": received creation request from "
+									System.out.println("Group2 - " + myAgent.getLocalName() + ": received creation request from "
 											+ (msg.getSender()).getLocalName());
 									ACLMessage reply = msg.createReply();
 									reply.setLanguage(codec.getName());
@@ -175,56 +189,31 @@ public class AgWorld extends Agent {
 									
 									//Validate unit creation
 									Integer code = canCreateUnit(tribeSender, senderUnit.getPosition(),indexTribe);
-									String newUnitName = "UnitY";
+									String newUnitName = "UnitY"+Math.random();
 
 									switch (code) {
 									case 1:
 
-										System.out.println("creating unit:" + newUnitName);
+										System.out.println("Group2 - " + "creating unit:" + newUnitName);
 										Unit u = createUnit(newUnitName,tribeSender);
 										tribes.get(indexTribe).addUnit(u, 150, 50);
-										/*DFAgentDescription dfd2 = new DFAgentDescription();
-										ServiceDescription sd2 = new ServiceDescription();
-										sd2.setType(TRIBE);
-										dfd2.addServices(sd2);
-										DFAgentDescription[] res = new DFAgentDescription[1];
-										res = DFService.search(myAgent, dfd2);
-										if (res.length > 0) {
-										if(tribeSender.getId()!=null)
-										{
-											//AID ag = (AID) res[0].getName();
-											//res = DFService.search(myAgent, dfd2);
-											ACLMessage msgInform = new ACLMessage(ACLMessage.INFORM);
-											AID ag = tribeSender.getId();
-											msgInform.addReceiver(ag);
-											msgInform.setLanguage(codec.getName());
-											msgInform.setOntology(ontology.getName());
-											// Creates a notifyNewUnit action
-											NotifyNewUnit notify = new NotifyNewUnit();
-											notify.setLocation(u.getPosition());
-											notify.setNewUnit(u.getId());
-											Action agActionNotification = new Action(ag, notify);
-											getContentManager().fillContent(msgInform, agActionNotification);
-											send(msgInform);
-											System.out.println("INFORM CREATION TO TRIBE");
-										}*/
-
+										
 										reply.setPerformative(ACLMessage.AGREE);
 										break;
 									case 2:
-										System.out.println("Not enough gold");
+										System.out.println("Group2 - " + "Not enough gold");
 										reply.setPerformative(ACLMessage.REFUSE);
 										break;
 									case 3:
-										System.out.println("Not enough food");
+										System.out.println("Group2 - " + "Not enough food");
 										reply.setPerformative(ACLMessage.REFUSE);
 										break;
 									case 4:
-										System.out.println("unit" + newUnitName + "not positioned in the townhall");
+										System.out.println("Group2 - " + "unit" + newUnitName + "not positioned in the townhall");
 										reply.setPerformative(ACLMessage.REFUSE);
 										break;
 									case 5:
-										System.out.println("unit" + newUnitName + "not positioned in the right townhall");
+										System.out.println("Group2 - " + "unit" + newUnitName + "not positioned in the right townhall");
 										reply.setPerformative(ACLMessage.REFUSE);
 										break;
 									default:
@@ -258,7 +247,7 @@ public class AgWorld extends Agent {
 	            // Wait for a units request to move to a new position
 	        	/*ACLMessage msg = receive(MessageTemplate.and(MessageTemplate.MatchLanguage(codec.getName()),
 						MessageTemplate.MatchOntology(ontology.getName())));*/
-	        	ACLMessage msg = receive(MessageTemplate.and(MessageTemplate.MatchPerformative(ACLMessage.REQUEST), MessageTemplate.MatchProtocol("move")));
+	        	ACLMessage msg = receive(MessageTemplate.and(MessageTemplate.MatchPerformative(ACLMessage.REQUEST), MessageTemplate.MatchProtocol("MoveToCell")));
 	            if(msg != null ) {//&& msg.getPerformative() == ACLMessage.REQUEST) {
 	                AID unitAID = msg.getSender();
 	                String senderName = (unitAID).getLocalName();
@@ -293,13 +282,13 @@ public class AgWorld extends Agent {
 								//validate that are adjacents 5.2.2 SCENARIO 1 & 2 ready								
 																
 	                            if (false) {//!areAdjacentPositions(currentPosition, requestedPosition)) {
-	                                System.out.println(platformName + "Unit " + senderName + " can't move there...");
-	                                reply = MessageFormatter.createReplyMessage(msg, ACLMessage.REFUSE, "move");
+	                                System.out.println("Group2 - " + platformName + "Unit " + senderName + " can't move there...");
+	                                reply = MessageFormatter.createReplyMessage(msg, ACLMessage.REFUSE, "MoveToCell");
 	                                send(reply);
 	                            } else {
 	                            		
-	                            		System.out.println(platformName + "Unit " + senderName + " IS ABLE TO MOVE TO NEW POSITION, START WAIT TIME");
-	                                reply = MessageFormatter.createReplyMessage(msg, ACLMessage.AGREE, "move");
+	                            		System.out.println("Group2 - " + platformName + "Unit " + senderName + " IS ABLE TO MOVE TO NEW POSITION, START WAIT TIME");
+	                                reply = MessageFormatter.createReplyMessage(msg, ACLMessage.AGREE, "MoveToCell");
 	                                send(reply);
 
 	                                // TODO (MAYBE): I'm not sure, but maybe we should inform all subscribers about this change?
@@ -312,7 +301,7 @@ public class AgWorld extends Agent {
 	                                    
 	                                    doWait(waitTime);
 	                                    
-	                                    System.out.println(platformName + "Unit " + senderName + " WAIT TIME FINISHED");
+	                                    System.out.println("Group2 - " + platformName + "Unit " + senderName + " WAIT TIME FINISHED");
 	                                    // Find the unit based on sender AID
 		                            		Unit unit = findUnitByAID(unitAID, tribeSender);
 		                            		ACLMessage informMsg =null;
@@ -320,8 +309,8 @@ public class AgWorld extends Agent {
 		                            		{
 		                            			//Move the unit 
 			                            		Cell cell = moveUnitToPosition(unit, requestedPosition);
-			                            		System.out.println(platformName + "Unit " + senderName + "POSITION UPDATED");
-			                            		informMsg = MessageFormatter.createReplyMessage(msg,ACLMessage.INFORM, "moveDone");
+			                            		System.out.println("Group2 - " + platformName + "Unit " + senderName + "POSITION UPDATED");
+			                            		informMsg = MessageFormatter.createReplyMessage(msg,ACLMessage.INFORM, "NotifyNewCellDiscovery");
 			                            		getContentManager().fillContent(informMsg,  new Action(unit.getId(), cell));
 			                            		send(informMsg);
 			                            		
@@ -334,7 +323,7 @@ public class AgWorld extends Agent {
 		                            		}
 		                            		else 
 		                            		{
-		                            			informMsg = MessageFormatter.createReplyMessage(msg,ACLMessage.FAILURE, "moveDone");
+		                            			informMsg = MessageFormatter.createReplyMessage(msg,ACLMessage.FAILURE, "NotifyNewCellDiscovery");
 		                            			send(informMsg);
 		                            		}
 
@@ -347,7 +336,7 @@ public class AgWorld extends Agent {
 	                                //try {
 	                                
 	                                
-		                                /*ACLMessage informMsgUnit = MessageFormatter.createMessage(ACLMessage.INFORM, "inform", tribeSender.getId());
+		                                /*ACLMessage informMsgUnit = MessageFormatter.createMessage(ACLMessage.INFORM, , tribeSender.getId());
 	                                    //TODO: DANIEL getContentManager().fillContent(informMsgUnit, new Action(unit.getUnitID(), cell));
 	                                      send(informMsgUnit);
 	                                
@@ -380,8 +369,8 @@ public class AgWorld extends Agent {
 	                        		ACLMessage reply = MessageFormatter.createReplyMessage(null, ACLMessage.NOT_UNDERSTOOD,null);
 	                             send(reply);
 	                        	}
-	                        } else { System.out.println("Wrong position."); }
-	                    } else { System.out.println("You lost"); }
+	                        } else { System.out.println("Group2 - " + "Wrong position."); }
+	                    } else { System.out.println("Group2 - " + "You lost"); }
 	                } catch (Codec.CodecException | OntologyException e) {
 	                    e.printStackTrace();
 	                }
@@ -425,6 +414,11 @@ public class AgWorld extends Agent {
 	
 	//Reservar la siguiente celda aleatoriamente
 	private Cell bookNextRandomCell(Concept conc) {
+		
+		//TODO: Integration test
+		return map[1][1];
+		
+		/*
 		int x = new Random().nextInt(X_BOUNDARY);
 		int y = new Random().nextInt(Y_BOUNDARY);
 		//validate if it doesn't
@@ -435,12 +429,13 @@ public class AgWorld extends Agent {
 		} else {
 			return bookNextRandomCell(conc);
 		}
+		*/
 	}
 
 	private Tribe createTribe(String nickname) {
 		ContainerController cc = getContainerController();
-
-		AgTribe agentTribe = new AgTribe();
+		
+		 AgTribe agentTribe = new AgTribe();
 		try {
 			cc.acceptNewAgent(nickname, agentTribe).start();
 			
@@ -451,6 +446,8 @@ public class AgWorld extends Agent {
 			
 			types.add(TOWNHALL);
 			townhall.setType(types);
+			
+			
 			Cell townhallCell = bookNextRandomCell(townhall);
 			map[townhallCell.getX()][townhallCell.getY()].setOwner(agentTribe.getAID());
 			Tribe tribe = new Tribe(agentTribe.getAID(), GOLD, FOOD, townhallCell);
@@ -463,17 +460,16 @@ public class AgWorld extends Agent {
 	}
 
 	private Integer canCreateUnit(Tribe t, Cell position, Integer index) {
-
-		if (worldRules.isItsOwnTownhall(t.getTownhall(), tribes.get(index).getTownhall())) {
+		if (!worldRules.isItsOwnTownhall(t.getTownhall(), tribes.get(index).getTownhall())) {
 			return 2;
 		}
-		if (worldRules.isInTownhall(t.getTownhall().getX(), t.getTownhall().getY(), position)) {
+		if (!worldRules.isInTownhall(t.getTownhall().getX(), t.getTownhall().getY(), position)) {
 			return 3;
 		}
-		if (worldRules.hasEnoughGold(t.getGold())) {
+		if (!worldRules.hasEnoughGold(t.getGold())) {
 			return 4;
 		}
-		if (worldRules.hasEnoughFood(t.getFood())){
+		if (!worldRules.hasEnoughFood(t.getFood())){
 			return 5;
 		}
 		return 1;
@@ -482,7 +478,7 @@ public class AgWorld extends Agent {
 	private Unit createUnit(String nickname,Tribe tribe) {
 
 		ContainerController cc = getContainerController();
-		AgUnit agentUnit = new AgUnit();
+		//es.upm.woa.agent.group1.AgUnit agentUnit = new es.upm.woa.agent.group1.AgUnit();
 		try {
 			//cc.acceptNewAgent(nickname, agentUnit).start();
 			Cell position = bookNextRandomCell(new Empty());
@@ -496,13 +492,13 @@ public class AgWorld extends Agent {
 			position.setOwner(tribe.getId());
 			Unit newUnit = new Unit(getAID(nickname), position);
 			map[position.getX()][position.getY()].setOwner(tribe.getId());
-			agentUnit.setCurrentPosition(position);
+			//agentUnit.setCurrentPosition(position);
 
 			if(tribe!=null)
 			{
 				AID ag = tribe.getId();
 
-				ACLMessage msgInform = MessageFormatter.createMessage(ACLMessage.INFORM, "informCreation", ag);
+				ACLMessage msgInform = MessageFormatter.createMessage(ACLMessage.INFORM, "CreateUnit", ag);
 				// Creates a notifyNewUnit action
 				NotifyNewUnit notify = new NotifyNewUnit();
 
@@ -511,7 +507,7 @@ public class AgWorld extends Agent {
 				Action agActionNotification = new Action(ag, notify);
 				getContentManager().fillContent(msgInform, agActionNotification);
 				send(msgInform);
-				System.out.println("INFORM CREATION TO TRIBE");
+				System.out.println("Group2 - " + "INFORM CREATION TO TRIBE");
 			}
 			return newUnit;
 		} catch (StaleProxyException e) {
@@ -573,7 +569,7 @@ public class AgWorld extends Agent {
     private boolean areAdjacentPositions(Cell posA, Cell posB) {
         // First, both positions need to be valid
         if(!isValidPosition(posA) || !isValidPosition(posB)) {
-            System.out.println("$$$ This position doesn't exist on our hexagonal map $$$");
+            System.out.println("Group2 - " +  "This position doesn't exist on our hexagonal map $$$");
             return false;
         }
 

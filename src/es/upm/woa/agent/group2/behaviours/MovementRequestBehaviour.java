@@ -39,8 +39,8 @@ public class MovementRequestBehaviour extends CyclicBehaviour {
 	
 	public MovementRequestBehaviour(AgWorld AgWorldInstance,ACLMessage msg){
 		this.AgWorldInstance=AgWorldInstance;
-		this.map=AgWorldInstance.map;
-		this.properties= AgWorldInstance.properties;
+		this.map=AgWorldInstance.getMap();
+		this.properties= AgWorldInstance.getProperties();
 		if(msg != null) {	
 			this.platformName=AgWorldInstance.getName();
 			try {

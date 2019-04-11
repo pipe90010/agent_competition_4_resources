@@ -18,5 +18,5 @@ public class AgWorldRules {
 	}
 	
 	public boolean isItsOwnTownhall(Cell senderTownhallPosition, Cell tribeTownhall) {
-		return senderTownhallPosition.getOwner()==tribeTownhall.getOwner();}
+		return senderTownhallPosition.getOwner().getName()==tribeTownhall.getOwner().getName();}
 }

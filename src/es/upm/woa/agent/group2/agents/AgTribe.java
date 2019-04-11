@@ -23,6 +23,7 @@ import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
+//import es.upm.woa.agent.group5.AgWorld;
 
 public class AgTribe extends Agent {
 
@@ -38,7 +39,7 @@ public class AgTribe extends Agent {
 	}
 
 	protected void setup() {
-		System.out.println(getLocalName() + ": has entered into the system");
+		System.out.println("Group2 - " + getLocalName() + ": has entered into the system");
 //      Register of the codec and the ontology to be used in the ContentManager
 		getContentManager().registerLanguage(codec);
 		getContentManager().registerOntology(ontology);
@@ -51,13 +52,13 @@ public class AgTribe extends Agent {
 				// Waits for units creation
 				/*ACLMessage msg = receive(MessageTemplate.and(MessageTemplate.MatchLanguage(codec.getName()),
 						MessageTemplate.MatchOntology(ontology.getName())));*/
-				ACLMessage msg = receive(MessageTemplate.and(MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.INFORM),MessageTemplate.MatchPerformative(ACLMessage.FAILURE)), MessageTemplate.MatchProtocol("informCreation")));
+				ACLMessage msg = receive(MessageTemplate.and(MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.INFORM),MessageTemplate.MatchPerformative(ACLMessage.FAILURE)), MessageTemplate.MatchProtocol("CreateUnit")));
 				if (msg != null) {
 
 					try {
 						ContentElement ce = null;
 						if (msg.getPerformative() == ACLMessage.INFORM) {
-							System.out.println("INFORM TRIBE"+msg);
+							System.out.println("Group2 - " + "INFORM TRIBE"+msg);
 							ce = getContentManager().extractContent(msg);
 							if (ce instanceof Action) {
 								Action agAction = (Action) ce;
@@ -70,7 +71,7 @@ public class AgTribe extends Agent {
 
 									Cell cell= agActionN.getLocation();
 									AID aid = agActionN.getNewUnit();
-									System.out.println(myAgent.getLocalName() + ": received unit creation from "
+									System.out.println("Group2 - " + myAgent.getLocalName() + ": received unit creation from "
 											+ (msg.getSender()).getLocalName()+" with AID: "+aid.getName()+" and its location is "+cell.getX()+" and "+cell.getY());
 								}
 							}
@@ -78,13 +79,13 @@ public class AgTribe extends Agent {
 						else
 						{
 							// If what is received is not understood
-							System.out.println(myAgent.getLocalName()+": Mamma mia!! non capisco il messaggio di "+(msg.getSender()).getLocalName());    
+							System.out.println("Group2 - " + myAgent.getLocalName()+": Mamma mia!! non capisco il messaggio di "+(msg.getSender()).getLocalName());    
 							ACLMessage reply = msg.createReply();
 												
 							//A NOT_UNDERSTOOD is sent		
 							reply.setPerformative(ACLMessage.NOT_UNDERSTOOD);
 							myAgent.send(reply);
-							System.out.println(myAgent.getLocalName()+": Perplexity sent");
+							System.out.println("Group2 - " + myAgent.getLocalName()+": Perplexity sent");
 						}
 
 					}
@@ -113,7 +114,7 @@ public class AgTribe extends Agent {
 			    {
 					if(msg.getPerformative()==ACLMessage.INFORM)
 					{
-						System.out.println(getLocalName()+" Movement has been received by Tribe");
+						System.out.println("Group2 - " + getLocalName()+" Movement has been received by Tribe");
 						try {
 							ContentElement ce = getContentManager().extractContent(msg);
 							if (ce instanceof Action) {
@@ -126,7 +127,7 @@ public class AgTribe extends Agent {
 									NotifyNewCellDiscovery agActionN = (NotifyNewCellDiscovery)agAction.getAction();
 
 									Cell cell= agActionN.getNewCell();
-									System.out.println(myAgent.getLocalName() + ": received unit creation from "
+									System.out.println("Group2 - " + myAgent.getLocalName() + ": received unit creation from "
 											+ (msg.getSender()).getLocalName()+" and its location is "+cell.getX()+" and "+cell.getY());
 								}
 							}
@@ -137,7 +138,7 @@ public class AgTribe extends Agent {
 					}
 						
 					else
-						System.out.println(getLocalName()+" Movement failure");
+						System.out.println("Group2 - " + getLocalName()+" Movement failure");
 			     }
 				else
 					block();
