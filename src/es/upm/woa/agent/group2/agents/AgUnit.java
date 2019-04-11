@@ -13,10 +13,10 @@ import jade.lang.acl.MessageTemplate;
 import es.upm.woa.agent.group2.beans.Tribe;
 import es.upm.woa.agent.group2.common.MessageFormatter;
 import es.upm.woa.ontology.Cell;
-import es.upm.woa.ontology.CreateUnit;
 import es.upm.woa.ontology.Empty;
 import es.upm.woa.ontology.GameOntology;
 import es.upm.woa.ontology.MoveToCell;
+
 import jade.content.lang.Codec;
 import jade.content.lang.Codec.*;
 import jade.content.onto.*;
@@ -159,8 +159,8 @@ public class AgUnit extends Agent{
 						MoveToCell createAction = new MoveToCell();
 						
 						Cell targetPosition = new Cell();
-						targetPosition.setX(currentPosition.getX()+1);
-						targetPosition.setY(currentPosition.getY()+1);
+						targetPosition.setX(2);//currentPosition.getX()+1);
+						targetPosition.setY(2);//currentPosition.getY()+1);
 						targetPosition.setOwner(getAID());
 						targetPosition.setContent(new Empty());
 						createAction.setTarget(targetPosition);

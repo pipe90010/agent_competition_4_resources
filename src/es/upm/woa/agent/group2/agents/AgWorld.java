@@ -187,7 +187,6 @@ public class AgWorld extends Agent {
 										ServiceDescription sd2 = new ServiceDescription();
 										sd2.setType(TRIBE);
 										dfd2.addServices(sd2);
-
 										DFAgentDescription[] res = new DFAgentDescription[1];
 										res = DFService.search(myAgent, dfd2);
 										if (res.length > 0) {
@@ -202,7 +201,6 @@ public class AgWorld extends Agent {
 											msgInform.setOntology(ontology.getName());
 											// Creates a notifyNewUnit action
 											NotifyNewUnit notify = new NotifyNewUnit();
-
 											notify.setLocation(u.getPosition());
 											notify.setNewUnit(u.getId());
 											Action agActionNotification = new Action(ag, notify);
@@ -356,17 +354,14 @@ public class AgWorld extends Agent {
 	                                    // Inform all subscribers, NIcolas: we are not handling suscribers for this 
 	                                    ArrayList<AID> subscribers = null; //TODO: DANIEL getSubscribers();
 	                                    ArrayList<Tribe> tribes = null; //TODO: DANIEL getTribes();
-
 	                                    for(Tribe tribe : tribes) {
 	                                        ArrayList<Cell> positions = null; //TODO: DANIEL entityManager.retrieveTribeKnownPosition(tribe.getAgentAID());
-
 	                                        // Verify if the tribe knows this position
 	                                        if (positions.contains(requestedPosition)) {
 	                                            // Notify Tribe
 	                                            ACLMessage informMsg = null; //TODO: DANIEL  MessageFormatter.createMessage(ACLMessage.INFORM, "subscribe", tribe.getAgentAID());
 	                                          //TODO: DANIEL getContentManager().fillContent(informMsg, new Action(tribe.getAgentAID(), cell));
 	                                            send(informMsg);
-
 	                                            // Notify Units
 	                                            for (Unit unit : tribe.getUnits()) {
 	                                            	ACLMessage informMsgUnit = null; //TODO: DANIEL MessageFormatter.createMessage(ACLMessage.INFORM, "subscribe", unit.getUnitID());
