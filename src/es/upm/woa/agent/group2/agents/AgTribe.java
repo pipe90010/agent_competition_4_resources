@@ -1,6 +1,7 @@
 package es.upm.woa.agent.group2.agents;
 
 
+import es.upm.woa.agent.group2.common.Printer;
 import es.upm.woa.ontology.Cell;
 import es.upm.woa.ontology.GameOntology;
 import es.upm.woa.ontology.NotifyNewCellDiscovery;
@@ -39,7 +40,7 @@ public class AgTribe extends Agent {
 	}
 
 	protected void setup() {
-		System.out.println("Group2 - " + getLocalName() + ": has entered into the system");
+		Printer.printSuccess( getLocalName(),": has entered into the system");
 //      Register of the codec and the ontology to be used in the ContentManager
 		getContentManager().registerLanguage(codec);
 		getContentManager().registerOntology(ontology);
@@ -58,7 +59,6 @@ public class AgTribe extends Agent {
 					try {
 						ContentElement ce = null;
 						if (msg.getPerformative() == ACLMessage.INFORM) {
-							System.out.println("Group2 - " + "INFORM TRIBE"+msg);
 							ce = getContentManager().extractContent(msg);
 							if (ce instanceof Action) {
 								Action agAction = (Action) ce;
@@ -71,21 +71,20 @@ public class AgTribe extends Agent {
 
 									Cell cell= agActionN.getLocation();
 									AID aid = agActionN.getNewUnit();
-									System.out.println("Group2 - " + myAgent.getLocalName() + ": received unit creation from "
-											+ (msg.getSender()).getLocalName()+" with AID: "+aid.getName()+" and its location is "+cell.getX()+" and "+cell.getY());
+									Printer.printSuccess( getLocalName(),"received unit creation from "+ (msg.getSender()).getLocalName()+" with AID: "+aid.getName()+" and its location is "+cell.getX()+" and "+cell.getY());
 								}
 							}
 						}
 						else
 						{
 							// If what is received is not understood
-							System.out.println("Group2 - " + myAgent.getLocalName()+": Mamma mia!! non capisco il messaggio di "+(msg.getSender()).getLocalName());    
+							Printer.printSuccess( getLocalName(),": Mamma mia!! non capisco il messaggio di "+(msg.getSender()).getLocalName());
 							ACLMessage reply = msg.createReply();
 												
 							//A NOT_UNDERSTOOD is sent		
 							reply.setPerformative(ACLMessage.NOT_UNDERSTOOD);
 							myAgent.send(reply);
-							System.out.println("Group2 - " + myAgent.getLocalName()+": Perplexity sent");
+							Printer.printSuccess( getLocalName(),": Perplexity sent");
 						}
 
 					}
@@ -114,7 +113,7 @@ public class AgTribe extends Agent {
 			    {
 					if(msg.getPerformative()==ACLMessage.INFORM)
 					{
-						System.out.println("Group2 - " + getLocalName()+" Movement has been received by Tribe");
+						Printer.printSuccess( getLocalName()," Movement has been received by Tribe");	
 						try {
 							ContentElement ce = getContentManager().extractContent(msg);
 							if (ce instanceof Action) {
@@ -127,8 +126,7 @@ public class AgTribe extends Agent {
 									NotifyNewCellDiscovery agActionN = (NotifyNewCellDiscovery)agAction.getAction();
 
 									Cell cell= agActionN.getNewCell();
-									System.out.println("Group2 - " + myAgent.getLocalName() + ": received unit creation from "
-											+ (msg.getSender()).getLocalName()+" and its location is "+cell.getX()+" and "+cell.getY());
+									Printer.printSuccess( getLocalName(),"received unit creation from "+ (msg.getSender()).getLocalName()+" and its location is "+cell.getX()+" and "+cell.getY());	
 								}
 							}
 						} catch (CodecException | OntologyException e) {
@@ -138,7 +136,7 @@ public class AgTribe extends Agent {
 					}
 						
 					else
-						System.out.println("Group2 - " + getLocalName()+" Movement failure");
+						Printer.printSuccess( getLocalName()," Movement failure");
 			     }
 				else
 					block();

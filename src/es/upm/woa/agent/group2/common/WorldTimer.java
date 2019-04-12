@@ -26,7 +26,9 @@ public class WorldTimer {
 	}
 	
 	public long getMovementTime() {
-		return  parseTime(MOVE_CELL_TIME);
+		long time = parseTime(MOVE_CELL_TIME);
+		System.out.println("...waiting time: "+time+"ms");
+		return time;
 	}
 
 }

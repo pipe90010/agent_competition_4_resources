@@ -35,7 +35,7 @@ public class MovementRequestBehaviour extends CyclicBehaviour {
 	private Ontology ontology = GameOntology.getInstance();
 	private Properties properties = new Properties();
 	private Cell[][] map;
-	
+	private String agentName;
 	
 	public MovementRequestBehaviour(AgWorld AgWorldInstance,ACLMessage msg){
 		this.AgWorldInstance=AgWorldInstance;
@@ -137,13 +137,13 @@ public class MovementRequestBehaviour extends CyclicBehaviour {
 
 					if (!areAdjacentPositions(currentPosition, requestedPosition)) {
 						System.out.println(platformName + "Unit " + senderName + " can't move there...");
-						reply = MessageFormatter.createReplyMessage(msg, ACLMessage.REFUSE, "move");
+						reply = MessageFormatter.createReplyMessage(this.agentName,msg, ACLMessage.REFUSE, "move");
 						AgWorldInstance.send(reply);
 					} else {
 						// Next, we'll have to store the new position for this unit
 						// TODO: DANIEL moveUnitToPosition(unitAID, requestedPosition);
 
-						reply = MessageFormatter.createReplyMessage(msg, ACLMessage.AGREE, "move");
+						reply = MessageFormatter.createReplyMessage(this.agentName,msg, ACLMessage.AGREE, "move");
 						AgWorldInstance.send(reply);
 
 						// TODO (MAYBE): I'm not sure, but maybe we should inform all subscribers about
@@ -161,7 +161,7 @@ public class MovementRequestBehaviour extends CyclicBehaviour {
 							// is really weird
 							// and casting the types didn't work as expected...
 							AgWorldInstance.doWait(2000);
-							ACLMessage informMsg = MessageFormatter.createMessage(ACLMessage.INFORM, "move",
+							ACLMessage informMsg = MessageFormatter.createMessage(this.agentName,ACLMessage.INFORM, "move",
 									unitAID);
 							AgWorldInstance.getContentManager().fillContent(informMsg, new Action(unitAID, cell));
 
