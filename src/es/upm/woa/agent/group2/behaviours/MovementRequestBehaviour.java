@@ -7,10 +7,14 @@ import es.upm.woa.agent.group2.agents.AgWorld;
 import es.upm.woa.agent.group2.beans.Tribe;
 import es.upm.woa.agent.group2.beans.Unit;
 import es.upm.woa.agent.group2.common.MessageFormatter;
+import es.upm.woa.agent.group2.common.Printer;
+import es.upm.woa.agent.group2.common.WorldTimer;
 import es.upm.woa.agent.group2.util.Searching;
 import es.upm.woa.ontology.Cell;
+import es.upm.woa.ontology.Empty;
 import es.upm.woa.ontology.GameOntology;
-
+import es.upm.woa.ontology.MoveToCell;
+import es.upm.woa.ontology.NotifyNewCellDiscovery;
 import jade.content.Concept;
 import jade.content.ContentElement;
 import jade.content.lang.Codec;
@@ -36,6 +40,7 @@ public class MovementRequestBehaviour extends CyclicBehaviour {
 	private Properties properties = new Properties();
 	private Cell[][] map;
 	private String agentName;
+	private WorldTimer worldTimer;
 	
 	public MovementRequestBehaviour(AgWorld AgWorldInstance,ACLMessage msg){
 		this.AgWorldInstance=AgWorldInstance;
@@ -102,118 +107,140 @@ public class MovementRequestBehaviour extends CyclicBehaviour {
     }
 	
 	
+    private Cell moveUnitToPosition(Unit unit, Cell cell) {
+		map[cell.getX()][cell.getY()]= cell;
+		//TODO: UPDATE WITH THE NEW ONTOLOGY
+		map[cell.getX()][cell.getY()].setContent(new Empty());
+		
+		updateUnitInTribeByUnitAID(unit);
+		
+		return map[cell.getX()][cell.getY()];
+		}
+    
+    private boolean updateUnitInTribeByUnitAID(Unit unit) {
+		for (int i = 0; i < tribes.size(); i++) {
+			for (int j = 0; j < tribes.get(i).getUnits().size(); j++) {
+				if (tribes.get(i).getUnits().get(j).getId().getName().equals(unit.getId().getName()))
+				{
+					tribes.get(i).getUnits().get(j).setPosition(unit.getPosition());
+					tribes.get(i).getUnits().get(j).setId(unit.getId());
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 	
 	@Override
 	public void action() {
 		// Wait for a units request to move to a new position
-		
-		if (msg != null) {
-			AID unitAID = msg.getSender();
-			String senderName = (unitAID).getLocalName();			
+		if(msg != null ) {//&& msg.getPerformative() == ACLMessage.REQUEST) {
+            AID unitAID = msg.getSender();
+            String senderName = (unitAID).getLocalName();
+            String platformName = AgWorldInstance.getLocalName();
 
-			if (movementRequest instanceof Action) {
-				Action action = (Action) movementRequest;
-				Concept concept = action.getAction();
+            try {
+            	
+                ContentElement movementRequest = AgWorldInstance.getContentManager().extractContent(msg);
+                
+                if (movementRequest instanceof Action) {
+                	Concept conc = ((Action) movementRequest).getAction();
+                	if(conc instanceof MoveToCell)
+                	{
+                		MoveToCell moveAction = ((MoveToCell) conc);
+                    	Cell requestedPosition = moveAction.getTarget();
+                    
+                    	if(requestedPosition!=null)
+                    	{
+                    	//ACLMessage reply;
+                    	ACLMessage reply = msg.createReply();
+						reply.setLanguage(codec.getName());
+						reply.setOntology(ontology.getName());
+						
+						AID sender = msg.getSender();
+                    	
+                    	int indexTribe = Searching.findTribePositionByUnitAID(AgWorldInstance,sender);
+						Tribe tribeSender = tribes.get(indexTribe);
+						Unit senderUnit = Searching.findUnitByAID(sender, tribeSender);
+						
+						Cell currentPosition = senderUnit.getPosition(); //TODO: DANIEL findUnitFromAnyTribe(unitAID).getPosition();
+						
+						//validate that are adjacents 5.2.2 SCENARIO 1 & 2 ready								
+														
+                        if (false) {//!areAdjacentPositions(currentPosition, requestedPosition)) {
+                            Printer.printSuccess( AgWorldInstance.getLocalName(),"Unit " + senderName + " can't move there...");
+                            reply = MessageFormatter.createReplyMessage(AgWorldInstance.getLocalName(),msg, ACLMessage.REFUSE, "MoveToCell");
+                            AgWorldInstance.send(reply);
+                        } 
+                        else {
+                        		Printer.printSuccess( AgWorldInstance.getLocalName(),"Unit " + senderName + " IS ABLE TO MOVE TO NEW POSITION, START WAIT TIME");
+                        		MoveToCell createAction = new MoveToCell();
+                        		createAction.setTarget(requestedPosition);
+                             Action agAction = new Action(sender,createAction);
+                        		reply = MessageFormatter.createReplyMessage(AgWorldInstance.getLocalName(),msg, ACLMessage.AGREE, "MoveToCell");
+                        		AgWorldInstance.getContentManager().fillContent(reply, agAction);
+                        		AgWorldInstance.send(reply);
 
-				// Validate that a cell exists: 5.2.2 Scenario 3
-				if (concept instanceof Cell) {
+                            try {
+                                long waitTime= worldTimer.getMovementTime();
+                                
+                                AgWorldInstance.doWait(waitTime);
+                                
+                                Printer.printSuccess( AgWorldInstance.getLocalName(),"Unit " + senderName + " WAIT TIME FINISHED");
+                                // Find the unit based on sender AID
+                            		Unit unit = Searching.findUnitByAID(unitAID, tribeSender);
+                            		ACLMessage informMsg =null;
+                            		if(!AgWorldInstance.isGameOver())
+                            		{
+                            			//Move the unit 
+	                            		Cell cell = moveUnitToPosition(unit, requestedPosition);
 
-					// ACLMessage reply;
-					ACLMessage reply = msg.createReply();
-					reply.setLanguage(codec.getName());
-					reply.setOntology(ontology.getName());
-
-					AID sender = reply.getSender();
-					Cell requestedPosition = (Cell) concept;
-
-					int indexTribe = Searching.findTribePositionByUnitAID(AgWorldInstance, sender);
-					Tribe tribeSender = tribes.get(indexTribe);
-					Unit senderUnit = Searching.findUnitByAID(sender, tribeSender);
-
-					Cell currentPosition = senderUnit.getPosition(); // TODO: DANIEL
-																		// findUnitFromAnyTribe(unitAID).getPosition();
-
-					// validate that are adjacent 5.2.2 SCENARIO 1 & 2 ready
-
-					if (!areAdjacentPositions(currentPosition, requestedPosition)) {
-						System.out.println(platformName + "Unit " + senderName + " can't move there...");
-						reply = MessageFormatter.createReplyMessage(this.agentName,msg, ACLMessage.REFUSE, "move");
-						AgWorldInstance.send(reply);
-					} else {
-						// Next, we'll have to store the new position for this unit
-						// TODO: DANIEL moveUnitToPosition(unitAID, requestedPosition);
-
-						reply = MessageFormatter.createReplyMessage(this.agentName,msg, ACLMessage.AGREE, "move");
-						AgWorldInstance.send(reply);
-
-						// TODO (MAYBE): I'm not sure, but maybe we should inform all subscribers about
-						// this change?
-						Cell cell = null; // TODO: DANIEL getCellInfo(requestedPosition);
-
-						try {
-							// Send an INFORM with its new position
-							Long gameHour = null; // TODO: DANIEL
-													// readFloatProp("game.hour.length").longValue();
-							Long movementDuration = null; // TODO: DANIEL
-															// readIntProp("unit.movement.duration").longValue();
-
-							// This should be read from the properties file but the format chosen in there
-							// is really weird
-							// and casting the types didn't work as expected...
-							AgWorldInstance.doWait(2000);
-							ACLMessage informMsg = MessageFormatter.createMessage(this.agentName,ACLMessage.INFORM, "move",
-									unitAID);
-							AgWorldInstance.getContentManager().fillContent(informMsg, new Action(unitAID, cell));
-
-							AgWorldInstance.send(informMsg);
-						} catch (Codec.CodecException | OntologyException e) {
-							e.printStackTrace();
-						}
-
-						// try {
-						// Inform all subscribers
-						ArrayList<AID> subscribers = null; // TODO: DANIEL getSubscribers();
-						ArrayList<Tribe> tribes = null; // TODO: DANIEL getTribes();
-
-						for (Tribe tribe : tribes) {
-							ArrayList<Cell> positions = null; // TODO: DANIEL
-																// entityManager.retrieveTribeKnownPosition(tribe.getAgentAID());
-
-							// Verify if the tribe knows this position
-							if (positions.contains(requestedPosition)) {
-								// Notify Tribe
-								ACLMessage informMsg = null; // TODO: DANIEL
-																// MessageFormatter.createMessage(ACLMessage.INFORM,
-																// "subscribe", tribe.getAgentAID());
-								// TODO: DANIEL getContentManager().fillContent(informMsg, new
-								// Action(tribe.getAgentAID(), cell));
-								AgWorldInstance.send(informMsg);
-
-								// Notify Units
-								for (Unit unit : tribe.getUnits()) {
-									ACLMessage informMsgUnit = null; // TODO: DANIEL
-																		// MessageFormatter.createMessage(ACLMessage.INFORM,
-																		// "subscribe", unit.getUnitID());
-									// TODO: DANIEL getContentManager().fillContent(informMsgUnit, new
-									// Action(unit.getUnitID(), cell));
-									AgWorldInstance.send(informMsgUnit);
-								}
-							}
-						}
-						// }
-						// catch (Codec.CodecException | OntologyException e) {
-						// e.printStackTrace();
-						// }
-					}
-				} else {
-					System.out.println("Wrong position.");
-				}
-			} else {
-				System.out.println("You lost");
-			}
-		} else {
-			// If no message arrives
-			block();
-		}
+	                            		Printer.printSuccess( AgWorldInstance.getLocalName(),"Unit " + senderName + "POSITION UPDATED");
+	                            		informMsg = MessageFormatter.createReplyMessage(AgWorldInstance.getLocalName(),msg,ACLMessage.INFORM, "NotifyNewCellDiscovery");
+	                            		AgWorldInstance.getContentManager().fillContent(informMsg, agAction);
+	                            		AgWorldInstance.send(informMsg);
+	                            		
+	                            		
+	                            		NotifyNewCellDiscovery notify = new NotifyNewCellDiscovery();
+	                            		notify.setNewCell(cell);
+	                            		
+	                            		ACLMessage informMsgTribe = MessageFormatter.createMessage(AgWorldInstance.getLocalName(),ACLMessage.INFORM, "informMove", tribeSender.getId());
+	                            		Action notifyCellDiscovery = new Action(tribeSender.getId(), notify);
+	                            		AgWorldInstance.getContentManager().fillContent(informMsgTribe, notifyCellDiscovery);
+	                            		AgWorldInstance.send(informMsgTribe);
+	                            		
+	                            		ACLMessage informMsgUnit = MessageFormatter.createMessage(AgWorldInstance.getLocalName(),ACLMessage.INFORM, "informMove", senderUnit.getId());
+	                            		Action notifyCellDiscoveryUnit = new Action(tribeSender.getId(), notify);
+	                            		AgWorldInstance.getContentManager().fillContent(informMsgUnit, notifyCellDiscoveryUnit);
+	                            		AgWorldInstance.send(informMsgUnit);
+                            		}
+                            		else 
+                            		{
+                            			informMsg = MessageFormatter.createReplyMessage(AgWorldInstance.getLocalName(),msg,ACLMessage.FAILURE, "NotifyNewCellDiscovery");
+                            			AgWorldInstance.send(informMsg);
+                            		}
+                                
+                            } catch (Codec.CodecException | OntologyException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                		}
+                    	else {
+                    		ACLMessage reply = MessageFormatter.createReplyMessage(AgWorldInstance.getLocalName(),msg, ACLMessage.NOT_UNDERSTOOD,null);
+                    		AgWorldInstance.send(reply);
+                    	}
+                    } else {
+                    Printer.printSuccess( AgWorldInstance.getLocalName(),"Wrong position.");
+                    }
+                } else { 
+                Printer.printSuccess(AgWorldInstance.getLocalName(),"You lost");
+                }
+            } catch (Codec.CodecException | OntologyException e) {
+                e.printStackTrace();
+            }
+        } else {
+            // If no message arrives
+            block();
+        }
 	}
 }
