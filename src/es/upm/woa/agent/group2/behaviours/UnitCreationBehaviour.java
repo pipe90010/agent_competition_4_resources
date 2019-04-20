@@ -75,6 +75,8 @@ public class UnitCreationBehaviour extends CyclicBehaviour {
 		if (!worldRules.hasEnoughFood(t.getFood())) {
 			return 5;
 		}
+		if(AgWorldInstance.isGameOver())
+			return 6;
 		return 1;
 	}
 
@@ -114,9 +116,9 @@ public class UnitCreationBehaviour extends CyclicBehaviour {
 
 								Printer.printSuccess(AgWorldInstance.getLocalName(),
 										"received creation request from " + "creating unit:" + newUnitName);
-								Unit u = createUnit(newUnitName, tribeSender);
-								tribes.get(indexTribe).addUnit(u, 150, 50);
-
+								//Unit u = createUnit(newUnitName, tribeSender);
+								//tribes.get(indexTribe).addUnit(u, 150, 50);
+								
 								performative = ACLMessage.AGREE;
 								break;
 							case 2:
@@ -137,6 +139,10 @@ public class UnitCreationBehaviour extends CyclicBehaviour {
 										"unit" + newUnitName + "not positioned in the right townhall");
 								performative = ACLMessage.REFUSE;
 								break;
+							case 6:
+								Printer.printSuccess( AgWorldInstance.getLocalName(),"unit" + newUnitName + "game is over");
+								performative = ACLMessage.REFUSE;
+								break;		
 							default:
 								performative = ACLMessage.NOT_UNDERSTOOD;
 								break;
@@ -145,6 +151,12 @@ public class UnitCreationBehaviour extends CyclicBehaviour {
 							ACLMessage reply = MessageFormatter.createReplyMessage(AgWorldInstance.getLocalName(), msg,
 									performative, "createUnit");
 							myAgent.send(reply);
+							if(code==1)
+							{
+								Unit u = createUnit(newUnitName, tribeSender);
+								if(u!=null)
+									tribes.get(indexTribe).addUnit(u, 150, 50);
+							}
 
 						}
 					}
@@ -172,29 +184,37 @@ public class UnitCreationBehaviour extends CyclicBehaviour {
 			Object[] args = new Object[2];
 			args[0] = position.getX();
 			args[1] = position.getY();
-			AgentController ac = cc.createNewAgent(nickname, AgUnit.class.getName(), args);
-			ac.start();
-			// TODO: CHECK IF WE NEED TO ADD THE UNIT AS A CONTENT FOR THE CELL
-			position.setOwner(tribe.getId());
-			Unit newUnit = new Unit(AgWorldInstance.getAID(nickname), position);
-			map[position.getX()][position.getY()].setOwner(tribe.getId());
-			// agentUnit.setCurrentPosition(position);
-
-			if (tribe != null) {
-				AID ag = tribe.getId();
-
-				ACLMessage msgInform = MessageFormatter.createMessage(AgWorldInstance.getLocalName(), ACLMessage.INFORM,
-						"CreateUnit", ag);
-				// Creates a notifyNewUnit action
-				NotifyNewUnit notify = new NotifyNewUnit();
-
-				notify.setLocation(position);
-				notify.setNewUnit(AgWorldInstance.getAID(nickname));
-				Action agActionNotification = new Action(ag, notify);
-				AgWorldInstance.getContentManager().fillContent(msgInform, agActionNotification);
-				AgWorldInstance.send(msgInform);
-			}
-			return newUnit;
+			
+			long waitTime= AgWorldInstance.getWorldTimer().getCreationTime();
+            
+			AgWorldInstance.doWait(waitTime);
+            if(!AgWorldInstance.isGameOver())
+            {
+				AgentController ac = cc.createNewAgent(nickname, AgUnit.class.getName(), args);
+				ac.start();
+				// TODO: CHECK IF WE NEED TO ADD THE UNIT AS A CONTENT FOR THE CELL
+				position.setOwner(tribe.getId());
+				Unit newUnit = new Unit(AgWorldInstance.getAID(nickname), position);
+				map[position.getX()][position.getY()].setOwner(tribe.getId());
+				// agentUnit.setCurrentPosition(position);
+	
+				if (tribe != null) {
+					AID ag = tribe.getId();
+	
+					ACLMessage msgInform = MessageFormatter.createMessage(AgWorldInstance.getLocalName(), ACLMessage.INFORM,
+							"CreateUnit", ag);
+					// Creates a notifyNewUnit action
+					NotifyNewUnit notify = new NotifyNewUnit();
+	
+					notify.setLocation(position);
+					notify.setNewUnit(AgWorldInstance.getAID(nickname));
+					Action agActionNotification = new Action(ag, notify);
+					AgWorldInstance.getContentManager().fillContent(msgInform, agActionNotification);
+					AgWorldInstance.send(msgInform);
+				}
+				return newUnit;
+            }
+            return null;
 		} catch (StaleProxyException e) {
 			// TODO: handle exception
 			e.printStackTrace();

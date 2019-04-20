@@ -11,6 +11,7 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import es.upm.woa.agent.group2.beans.Tribe;
+import es.upm.woa.agent.group2.beans.Unit;
 import es.upm.woa.agent.group2.common.MessageFormatter;
 import es.upm.woa.agent.group2.common.Printer;
 import es.upm.woa.ontology.Cell;
@@ -36,8 +37,8 @@ public class AgUnit extends Agent{
     private Ontology ontology = GameOntology.getInstance();
     
     private Cell currentPosition;
-    private Tribe tribe;
     
+    private Unit unit;
 	
 	public AgUnit() {
 		// TODO Auto-generated constructor stub
@@ -45,6 +46,7 @@ public class AgUnit extends Agent{
 	
 	protected void setup()
 	{
+		unit = new Unit(getAID());
 		Printer.printSuccess( getLocalName(),"has entered into the system ");
 		//Register of the codec and the ontology to be used in the ContentManager
 		//Register language and ontology this part always goes
@@ -275,15 +277,4 @@ public class AgUnit extends Agent{
 	public void setCurrentPosition(Cell currentPosition) {
 		this.currentPosition = currentPosition;
 	}
-
-	public Tribe getTribe() {
-		return tribe;
-	}
-
-	public void setTribe(Tribe tribe) {
-		this.tribe = tribe;
-	}
-	
-	
-	
 }

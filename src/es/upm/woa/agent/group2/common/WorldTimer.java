@@ -7,6 +7,7 @@ public class WorldTimer {
 	// -----------------------------------------------------------------
 		//REAL HOURS
 		private final static long MOVE_CELL_TIME = 6; 
+		private final static long CREATE_UNIT_TIME = 1;//150; 
 		
 	// -----------------------------------------------------------------
 	// Atributes
@@ -30,5 +31,10 @@ public class WorldTimer {
 		System.out.println("...waiting time: "+time+"ms");
 		return time;
 	}
-
+	
+	public long getCreationTime() {
+		long time = parseTime(CREATE_UNIT_TIME);
+		System.out.println("...waiting time: "+time+"ms");
+		return time;
+	}
 }

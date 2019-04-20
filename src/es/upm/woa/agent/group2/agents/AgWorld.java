@@ -181,8 +181,8 @@ public class AgWorld extends Agent {
 									case 1:
 
 										Printer.printSuccess( getLocalName(),"received creation request from "+"creating unit:" + newUnitName);
-										Unit u = createUnit(newUnitName,tribeSender);
-										tribes.get(indexTribe).addUnit(u, 150, 50);
+										//Unit u = createUnit(newUnitName,tribeSender);
+										//tribes.get(indexTribe).addUnit(u, 150, 50);
 										
 										performative = ACLMessage.AGREE;
 										break;
@@ -202,6 +202,10 @@ public class AgWorld extends Agent {
 										Printer.printSuccess( getLocalName(),"unit" + newUnitName + "not positioned in the right townhall");
 										performative = ACLMessage.REFUSE;
 										break;
+									case 6:
+										Printer.printSuccess( getLocalName(),"unit" + newUnitName + "game is over");
+										performative = ACLMessage.REFUSE;
+										break;	
 									default:
 										performative = ACLMessage.NOT_UNDERSTOOD;
 										break;
@@ -209,7 +213,13 @@ public class AgWorld extends Agent {
 									
 									ACLMessage reply = MessageFormatter.createReplyMessage(getLocalName(),msg, performative, "createUnit");
 									myAgent.send(reply);
-
+									
+									if(code==1)
+									{
+										Unit u = createUnit(newUnitName, tribeSender);
+										if(u!=null)
+											tribes.get(indexTribe).addUnit(u, 150, 50);
+									}
 								}
 							}
 						}
@@ -294,7 +304,8 @@ public class AgWorld extends Agent {
 		                            		{
 		                            			//Move the unit 
 			                            		Cell cell = moveUnitToPosition(unit, requestedPosition);
-
+			                            		
+			                            		tribeSender.addDiscoveredCell(cell);
 			                            		Printer.printSuccess( getLocalName(),"Unit " + senderName + "POSITION UPDATED");
 			                            		informMsg = MessageFormatter.createReplyMessage(getLocalName(),msg,ACLMessage.INFORM, "NotifyNewCellDiscovery");
 			                            		getContentManager().fillContent(informMsg, agAction);
@@ -436,6 +447,8 @@ public class AgWorld extends Agent {
 		if (!worldRules.hasEnoughFood(t.getFood())){
 			return 5;
 		}
+		if(isGameOver())
+			return 6;
 		return 1;
 	}
 
@@ -450,29 +463,36 @@ public class AgWorld extends Agent {
 			Object [] args= new Object[2];
 			args[0]= position.getX();
 			args[1]= position.getY();
-			AgentController ac =cc.createNewAgent(nickname, AgUnit.class.getName(), args);
-			ac.start();
-			//TODO: CHECK IF WE NEED TO ADD THE UNIT AS A CONTENT FOR THE CELL
-			position.setOwner(tribe.getId());
-			Unit newUnit = new Unit(getAID(nickname), position);
-			map[position.getX()][position.getY()].setOwner(tribe.getId());
-			//agentUnit.setCurrentPosition(position);
-
-			if(tribe!=null)
-			{
-				AID ag = tribe.getId();
-
-				ACLMessage msgInform = MessageFormatter.createMessage(getLocalName(),ACLMessage.INFORM, "CreateUnit", ag);
-				// Creates a notifyNewUnit action
-				NotifyNewUnit notify = new NotifyNewUnit();
-
-				notify.setLocation(position);
-				notify.setNewUnit(getAID(nickname));
-				Action agActionNotification = new Action(ag, notify);
-				getContentManager().fillContent(msgInform, agActionNotification);
-				send(msgInform);
-			}
-			return newUnit;
+			long waitTime= worldTimer.getCreationTime();
+            
+            doWait(waitTime);
+            if(!isGameOver())
+            {
+				AgentController ac =cc.createNewAgent(nickname, AgUnit.class.getName(), args);
+				ac.start();
+				//TODO: CHECK IF WE NEED TO ADD THE UNIT AS A CONTENT FOR THE CELL
+				position.setOwner(tribe.getId());
+				Unit newUnit = new Unit(getAID(nickname), position);
+				map[position.getX()][position.getY()].setOwner(tribe.getId());
+				//agentUnit.setCurrentPosition(position);
+	
+				if(tribe!=null)
+				{
+					AID ag = tribe.getId();
+	
+					ACLMessage msgInform = MessageFormatter.createMessage(getLocalName(),ACLMessage.INFORM, "CreateUnit", ag);
+					// Creates a notifyNewUnit action
+					NotifyNewUnit notify = new NotifyNewUnit();
+	
+					notify.setLocation(position);
+					notify.setNewUnit(getAID(nickname));
+					Action agActionNotification = new Action(ag, notify);
+					getContentManager().fillContent(msgInform, agActionNotification);
+					send(msgInform);
+				}
+				return newUnit;
+            }
+			return null;
 		} catch (StaleProxyException e) {
 			// TODO: handle exception
 			e.printStackTrace();
@@ -585,4 +605,18 @@ public class AgWorld extends Agent {
 	public Properties getProperties() {
 		return properties;
 	}
+
+	public boolean isGameOver() {
+		
+		return false;
+	}
+
+	public WorldTimer getWorldTimer() {
+		return worldTimer;
+	}
+
+	public void setWorldTimer(WorldTimer worldTimer) {
+		this.worldTimer = worldTimer;
+	}
+	
 }

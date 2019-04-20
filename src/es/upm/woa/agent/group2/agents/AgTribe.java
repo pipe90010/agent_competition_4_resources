@@ -1,6 +1,8 @@
 package es.upm.woa.agent.group2.agents;
 
 
+import es.upm.woa.agent.group2.beans.Tribe;
+import es.upm.woa.agent.group2.beans.Unit;
 import es.upm.woa.agent.group2.common.Printer;
 import es.upm.woa.ontology.Cell;
 import es.upm.woa.ontology.GameOntology;
@@ -34,12 +36,14 @@ public class AgTribe extends Agent {
 	// GameOntology that we have created
 	private Codec codec = new SLCodec();
 	private Ontology ontology = GameOntology.getInstance();
+	private Tribe tribe;
 
 	public AgTribe() {
 		// TODO Auto-generated constructor stub
 	}
 
 	protected void setup() {
+		tribe = new Tribe(getAID());
 		Printer.printSuccess( getLocalName(),": has entered into the system");
 //      Register of the codec and the ontology to be used in the ContentManager
 		getContentManager().registerLanguage(codec);
@@ -71,6 +75,9 @@ public class AgTribe extends Agent {
 
 									Cell cell= agActionN.getLocation();
 									AID aid = agActionN.getNewUnit();
+									
+									Unit u = new Unit(aid, cell);
+									tribe.addUnit(u, 150, 50);
 									Printer.printSuccess( getLocalName(),"received unit creation from "+ (msg.getSender()).getLocalName()+" with AID: "+aid.getName()+" and its location is "+cell.getX()+" and "+cell.getY());
 								}
 							}
@@ -126,6 +133,7 @@ public class AgTribe extends Agent {
 									NotifyNewCellDiscovery agActionN = (NotifyNewCellDiscovery)agAction.getAction();
 
 									Cell cell= agActionN.getNewCell();
+									tribe.addDiscoveredCell(cell);
 									Printer.printSuccess( getLocalName(),"received unit creation from "+ (msg.getSender()).getLocalName()+" and its location is "+cell.getX()+" and "+cell.getY());	
 								}
 							}

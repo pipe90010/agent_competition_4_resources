@@ -40,7 +40,7 @@ public class MovementRequestBehaviour extends CyclicBehaviour {
 	private Properties properties = new Properties();
 	private Cell[][] map;
 	private String agentName;
-	private WorldTimer worldTimer;
+	//private WorldTimer worldTimer;
 	
 	public MovementRequestBehaviour(AgWorld AgWorldInstance,ACLMessage msg){
 		this.AgWorldInstance=AgWorldInstance;
@@ -182,7 +182,7 @@ public class MovementRequestBehaviour extends CyclicBehaviour {
                         		AgWorldInstance.send(reply);
 
                             try {
-                                long waitTime= worldTimer.getMovementTime();
+                                long waitTime= AgWorldInstance.getWorldTimer().getMovementTime();
                                 
                                 AgWorldInstance.doWait(waitTime);
                                 
@@ -194,7 +194,9 @@ public class MovementRequestBehaviour extends CyclicBehaviour {
                             		{
                             			//Move the unit 
 	                            		Cell cell = moveUnitToPosition(unit, requestedPosition);
-
+	                            		
+	                            		tribeSender.addDiscoveredCell(cell);
+	                            		
 	                            		Printer.printSuccess( AgWorldInstance.getLocalName(),"Unit " + senderName + "POSITION UPDATED");
 	                            		informMsg = MessageFormatter.createReplyMessage(AgWorldInstance.getLocalName(),msg,ACLMessage.INFORM, "NotifyNewCellDiscovery");
 	                            		AgWorldInstance.getContentManager().fillContent(informMsg, agAction);

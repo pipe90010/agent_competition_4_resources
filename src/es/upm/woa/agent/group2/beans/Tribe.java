@@ -22,7 +22,7 @@ public class Tribe {
 	private ArrayList<Unit> units;
 	private int memberSize;
 	private AID id;
-	
+	private ArrayList<Cell> discoveredCells;
 	// -----------------------------------------------------------------
     // Constructor
     // -----------------------------------------------------------------
@@ -34,6 +34,13 @@ public class Tribe {
 		this.food = food;
 		this.townhall = townhall;
 		this.units = new ArrayList<Unit>();
+		this.discoveredCells = new ArrayList<Cell>();
+		this.memberSize = 0;
+	}
+	
+	public Tribe(AID id) {
+		this.units = new ArrayList<Unit>();
+		this.discoveredCells = new ArrayList<Cell>();
 		this.memberSize = 0;
 	}
 	
@@ -96,6 +103,16 @@ public class Tribe {
 	public void setMemberSize(int memberSize) {
 		this.memberSize = memberSize;
 	}
+
+	public ArrayList<Cell> getDiscoveredCells() {
+		return discoveredCells;
+	}
+
+	public void setDiscoveredCells(ArrayList<Cell> discoveredCells) {
+		this.discoveredCells = discoveredCells;
+	}
 	
-	
+	public void addDiscoveredCell(Cell cell) {
+		this.discoveredCells.add(cell);
+	}
 }
