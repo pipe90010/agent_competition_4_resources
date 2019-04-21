@@ -131,11 +131,21 @@ public class AgWorld extends Agent {
 			 * TEST UNIT IS CREATED FROM THE WORLD
 			 */
 			Unit u = createUnit("UnitX1",tx);
-			
 			u.setPosition(tx.getTownhall());
 			
+			Unit u2 = createUnit("UnitX2",tx);
+			u2.setPosition(tx.getTownhall());
+			
+			Unit u3 = createUnit("UnitX3",tx);
+			u3.setPosition(tx.getTownhall());
+			
 			//adds created unit to 
-			tx.addUnit(u, 150, 50);
+			tx.addUnit(u);
+			tx.addUnit(u2);
+			tx.addUnit(u3);
+			tx.deductCost(150,50);
+			tx.deductCost(150,50);
+			tx.deductCost(150,50);
 			
 			tribes.add(tx);
 			
@@ -179,7 +189,7 @@ public class AgWorld extends Agent {
 									
 									//Validate unit creation
 									Integer code = canCreateUnit(tribeSender, senderUnit.getPosition(),indexTribe);
-									String newUnitName = "UnitY"+Math.random();
+									String newUnitName = "Unit-"+tribeSender.getId().getName()+tribeSender.getMemberSize();
 									int performative;
 									switch (code) {
 									case 1:
@@ -218,7 +228,10 @@ public class AgWorld extends Agent {
 									{
 										Unit u = createUnit(newUnitName, tribeSender);
 										if(u!=null)
-											tribes.get(indexTribe).addUnit(u, 150, 50);
+										{
+											tribes.get(indexTribe).addUnit(u);
+											tribes.get(indexTribe).deductCost(150,50);
+										}
 									}
 								}
 							}
@@ -324,7 +337,7 @@ public class AgWorld extends Agent {
 			                            		send(informMsgTribe);
 			                            		
 			                            		ACLMessage informMsgUnit = MessageFormatter.createMessage(getLocalName(),ACLMessage.INFORM, "informMove", senderUnit.getId());
-			                            		Action notifyCellDiscoveryUnit = new Action(tribeSender.getId(), notify);
+			                            		Action notifyCellDiscoveryUnit = new Action(senderUnit.getId(), notify);
 			                            		getContentManager().fillContent(informMsgUnit, notifyCellDiscoveryUnit);
 			                            		send(informMsgUnit);
 		                            		}

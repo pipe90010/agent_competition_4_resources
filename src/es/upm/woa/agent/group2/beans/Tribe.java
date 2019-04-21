@@ -77,9 +77,13 @@ public class Tribe {
 		return units;
 	}
 	
-	public void addUnit(Unit u, int goldCost, int foodCost) {
+	public void addUnit(Unit u) {
 		units.add(u);
 		setMemberSize(this.memberSize+1);
+	}
+	
+	//Always overload the gold and food cost for world actions
+	public void deductCost(int goldCost, int foodCost) {
 		setGold(getGold()-goldCost);
 		setFood(getFood()-foodCost);
 	}

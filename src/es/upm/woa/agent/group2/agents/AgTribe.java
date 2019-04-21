@@ -1,13 +1,19 @@
 package es.upm.woa.agent.group2.agents;
 
 
+import java.util.ArrayList;
+
 import es.upm.woa.agent.group2.beans.Tribe;
 import es.upm.woa.agent.group2.beans.Unit;
+import es.upm.woa.agent.group2.common.MessageFormatter;
 import es.upm.woa.agent.group2.common.Printer;
+import es.upm.woa.ontology.Building;
 import es.upm.woa.ontology.Cell;
+import es.upm.woa.ontology.Empty;
 import es.upm.woa.ontology.GameOntology;
 import es.upm.woa.ontology.NotifyNewCellDiscovery;
 import es.upm.woa.ontology.NotifyNewUnit;
+import es.upm.woa.ontology.Resource;
 import jade.content.Concept;
 import jade.content.ContentElement;
 import jade.content.lang.Codec;
@@ -77,7 +83,7 @@ public class AgTribe extends Agent {
 									AID aid = agActionN.getNewUnit();
 									
 									Unit u = new Unit(aid, cell);
-									tribe.addUnit(u, 150, 50);
+									tribe.addUnit(u);
 									Printer.printSuccess( getLocalName(),"received unit creation from "+ (msg.getSender()).getLocalName()+" with AID: "+aid.getName()+" and its location is "+cell.getX()+" and "+cell.getY());
 								}
 							}
@@ -133,8 +139,39 @@ public class AgTribe extends Agent {
 									NotifyNewCellDiscovery agActionN = (NotifyNewCellDiscovery)agAction.getAction();
 
 									Cell cell= agActionN.getNewCell();
+									
+									Object content = cell.getContent();
+									
+									Printer.printSuccess( getLocalName()," Movement has been made");
 									tribe.addDiscoveredCell(cell);
-									Printer.printSuccess( getLocalName(),"received unit creation from "+ (msg.getSender()).getLocalName()+" and its location is "+cell.getX()+" and "+cell.getY());	
+									Printer.printSuccess( getLocalName(),"received unit creation from "+ (msg.getSender()).getLocalName()+" and its location is "+cell.getX()+" and "+cell.getY());
+									
+									ArrayList<Unit> units = tribe.getUnits();
+									
+									for (Unit unit : units) {
+										
+										ACLMessage informMsgUnit = MessageFormatter.createMessage(getLocalName(),ACLMessage.INFORM, "NotifyNewCellDiscovery", unit.getId());
+										NotifyNewCellDiscovery notify = new NotifyNewCellDiscovery();
+	                            		notify.setNewCell(cell);
+										Action notifyCellDiscoveryUnit = new Action(unit.getId(), notify);
+	                            		getContentManager().fillContent(informMsgUnit, notifyCellDiscoveryUnit);
+	                            		send(informMsgUnit);
+									}
+									
+									if(content!=null)
+									{
+										if(content instanceof Building) {
+											Printer.printSuccess(getLocalName(), "New cell is a building");
+										}
+										else if(content instanceof Empty) {
+											Printer.printSuccess(getLocalName(), "New cell is empty");
+										}
+										else if(content instanceof Resource) {
+											Printer.printSuccess(getLocalName(), "New cell is a resource");
+										}
+										else
+											Printer.printSuccess(getLocalName(), "New cell's content is unknown");
+									}
 								}
 							}
 						} catch (CodecException | OntologyException e) {

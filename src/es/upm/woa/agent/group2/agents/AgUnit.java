@@ -10,16 +10,25 @@ import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
+
+import java.util.ArrayList;
+
 import es.upm.woa.agent.group2.beans.Tribe;
 import es.upm.woa.agent.group2.beans.Unit;
+import es.upm.woa.agent.group2.behaviours.MovementRequestBehaviour;
 import es.upm.woa.agent.group2.common.MessageFormatter;
 import es.upm.woa.agent.group2.common.Printer;
+import es.upm.woa.ontology.Building;
 import es.upm.woa.ontology.Cell;
 import es.upm.woa.ontology.CreateUnit;
 import es.upm.woa.ontology.Empty;
 import es.upm.woa.ontology.GameOntology;
 import es.upm.woa.ontology.MoveToCell;
-
+import es.upm.woa.ontology.NotifyNewCellDiscovery;
+import es.upm.woa.ontology.NotifyNewUnit;
+import es.upm.woa.ontology.Resource;
+import jade.content.Concept;
+import jade.content.ContentElement;
 import jade.content.lang.Codec;
 import jade.content.lang.Codec.*;
 import jade.content.onto.*;
@@ -41,6 +50,8 @@ public class AgUnit extends Agent{
     
     private Unit unit;
 	
+    private ArrayList<Cell> discoveredCells;
+    
 	public AgUnit() {
 		// TODO Auto-generated constructor stub
 	}
@@ -48,6 +59,7 @@ public class AgUnit extends Agent{
 	protected void setup()
 	{
 		unit = new Unit(getAID());
+		discoveredCells = new ArrayList<Cell>();
 		Printer.printSuccess( getLocalName(),"has entered into the system ");
 		//Register of the codec and the ontology to be used in the ContentManager
 		//Register language and ontology this part always goes
@@ -75,7 +87,7 @@ public class AgUnit extends Agent{
          */
 		
 		
-		addBehaviour(new SimpleBehaviour(this)
+		/*addBehaviour(new SimpleBehaviour(this)
 		{
 			
 			@Override
@@ -127,7 +139,7 @@ public class AgUnit extends Agent{
 			}
 			
 		});
-		
+		*/
 		//Behavior for moving
 		addBehaviour(new SimpleBehaviour(this)
 		{
@@ -246,7 +258,47 @@ public class AgUnit extends Agent{
 				if (msg != null)
 			    {
 					if(msg.getPerformative()==ACLMessage.INFORM)
-						Printer.printSuccess( getLocalName()," Movement has been made");
+					{
+						try {
+							ContentElement ce = getContentManager().extractContent(msg);
+							if (ce instanceof Action) {
+								Action agAction = (Action) ce;
+								Concept conc = agAction.getAction();
+								//casting
+								
+								if (conc instanceof NotifyNewCellDiscovery) {
+									
+									NotifyNewCellDiscovery agActionN = (NotifyNewCellDiscovery)agAction.getAction();
+			
+									Cell cell= agActionN.getNewCell();
+									addNewCellDiscovered(cell);
+									
+									Object content = cell.getContent();
+									
+									Printer.printSuccess( getLocalName()," Movement has been made");
+									
+									if(content!=null)
+									{
+										if(content instanceof Building) {
+											Printer.printSuccess(getLocalName(), "New cell is a building");
+										}
+										else if(content instanceof Empty) {
+											Printer.printSuccess(getLocalName(), "New cell is empty");
+										}
+										else if(content instanceof Resource) {
+											Printer.printSuccess(getLocalName(), "New cell is a resource");
+										}
+										else
+											Printer.printSuccess(getLocalName(), "New cell's content is unknown");
+									}
+								}
+								
+							}
+						}
+						catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
 					else
 						Printer.printSuccess( getLocalName()," Movement failure");
 			     }
@@ -268,5 +320,21 @@ public class AgUnit extends Agent{
 
 	public void setCurrentPosition(Cell currentPosition) {
 		this.currentPosition = currentPosition;
+	}
+	
+	public void addNewCellDiscovered(Cell cell) {
+	
+		boolean found=false;
+		for (int i = 0; i < discoveredCells.size(); i++) {
+			Cell currentCell = discoveredCells.get(i);
+			if(currentCell.getX()==cell.getX() && currentCell.getY()==cell.getY())
+			{
+				found = true;
+				discoveredCells.set(i, cell);
+			}
+				
+		}
+		if(!found)
+			discoveredCells.add(cell);
 	}
 }
