@@ -117,6 +117,18 @@ public class Tribe {
 	}
 	
 	public void addDiscoveredCell(Cell cell) {
-		this.discoveredCells.add(cell);
+		
+		boolean found=false;
+		for (int i = 0; i < discoveredCells.size(); i++) {
+			Cell currentCell = discoveredCells.get(i);
+			if(currentCell.getX()==cell.getX() && currentCell.getY()==cell.getY())
+			{
+				found = true;
+				discoveredCells.set(i, cell);
+			}
+				
+		}
+		if(!found)
+			discoveredCells.add(cell);
 	}
 }
