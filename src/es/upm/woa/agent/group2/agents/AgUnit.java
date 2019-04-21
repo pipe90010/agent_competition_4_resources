@@ -15,6 +15,7 @@ import es.upm.woa.agent.group2.beans.Unit;
 import es.upm.woa.agent.group2.common.MessageFormatter;
 import es.upm.woa.agent.group2.common.Printer;
 import es.upm.woa.ontology.Cell;
+import es.upm.woa.ontology.CreateUnit;
 import es.upm.woa.ontology.Empty;
 import es.upm.woa.ontology.GameOntology;
 import es.upm.woa.ontology.MoveToCell;
@@ -74,7 +75,7 @@ public class AgUnit extends Agent{
          */
 		
 		
-		/*addBehaviour(new SimpleBehaviour(this)
+		addBehaviour(new SimpleBehaviour(this)
 		{
 			
 			@Override
@@ -94,12 +95,8 @@ public class AgUnit extends Agent{
 					if (res.length > 0)
 					{
 						AID ag = (AID)res[0].getName();
-					
-						/*ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
-						msg.addReceiver(ag);
-						msg.setLanguage(codec.getName());
-						msg.setOntology(ontology.getName());*/
-        					/*ACLMessage msg =	MessageFormatter.createMessage(getLocalName(),ACLMessage.REQUEST, "createUnit",ag);
+	        				
+						ACLMessage msg =	MessageFormatter.createMessage(getLocalName(),ACLMessage.REQUEST, "createUnit",ag);
 						
 						CreateUnit create = new CreateUnit();
 						Action agAction = new Action(ag,create);
@@ -129,7 +126,7 @@ public class AgUnit extends Agent{
 				return true;
 			}
 			
-		});*/
+		});
 		
 		//Behavior for moving
 		addBehaviour(new SimpleBehaviour(this)
@@ -152,12 +149,7 @@ public class AgUnit extends Agent{
 					if (res.length > 0)
 					{
 						AID ag = (AID)res[0].getName();
-					
-						/*ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
-						  msg.addReceiver(ag);
-						msg.setLanguage(codec.getName());
-						msg.setOntology(ontology.getName());*/
-						
+											
 						ACLMessage createMsg =	MessageFormatter.createMessage(getLocalName(),ACLMessage.REQUEST, "MoveToCell",ag);
 						MoveToCell createAction = new MoveToCell();
 						

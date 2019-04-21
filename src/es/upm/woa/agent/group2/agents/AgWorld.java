@@ -130,12 +130,16 @@ public class AgWorld extends Agent {
 			/**
 			 * TEST UNIT IS CREATED FROM THE WORLD
 			 */
-			Unit u = createUnit("UnitX",tx);
+			Unit u = createUnit("UnitX1",tx);
+			
 			u.setPosition(tx.getTownhall());
-			//TODO: Change amount of gold and food - TEST Integration
-			tx.addUnit(u, 100, 10);
+			
+			//adds created unit to 
+			tx.addUnit(u, 150, 50);
+			
 			tribes.add(tx);
-			//tribes.add(ty);
+			
+			
 		} catch (FIPAException e) {
 			e.printStackTrace();
 		}
@@ -179,11 +183,7 @@ public class AgWorld extends Agent {
 									int performative;
 									switch (code) {
 									case 1:
-
 										Printer.printSuccess( getLocalName(),"received creation request from "+"creating unit:" + newUnitName);
-										//Unit u = createUnit(newUnitName,tribeSender);
-										//tribes.get(indexTribe).addUnit(u, 150, 50);
-										
 										performative = ACLMessage.AGREE;
 										break;
 									case 2:
@@ -240,6 +240,9 @@ public class AgWorld extends Agent {
 		
 
 		addBehaviour(new CyclicBehaviour(this) {
+	        /* (non-Javadoc)
+	         * @see jade.core.behaviours.Behaviour#action()
+	         */
 	        @Override
 	        public void action() {
 	            // Wait for a units request to move to a new position
@@ -455,9 +458,9 @@ public class AgWorld extends Agent {
 	private Unit createUnit(String nickname,Tribe tribe) {
 
 		ContainerController cc = getContainerController();
-		//es.upm.woa.agent.group1.AgUnit agentUnit = new es.upm.woa.agent.group1.AgUnit();
+	
 		try {
-			//cc.acceptNewAgent(nickname, agentUnit).start();
+			
 			Cell position = bookNextRandomCell(new Empty());
 			
 			Object [] args= new Object[2];
@@ -474,7 +477,7 @@ public class AgWorld extends Agent {
 				position.setOwner(tribe.getId());
 				Unit newUnit = new Unit(getAID(nickname), position);
 				map[position.getX()][position.getY()].setOwner(tribe.getId());
-				//agentUnit.setCurrentPosition(position);
+				
 	
 				if(tribe!=null)
 				{
