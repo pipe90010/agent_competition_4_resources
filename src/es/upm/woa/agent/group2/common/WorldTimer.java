@@ -7,7 +7,7 @@ public class WorldTimer {
 	// -----------------------------------------------------------------
 		//REAL HOURS
 		private final static long MOVE_CELL_TIME = 6; 
-		private final static long CREATE_UNIT_TIME = 1;//150; 
+		private final static long CREATE_UNIT_TIME = 150; 
 		
 	// -----------------------------------------------------------------
 	// Atributes
