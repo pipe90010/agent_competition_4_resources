@@ -58,7 +58,6 @@ public class AgWorld extends Agent {
 
 	private final static int GOLD = 1500;
 	private final static int FOOD = 500;
-	// private final static int HOURS = 150;
 
 	private final static int X_BOUNDARY = 100;
 	private final static int Y_BOUNDARY = 100;
@@ -124,33 +123,36 @@ public class AgWorld extends Agent {
 			/**
 			 * TRIBE IS CREATED FROM THE WORLD
 			 */
-			Tribe tx = createTribe("TribeX");
-			// Tribe ty = createTribe("TribeY");
+			Tribe tg2 = createTribe("TribeX");
+			// Tribe tg1 = createTribe("TribeY");
+			// Tribe tg3 = createTribe("TribeY");
+			// Tribe tg4 = createTribe("TribeY");
+			// Tribe tg5 = createTribe("TribeY");
 
 			/**
 			 * TEST UNIT IS CREATED FROM THE WORLD
 			 */
-			Unit u = createUnit("UnitX1", tx);
-			u.setPosition(tx.getTownhall());
+			Unit u = createUnit("UnitX1", tg2);
+			u.setPosition(tg2.getTownhall());
 			
-			Cell u2Position = map[tx.getTownhall().getX()+1][tx.getTownhall().getY()];
-			Cell u3Position = map[tx.getTownhall().getX()-1][tx.getTownhall().getY()];
+			Cell u2Position = map[tg2.getTownhall().getX()+1][tg2.getTownhall().getY()];
+			Cell u3Position = map[tg2.getTownhall().getX()-1][tg2.getTownhall().getY()];
 
-			Unit u2 = createUnit("UnitX2", tx);
+			Unit u2 = createUnit("UnitX2", tg2);
 			u2.setPosition(u2Position);
 
-			Unit u3 = createUnit("UnitX3", tx);
+			Unit u3 = createUnit("UnitX3", tg2);
 			u3.setPosition(u3Position);
 
 			// adds created unit to the tribe and deduct cost of each unit creation
-			tx.addUnit(u);
-			tx.addUnit(u2);
-			tx.addUnit(u3);
-			tx.deductCost(150, 50);
-			tx.deductCost(150, 50);
-			tx.deductCost(150, 50);
+			tg2.addUnit(u);
+			tg2.addUnit(u2);
+			tg2.addUnit(u3);
+			tg2.deductCost(150, 50);
+			tg2.deductCost(150, 50);
+			tg2.deductCost(150, 50);
 
-			tribes.add(tx);
+			tribes.add(tg2);
 
 		} catch (FIPAException e) {
 			e.printStackTrace();
@@ -494,7 +496,7 @@ public class AgWorld extends Agent {
 		ContainerController cc = getContainerController();
 
 		try {
-
+			
 			Cell position = bookNextRandomCell(new Empty());
 
 			Object[] args = new Object[2];

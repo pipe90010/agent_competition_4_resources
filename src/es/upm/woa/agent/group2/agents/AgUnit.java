@@ -166,8 +166,8 @@ public class AgUnit extends Agent{
 						MoveToCell createAction = new MoveToCell();
 						
 						Cell targetPosition = new Cell();
-						targetPosition.setX(1);//currentPosition.getX()+1);
-						targetPosition.setY(1);//currentPosition.getY()+1);
+						targetPosition.setX(currentPosition.getX()+1);
+						targetPosition.setY(currentPosition.getY()+1);
 						targetPosition.setOwner(getAID());
 						targetPosition.setContent(new Empty());
 						createAction.setTarget(targetPosition);

@@ -61,8 +61,7 @@ public class AgTribe extends Agent {
 
 			public void action() {
 				// Waits for units creation
-				/*ACLMessage msg = receive(MessageTemplate.and(MessageTemplate.MatchLanguage(codec.getName()),
-						MessageTemplate.MatchOntology(ontology.getName())));*/
+				
 				ACLMessage msg = receive(MessageTemplate.and(MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.INFORM),MessageTemplate.MatchPerformative(ACLMessage.FAILURE)), MessageTemplate.MatchProtocol("CreateUnit")));
 				if (msg != null) {
 
