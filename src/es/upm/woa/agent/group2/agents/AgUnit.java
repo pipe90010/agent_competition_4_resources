@@ -52,6 +52,8 @@ public class AgUnit extends Agent{
 	
     private ArrayList<Cell> discoveredCells;
     
+    private Boolean isBusy;
+    
 	public AgUnit() {
 		// TODO Auto-generated constructor stub
 	}
@@ -59,6 +61,7 @@ public class AgUnit extends Agent{
 	protected void setup()
 	{
 		unit = new Unit(getAID());
+		isBusy = false;
 		discoveredCells = new ArrayList<Cell>();
 		Printer.printSuccess( getLocalName(),"has entered into the system ");
 		//Register of the codec and the ontology to be used in the ContentManager
@@ -174,6 +177,7 @@ public class AgUnit extends Agent{
 						Action agAction = new Action(ag,createAction);
 						// Here you pass in arguments the message and the content that it will be filled with
 						getContentManager().fillContent(createMsg, agAction);
+						isBusy = true;
 						send(createMsg);
 					}
 					else
@@ -254,7 +258,11 @@ public class AgUnit extends Agent{
 
 			public void action() {
 					
-				ACLMessage msg = receive(MessageTemplate.and(MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.INFORM),MessageTemplate.MatchPerformative(ACLMessage.FAILURE)), MessageTemplate.MatchProtocol("NotifyNewCellDiscovery")));
+				ACLMessage msg = receive(MessageTemplate.and(
+						MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.INFORM),
+						MessageTemplate.MatchPerformative(ACLMessage.FAILURE)),
+						MessageTemplate.or(MessageTemplate.MatchProtocol("NotifyNewCellDiscovery"),
+						MessageTemplate.MatchProtocol("informMove"))));
 				if (msg != null)
 			    {
 					if(msg.getPerformative()==ACLMessage.INFORM)
@@ -291,6 +299,15 @@ public class AgUnit extends Agent{
 										else
 											Printer.printSuccess(getLocalName(), "New cell's content is unknown");
 									}
+								}
+								else if(conc instanceof MoveToCell)
+								{
+									MoveToCell agActionN = (MoveToCell)agAction.getAction();
+									
+									Cell cell= agActionN.getTarget();
+									isBusy=false;
+									setCurrentPosition(cell);
+									Printer.printSuccess(getLocalName(), "New position has been updated to: "+cell.getX()+" and "+cell.getY());
 								}
 								
 							}

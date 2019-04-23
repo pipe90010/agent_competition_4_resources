@@ -115,20 +115,25 @@ public class Tribe {
 	public void setDiscoveredCells(ArrayList<Cell> discoveredCells) {
 		this.discoveredCells = discoveredCells;
 	}
-	
-	public void addDiscoveredCell(Cell cell) {
+	/**
+	 * 
+	 * @param cell
+	 * @return
+	 */
+	public boolean addDiscoveredCell(Cell cell) {
 		
-		boolean found=false;
+		boolean isNew=true;
 		for (int i = 0; i < discoveredCells.size(); i++) {
 			Cell currentCell = discoveredCells.get(i);
 			if(currentCell.getX()==cell.getX() && currentCell.getY()==cell.getY())
 			{
-				found = true;
+				isNew = false;
 				discoveredCells.set(i, cell);
 			}
 				
 		}
-		if(!found)
+		if(isNew)
 			discoveredCells.add(cell);
+		return isNew;
 	}
 }

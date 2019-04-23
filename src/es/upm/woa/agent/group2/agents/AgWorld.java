@@ -132,22 +132,19 @@ public class AgWorld extends Agent {
 			/**
 			 * TEST UNIT IS CREATED FROM THE WORLD
 			 */
-			Unit u = createUnit("UnitX1", tg2);
-			u.setPosition(tg2.getTownhall());
+			Unit u = createUnit(true,"UnitX1", tg2);
 			
 			Cell u2Position = map[tg2.getTownhall().getX()+1][tg2.getTownhall().getY()];
 			Cell u3Position = map[tg2.getTownhall().getX()-1][tg2.getTownhall().getY()];
 
-			Unit u2 = createUnit("UnitX2", tg2);
-			u2.setPosition(u2Position);
+			//Unit u2 = createUnit(false,"UnitX2", tg2);
 
-			Unit u3 = createUnit("UnitX3", tg2);
-			u3.setPosition(u3Position);
+			//Unit u3 = createUnit(false,"UnitX3", tg2);
 
 			// adds created unit to the tribe and deduct cost of each unit creation
 			tg2.addUnit(u);
-			tg2.addUnit(u2);
-			tg2.addUnit(u3);
+			//tg2.addUnit(u2);
+			//tg2.addUnit(u3);
 			tg2.deductCost(150, 50);
 			tg2.deductCost(150, 50);
 			tg2.deductCost(150, 50);
@@ -235,7 +232,7 @@ public class AgWorld extends Agent {
 									myAgent.send(reply);
 
 									if (code == 1) {
-										Unit u = createUnit(newUnitName, tribeSender);
+										Unit u = createUnit(false,newUnitName, tribeSender);
 										if (u != null) {
 											tribes.get(indexTribe).addUnit(u);
 											tribes.get(indexTribe).deductCost(150, 50);
@@ -341,32 +338,41 @@ public class AgWorld extends Agent {
 												// Move the unit
 												Cell cell = moveUnitToPosition(unit, requestedPosition);
 
-												tribeSender.addDiscoveredCell(cell);
+												boolean isNew = tribeSender.addDiscoveredCell(cell);
 												
 												
 												Printer.printSuccess(getLocalName(),
 														"Unit " + senderName + "POSITION UPDATED");
+												
+												//INFORMS UNIT WHO REQUESTED THE MOVEMENT
 												informMsg = MessageFormatter.createReplyMessage(getLocalName(), msg,
-														ACLMessage.INFORM, "NotifyNewCellDiscovery");
+														ACLMessage.INFORM, "informMove");
 												getContentManager().fillContent(informMsg, agAction);
 												send(informMsg);
+												
+												if(isNew)
+												{
+													NotifyNewCellDiscovery notify = new NotifyNewCellDiscovery();
+													notify.setNewCell(cell);
+													
+													//INFORMS TRIBE ABOUT NEW CELL DISCOVERY
+													ACLMessage informMsgTribe = MessageFormatter.createMessage(
+															getLocalName(), ACLMessage.INFORM, "NotifyNewCellDiscovery",
+															tribeSender.getId());
+													Action notifyCellDiscovery = new Action(tribeSender.getId(), notify);
+													getContentManager().fillContent(informMsgTribe, notifyCellDiscovery);
+													send(informMsgTribe);
+													
+													
 
-												NotifyNewCellDiscovery notify = new NotifyNewCellDiscovery();
-												notify.setNewCell(cell);
-
-												ACLMessage informMsgTribe = MessageFormatter.createMessage(
-														getLocalName(), ACLMessage.INFORM, "informMove",
-														tribeSender.getId());
-												Action notifyCellDiscovery = new Action(tribeSender.getId(), notify);
-												getContentManager().fillContent(informMsgTribe, notifyCellDiscovery);
-												send(informMsgTribe);
-
-												ACLMessage informMsgUnit = MessageFormatter.createMessage(
-														getLocalName(), ACLMessage.INFORM, "informMove",
-														senderUnit.getId());
-												Action notifyCellDiscoveryUnit = new Action(senderUnit.getId(), notify);
-												getContentManager().fillContent(informMsgUnit, notifyCellDiscoveryUnit);
-												send(informMsgUnit);
+													ACLMessage informMsgUnit = MessageFormatter.createMessage(
+															getLocalName(), ACLMessage.INFORM, "NotifyNewCellDiscovery",
+															senderUnit.getId());
+													Action notifyCellDiscoveryUnit = new Action(senderUnit.getId(), notify);
+													getContentManager().fillContent(informMsgUnit, notifyCellDiscoveryUnit);
+													send(informMsgUnit);
+												}
+												
 											} else {
 												informMsg = MessageFormatter.createReplyMessage(getLocalName(), msg,
 														ACLMessage.FAILURE, "NotifyNewCellDiscovery");
@@ -429,7 +435,11 @@ public class AgWorld extends Agent {
 	// Regular Methods
 	// -----------------------------------------------------------------
 
-	// Randomly books the next cell once a  
+	/**
+	 * Randomly books the next empty available cell 
+	 * @param conc
+	 * @return
+	 */
 	private Cell bookNextRandomCell(Concept conc) {
 
 		int x = new Random().nextInt(X_BOUNDARY);
@@ -491,13 +501,16 @@ public class AgWorld extends Agent {
 		return 1;
 	}
 
-	private Unit createUnit(String nickname, Tribe tribe) {
+	private Unit createUnit(boolean isFirst,String nickname, Tribe tribe) {
 
 		ContainerController cc = getContainerController();
 
 		try {
-			
-			Cell position = bookNextRandomCell(new Empty());
+			Cell position;
+			if(isFirst)
+				position = tribe.getTownhall();
+			else
+			 position = bookNextRandomCell(new Empty());
 
 			Object[] args = new Object[2];
 			args[0] = position.getX();
