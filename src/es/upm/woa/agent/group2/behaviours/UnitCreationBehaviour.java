@@ -157,7 +157,7 @@ public class UnitCreationBehaviour extends CyclicBehaviour {
 								if(u!=null)
 								{
 									tribes.get(indexTribe).addUnit(u);
-									tribes.get(indexTribe).deductCost(150, 50);
+									tribes.get(indexTribe).deductCost(150, 50,0,0);
 								}
 							}
 
