@@ -18,7 +18,7 @@ import es.upm.woa.ontology.CreateUnit;
 import es.upm.woa.ontology.Empty;
 import es.upm.woa.ontology.GameOntology;
 import es.upm.woa.ontology.MoveToCell;
-import es.upm.woa.ontology.NotifyNewCellDiscovery;
+import es.upm.woa.ontology.NotifyCellDetail;
 import es.upm.woa.ontology.NotifyNewUnit;
 
 import jade.content.Concept;
@@ -352,7 +352,7 @@ public class AgWorld extends Agent {
 												
 												if(isNew)
 												{
-													NotifyNewCellDiscovery notify = new NotifyNewCellDiscovery();
+													NotifyCellDetail notify = new NotifyCellDetail();
 													notify.setNewCell(cell);
 													
 													//INFORMS TRIBE ABOUT NEW CELL DISCOVERY
@@ -424,7 +424,6 @@ public class AgWorld extends Agent {
 			for (int j = 0; j < Y_BOUNDARY; j++) {
 				map[i][j] = new Cell();
 				map[i][j].setContent(new Empty());
-				map[i][j].setOwner(null);
 				map[i][j].setX(i);
 				map[i][j].setY(j);
 			}
@@ -440,19 +439,11 @@ public class AgWorld extends Agent {
 	 * @param conc
 	 * @return
 	 */
-	private Cell bookNextRandomCell(Concept conc) {
+	private Cell bookNextRandomCell() {
 
 		int x = new Random().nextInt(X_BOUNDARY);
 		int y = new Random().nextInt(Y_BOUNDARY);
-
-		// validate if the cell doesn't have an owner 
-		if (map[x][y].getOwner() == null) {
-			map[x][y].setContent(conc);
-			return map[x][y];
-		} else {
-			return bookNextRandomCell(conc);
-		}
-
+		return map[x][y];
 	}
 
 	private Tribe createTribe(String nickname) {
@@ -464,16 +455,10 @@ public class AgWorld extends Agent {
 
 			Building townhall = new Building();
 			townhall.setOwner(agentTribe.getAID());
-			List types = new jade.util.leap.ArrayList();
+			townhall.setType(TOWNHALL);
 
-			types.add(TOWNHALL);
-			townhall.setType(types);
-
-			Cell townhallCell = bookNextRandomCell(townhall); //map[0][0];
-			
-			
-			map[townhallCell.getX()][townhallCell.getY()].setOwner(agentTribe.getAID());
-			
+			Cell townhallCell = bookNextRandomCell();
+									
 			//creates the tribe and assign it an initial amount of resources and a TownHall cell 
 			Tribe tribe = new Tribe(agentTribe.getAID(), GOLD, FOOD, townhallCell);
 			return tribe;
@@ -510,7 +495,7 @@ public class AgWorld extends Agent {
 			if(isFirst)
 				position = tribe.getTownhall();
 			else
-			 position = bookNextRandomCell(new Empty());
+			 position = bookNextRandomCell();
 
 			Object[] args = new Object[2];
 			args[0] = position.getX();
@@ -525,9 +510,8 @@ public class AgWorld extends Agent {
 				AgentController ac = cc.createNewAgent(nickname, AgUnit.class.getName(), args);
 				ac.start();
 				// TODO: CHECK IF WE NEED TO ADD THE UNIT AS A CONTENT FOR THE CELL
-				position.setOwner(tribe.getId());
 				Unit newUnit = new Unit(getAID(nickname), position);
-				map[position.getX()][position.getY()].setOwner(tribe.getId());
+				//map[position.getX()][position.getY()].setOwner(tribe.getId());
 
 				if (tribe != null) {
 					AID ag = tribe.getId();

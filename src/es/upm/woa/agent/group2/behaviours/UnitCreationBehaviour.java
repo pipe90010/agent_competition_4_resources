@@ -196,9 +196,7 @@ public class UnitCreationBehaviour extends CyclicBehaviour {
 				AgentController ac = cc.createNewAgent(nickname, AgUnit.class.getName(), args);
 				ac.start();
 				// TODO: CHECK IF WE NEED TO ADD THE UNIT AS A CONTENT FOR THE CELL
-				position.setOwner(tribe.getId());
 				Unit newUnit = new Unit(AgWorldInstance.getAID(nickname), position);
-				map[position.getX()][position.getY()].setOwner(tribe.getId());
 				// agentUnit.setCurrentPosition(position);
 	
 				if (tribe != null) {
@@ -232,17 +230,9 @@ public class UnitCreationBehaviour extends CyclicBehaviour {
 	}
 
 	private Cell bookNextRandomCell(Concept conc) {
-		// TODO: Integration test
-		// return map[0][0];
 		int x = new Random().nextInt(X_BOUNDARY);
 		int y = new Random().nextInt(Y_BOUNDARY);
-		// validate if it doesn't
-		if (map[x][y].getOwner() == null) {
-			// map[x][y].setContent(content);
-			map[x][y].setContent(conc);
 			return map[x][y];
-		} else {
-			return bookNextRandomCell(conc);
-		}
+		
 	}
 }

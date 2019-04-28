@@ -2,36 +2,14 @@ package es.upm.woa.ontology;
 
 
 import jade.content.*;
-import jade.util.leap.*;
 import jade.core.*;
 
 /**
 * Protege name: Building
 * @author ontology bean generator
-* @version 2019/04/5, 19:32:22
+* @version 2019/04/26, 13:38:37
 */
 public class Building implements Concept {
-
-   /**
-* Protege name: type
-   */
-   private List type = new ArrayList();
-   public void addType(String elem) { 
-     List oldList = this.type;
-     type.add(elem);
-   }
-   public boolean removeType(String elem) {
-     List oldList = this.type;
-     boolean result = type.remove(elem);
-     return result;
-   }
-   public void clearAllType() {
-     List oldList = this.type;
-     type.clear();
-   }
-   public Iterator getAllType() {return type.iterator(); }
-   public List getType() {return type; }
-   public void setType(List l) {type = l; }
 
    /**
 * Protege name: owner
@@ -42,6 +20,18 @@ public class Building implements Concept {
    }
    public AID getOwner() {
      return this.owner;
+   }
+
+   /**
+* Protege name: type
+   */
+   private String type;
+   
+   public void setType(String value) { 
+    this.type=value;
+   }
+   public String getType() {
+     return this.type;
    }
 
 }

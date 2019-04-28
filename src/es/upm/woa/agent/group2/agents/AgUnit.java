@@ -24,7 +24,7 @@ import es.upm.woa.ontology.CreateUnit;
 import es.upm.woa.ontology.Empty;
 import es.upm.woa.ontology.GameOntology;
 import es.upm.woa.ontology.MoveToCell;
-import es.upm.woa.ontology.NotifyNewCellDiscovery;
+import es.upm.woa.ontology.NotifyCellDetail;
 import es.upm.woa.ontology.NotifyNewUnit;
 import es.upm.woa.ontology.Resource;
 import jade.content.Concept;
@@ -78,7 +78,6 @@ public class AgUnit extends Agent{
                 Cell cell= new Cell();
                 cell.setX(x);
                 cell.setY(y);
-                cell.setOwner(this.getAID());
                 setCurrentPosition(cell);
                 Printer.printSuccess( getLocalName(),"CURRENT POSITION IS SET FOR X: "+x+" and Y: "+y);
             }            
@@ -170,8 +169,7 @@ public class AgUnit extends Agent{
 						
 						Cell targetPosition = new Cell();
 						targetPosition.setX(currentPosition.getX()+1);
-						targetPosition.setY(currentPosition.getY()+1);
-						targetPosition.setOwner(getAID());
+						targetPosition.setY(currentPosition.getY()+1);						
 						targetPosition.setContent(new Empty());
 						createAction.setTarget(targetPosition);
 						Action agAction = new Action(ag,createAction);
@@ -274,9 +272,9 @@ public class AgUnit extends Agent{
 								Concept conc = agAction.getAction();
 								//casting
 								
-								if (conc instanceof NotifyNewCellDiscovery) {
+								if (conc instanceof NotifyCellDetail) {
 									
-									NotifyNewCellDiscovery agActionN = (NotifyNewCellDiscovery)agAction.getAction();
+									NotifyCellDetail agActionN = (NotifyCellDetail)agAction.getAction();
 			
 									Cell cell= agActionN.getNewCell();
 									addNewCellDiscovered(cell);

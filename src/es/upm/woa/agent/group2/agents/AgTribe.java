@@ -11,7 +11,7 @@ import es.upm.woa.ontology.Building;
 import es.upm.woa.ontology.Cell;
 import es.upm.woa.ontology.Empty;
 import es.upm.woa.ontology.GameOntology;
-import es.upm.woa.ontology.NotifyNewCellDiscovery;
+import es.upm.woa.ontology.NotifyCellDetail;
 import es.upm.woa.ontology.NotifyNewUnit;
 import es.upm.woa.ontology.Resource;
 import jade.content.Concept;
@@ -132,10 +132,10 @@ public class AgTribe extends Agent {
 								Action agAction = (Action) ce;
 								Concept conc = agAction.getAction();
 								// If the action is NotifyNewUnit
-								if (conc instanceof NotifyNewCellDiscovery) {
+								if (conc instanceof NotifyCellDetail) {
 									
 									//casting
-									NotifyNewCellDiscovery agActionN = (NotifyNewCellDiscovery)agAction.getAction();
+									NotifyCellDetail agActionN = (NotifyCellDetail)agAction.getAction();
 
 									Cell cell= agActionN.getNewCell();
 									
@@ -150,7 +150,7 @@ public class AgTribe extends Agent {
 									for (Unit unit : units) {
 										
 										ACLMessage informMsgUnit = MessageFormatter.createMessage(getLocalName(),ACLMessage.INFORM, "NotifyNewCellDiscovery", unit.getId());
-										NotifyNewCellDiscovery notify = new NotifyNewCellDiscovery();
+										NotifyCellDetail notify = new NotifyCellDetail();
 	                            		notify.setNewCell(cell);
 										Action notifyCellDiscoveryUnit = new Action(unit.getId(), notify);
 	                            		getContentManager().fillContent(informMsgUnit, notifyCellDiscoveryUnit);

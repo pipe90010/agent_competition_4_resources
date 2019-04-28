@@ -18,5 +18,6 @@ public class AgWorldRules {
 	}
 	
 	public boolean isItsOwnTownhall(Cell senderTownhallPosition, Cell tribeTownhall) {
-		return senderTownhallPosition.getOwner().getName().equals(tribeTownhall.getOwner().getName());}
+		 return senderTownhallPosition.getX()==tribeTownhall.getX()&&senderTownhallPosition.getY()==tribeTownhall.getY();		 
+		 }
 }

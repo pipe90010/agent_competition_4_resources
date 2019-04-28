@@ -14,7 +14,7 @@ import es.upm.woa.ontology.Cell;
 import es.upm.woa.ontology.Empty;
 import es.upm.woa.ontology.GameOntology;
 import es.upm.woa.ontology.MoveToCell;
-import es.upm.woa.ontology.NotifyNewCellDiscovery;
+import es.upm.woa.ontology.NotifyCellDetail;
 import jade.content.Concept;
 import jade.content.ContentElement;
 import jade.content.lang.Codec;
@@ -203,7 +203,7 @@ public class MovementRequestBehaviour extends CyclicBehaviour {
 	                            		AgWorldInstance.send(informMsg);
 	                            		
 	                            		
-	                            		NotifyNewCellDiscovery notify = new NotifyNewCellDiscovery();
+	                            		NotifyCellDetail notify = new NotifyCellDetail();
 	                            		notify.setNewCell(cell);
 	                            		
 	                            		ACLMessage informMsgTribe = MessageFormatter.createMessage(AgWorldInstance.getLocalName(),ACLMessage.INFORM, "informMove", tribeSender.getId());
