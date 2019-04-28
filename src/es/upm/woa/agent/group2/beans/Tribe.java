@@ -173,7 +173,7 @@ public class Tribe {
 		
 		for (int i = 0; i < units.size(); i++) {
 			Unit unit = units.get(i);
-			if(unit.getAction()!=null && unit.getAction().equals("MOVING"))
+			if(unit.getAction()!=null && unit.getAction().equals("BUILDING"))
 				return unit;
 		}
 		return null;

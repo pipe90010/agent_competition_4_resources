@@ -469,14 +469,12 @@ public class AgWorld extends Agent {
 										doWait(time);
 										Printer.printSuccess(getLocalName(), "Townhall from "+tribeSender.getId().getLocalName()+" creation time finished");
 										
-										updateTribeByTribeAID(tribeSender);
+										//updateTribeByTribeAID(tribeSender);
 										
 										
 										Unit unitUpdated = findUnitByAID(unitAID, tribeSender);
 										if(unitUpdated.getAction().equals("BUILDING"))
 										{
-											unit.setAction(null);
-											updateUnitInTribeByUnitAID(unit);
 											//INFORMS TRIBE ABOUT CELL UPDATE WITH TOWNHALL
 											ACLMessage informMsgTribe = MessageFormatter.createMessage(
 													getLocalName(), ACLMessage.INFORM, "informBuildingCreation",
@@ -491,11 +489,11 @@ public class AgWorld extends Agent {
 											ACLMessage informMsg = MessageFormatter.createReplyMessage(getLocalName(), msg,
 													ACLMessage.FAILURE, "NotifyCellDetail");
 											send(informMsg);
-											unit.setAction(null);
-											updateUnitInTribeByUnitAID(unit);
 										}
 										
+										unit.setAction(null);
 										//UPDATES TRIBES ARRAY
+										updateUnitInTribeByUnitAID(unit);
 										updateTribeByTribeAID(tribeSender);		
 										
 									}
@@ -690,8 +688,8 @@ public class AgWorld extends Agent {
 		for (int i = 0; i < tribes.size(); i++) {
 			for (int j = 0; j < tribes.get(i).getUnits().size(); j++) {
 				if (tribes.get(i).getUnits().get(j).getId().getName().equals(unit.getId().getName())) {
-					tribes.get(i).getUnits().get(j).setPosition(unit.getPosition());
-					tribes.get(i).getUnits().get(j).setId(unit.getId());
+					tribes.get(i).getUnits().set(j, unit);
+					
 					return true;
 				}
 			}
