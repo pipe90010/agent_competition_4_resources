@@ -14,6 +14,7 @@ import es.upm.woa.agent.group2.common.WorldTimer;
 import es.upm.woa.agent.group2.rules.AgWorldRules;
 import es.upm.woa.ontology.Building;
 import es.upm.woa.ontology.Cell;
+import es.upm.woa.ontology.CreateBuilding;
 import es.upm.woa.ontology.CreateUnit;
 import es.upm.woa.ontology.Empty;
 import es.upm.woa.ontology.GameOntology;
@@ -58,6 +59,8 @@ public class AgWorld extends Agent {
 
 	private final static int GOLD = 1500;
 	private final static int FOOD = 500;
+	private final static int STONES = 500;
+	private final static int WOOD = 500;
 
 	private final static int X_BOUNDARY = 100;
 	private final static int Y_BOUNDARY = 100;
@@ -145,9 +148,9 @@ public class AgWorld extends Agent {
 			tg2.addUnit(u);
 			//tg2.addUnit(u2);
 			//tg2.addUnit(u3);
-			tg2.deductCost(150, 50);
-			tg2.deductCost(150, 50);
-			tg2.deductCost(150, 50);
+			tg2.deductCost(150, 50,0,0);
+			tg2.deductCost(150, 50,0,0);
+			tg2.deductCost(150, 50,0,0);
 
 			tribes.add(tg2);
 
@@ -235,7 +238,7 @@ public class AgWorld extends Agent {
 										Unit u = createUnit(false,newUnitName, tribeSender);
 										if (u != null) {
 											tribes.get(indexTribe).addUnit(u);
-											tribes.get(indexTribe).deductCost(150, 50);
+											tribes.get(indexTribe).deductCost(150, 50,0,0);
 										}
 									}
 								}
@@ -316,7 +319,10 @@ public class AgWorld extends Agent {
 												ACLMessage.AGREE, "MoveToCell");
 										getContentManager().fillContent(reply, agAction);
 										send(reply);
-
+										
+										senderUnit.setAction("MOVING");
+										updateUnitInTribeByUnitAID(senderUnit);
+										
 										//starts the unit movement
 										
 										try {
@@ -350,33 +356,35 @@ public class AgWorld extends Agent {
 												getContentManager().fillContent(informMsg, agAction);
 												send(informMsg);
 												
-												if(isNew)
-												{
-													NotifyCellDetail notify = new NotifyCellDetail();
-													notify.setNewCell(cell);
-													
-													//INFORMS TRIBE ABOUT NEW CELL DISCOVERY
-													ACLMessage informMsgTribe = MessageFormatter.createMessage(
-															getLocalName(), ACLMessage.INFORM, "NotifyNewCellDiscovery",
-															tribeSender.getId());
-													Action notifyCellDiscovery = new Action(tribeSender.getId(), notify);
-													getContentManager().fillContent(informMsgTribe, notifyCellDiscovery);
-													send(informMsgTribe);
-													
-													
+												
+												NotifyCellDetail notify = new NotifyCellDetail();
+												notify.setNewCell(cell);
 
-													ACLMessage informMsgUnit = MessageFormatter.createMessage(
-															getLocalName(), ACLMessage.INFORM, "NotifyNewCellDiscovery",
-															senderUnit.getId());
-													Action notifyCellDiscoveryUnit = new Action(senderUnit.getId(), notify);
-													getContentManager().fillContent(informMsgUnit, notifyCellDiscoveryUnit);
-													send(informMsgUnit);
-												}
+												// INFORMS TRIBE ABOUT NEW CELL DISCOVERY
+												ACLMessage informMsgTribe = MessageFormatter.createMessage(
+														getLocalName(), ACLMessage.INFORM, "NotifyCellDetail",
+														tribeSender.getId());
+												Action notifyCellDiscovery = new Action(tribeSender.getId(), notify);
+												getContentManager().fillContent(informMsgTribe, notifyCellDiscovery);
+												send(informMsgTribe);
+
+												ACLMessage informMsgUnit = MessageFormatter.createMessage(
+														getLocalName(), ACLMessage.INFORM, "NotifyCellDetail",
+														senderUnit.getId());
+												Action notifyCellDiscoveryUnit = new Action(senderUnit.getId(), notify);
+												getContentManager().fillContent(informMsgUnit, notifyCellDiscoveryUnit);
+												send(informMsgUnit);
+												
+												senderUnit.setAction(null);
+												updateUnitInTribeByUnitAID(senderUnit);
 												
 											} else {
 												informMsg = MessageFormatter.createReplyMessage(getLocalName(), msg,
-														ACLMessage.FAILURE, "NotifyNewCellDiscovery");
+														ACLMessage.FAILURE, "NotifyCellDetail");
 												send(informMsg);
+												
+												senderUnit.setAction(null);
+												updateUnitInTribeByUnitAID(senderUnit);
 											}
 
 										} catch (Codec.CodecException | OntologyException e) {
@@ -400,6 +408,123 @@ public class AgWorld extends Agent {
 				} else {
 					// If no message arrives
 					block();
+				}
+			}
+		});
+		
+		//BEHAVIOR FOR CHECKING BUILDING CREATION
+		addBehaviour(new CyclicBehaviour(this) {
+			@Override
+			public void action() {
+				// Wait for a units request to move to a new position
+				ACLMessage msg = receive(MessageTemplate.and(MessageTemplate.MatchPerformative(ACLMessage.REQUEST),
+						MessageTemplate.MatchProtocol("CreateBuilding")));
+				if (msg != null) {
+					AID unitAID = msg.getSender();
+					String senderName = (unitAID).getLocalName();					
+
+					try {
+						ContentElement createBuildingRequest = getContentManager().extractContent(msg);
+
+						// validates that the movementRequest is and action and cast it to MoveToCell
+						if (createBuildingRequest instanceof Action) {
+							Concept conc = ((Action) createBuildingRequest).getAction();
+							AID sender = msg.getSender();
+							int indexTribe = findTribePositionByUnitAID(sender);
+							Tribe tribeSender = tribes.get(indexTribe);
+							Unit unit = findUnitByAID(unitAID, tribeSender);
+							
+							if (conc instanceof CreateBuilding) {
+								CreateBuilding createBuildingAction = ((CreateBuilding) conc);
+								String buildingType = createBuildingAction.getBuildingType();
+								
+								ACLMessage reply = msg.createReply();
+								reply.setLanguage(codec.getName());
+								reply.setOntology(ontology.getName());
+								
+								if(buildingType.equals(TOWNHALL)) {
+									
+									boolean oneUnitBilding = tribeSender.isAnyUnitBuilding()!=null;
+									boolean meetConditions = worldRules.meetTownhallCreationCondition(tribeSender.getGold(), tribeSender.getStones(), tribeSender.getWood(),  oneUnitBilding);
+									
+									if(meetConditions && unit.getPosition().getContent() instanceof Empty)
+									{
+										Action agAction = new Action(sender, createBuildingAction);
+										reply = MessageFormatter.createReplyMessage(getLocalName(), msg,
+												ACLMessage.AGREE, "CreateBuilding");
+										getContentManager().fillContent(reply, agAction);
+										send(reply);
+										
+										unit.setAction("BUILDING");
+										updateUnitInTribeByUnitAID(unit);
+										
+										
+										Cell currentPosition = unit.getPosition();
+										Building townHall = new Building();
+										townHall.setType(TOWNHALL);
+										map[currentPosition.getX()][currentPosition.getY()].setContent(townHall);
+										
+										long time = worldTimer.getBuildTownhallTime();
+										Printer.printSuccess(getLocalName(), "Townhall from "+tribeSender.getId().getLocalName()+" creation time started");
+										doWait(time);
+										Printer.printSuccess(getLocalName(), "Townhall from "+tribeSender.getId().getLocalName()+" creation time finished");
+										
+										updateTribeByTribeAID(tribeSender);
+										
+										
+										Unit unitUpdated = findUnitByAID(unitAID, tribeSender);
+										if(unitUpdated.getAction().equals("BUILDING"))
+										{
+											unit.setAction(null);
+											updateUnitInTribeByUnitAID(unit);
+											//INFORMS TRIBE ABOUT CELL UPDATE WITH TOWNHALL
+											ACLMessage informMsgTribe = MessageFormatter.createMessage(
+													getLocalName(), ACLMessage.INFORM, "informBuildingCreation",
+													tribeSender.getId());
+											getContentManager().fillContent(informMsgTribe, agAction);
+											send(informMsgTribe);
+											tribeSender.setTownhall(currentPosition);
+											tribeSender.deductCost(250,0,150,200);
+										}
+										else
+										{
+											ACLMessage informMsg = MessageFormatter.createReplyMessage(getLocalName(), msg,
+													ACLMessage.FAILURE, "NotifyCellDetail");
+											send(informMsg);
+											unit.setAction(null);
+											updateUnitInTribeByUnitAID(unit);
+										}
+										
+										//UPDATES TRIBES ARRAY
+										updateTribeByTribeAID(tribeSender);		
+										
+									}
+									else
+									{
+										Printer.printSuccess(getLocalName(),
+												"Unit " + senderName + " CANNOT CREATE BUILDING");
+										reply = MessageFormatter.createReplyMessage(getLocalName(), msg,
+												ACLMessage.REFUSE, "CreateBuilding");
+										send(reply);
+									}
+								}
+								
+							}
+							else
+							{
+								Printer.printSuccess(getLocalName(),
+										"CREATE BUILDING MESSAGE NOT UNDERSTOOD");
+								ACLMessage reply = MessageFormatter.createReplyMessage(getLocalName(), msg,
+										ACLMessage.NOT_UNDERSTOOD, null);
+								send(reply);
+							}
+								
+						}
+					}
+					catch (Exception e) {
+						// TODO: handle exception
+						e.printStackTrace();
+					}
 				}
 			}
 		});
@@ -453,14 +578,14 @@ public class AgWorld extends Agent {
 		try {
 			cc.acceptNewAgent(nickname, agentTribe).start();
 
-			Building townhall = new Building();
+			/*Building townhall = new Building();
 			townhall.setOwner(agentTribe.getAID());
 			townhall.setType(TOWNHALL);
 
-			Cell townhallCell = bookNextRandomCell();
+			Cell townhallCell = bookNextRandomCell();*/
 									
 			//creates the tribe and assign it an initial amount of resources and a TownHall cell 
-			Tribe tribe = new Tribe(agentTribe.getAID(), GOLD, FOOD, townhallCell);
+			Tribe tribe = new Tribe(agentTribe.getAID(), GOLD, FOOD,STONES,WOOD);
 			return tribe;
 		} catch (StaleProxyException e) {
 			e.printStackTrace();
@@ -552,6 +677,14 @@ public class AgWorld extends Agent {
 		}
 		return -1;
 	}
+	
+	private int findTribePositionByTribeAID(AID aid) {
+		for (int i = 0; i < tribes.size(); i++) {
+			if (tribes.get(i).getId().getLocalName().equals(aid.getLocalName()))
+					return i;
+		}
+		return -1;
+	}
 
 	private boolean updateUnitInTribeByUnitAID(Unit unit) {
 		for (int i = 0; i < tribes.size(); i++) {
@@ -561,6 +694,16 @@ public class AgWorld extends Agent {
 					tribes.get(i).getUnits().get(j).setId(unit.getId());
 					return true;
 				}
+			}
+		}
+		return false;
+	}
+	
+	private boolean updateTribeByTribeAID(Tribe tribe) {
+		for (int i = 0; i < tribes.size(); i++) {
+			if (tribes.get(i).getId().getName().equals(tribe.getId().getName())) {
+				tribes.set(i, tribe);
+				return true;
 			}
 		}
 		return false;

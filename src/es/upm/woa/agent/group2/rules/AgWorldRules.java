@@ -19,5 +19,10 @@ public class AgWorldRules {
 	
 	public boolean isItsOwnTownhall(Cell senderTownhallPosition, Cell tribeTownhall) {
 		 return senderTownhallPosition.getX()==tribeTownhall.getX()&&senderTownhallPosition.getY()==tribeTownhall.getY();		 
-		 }
+	}
+	
+	public boolean meetTownhallCreationCondition(Integer gold,Integer stones, Integer wood, boolean oneUnitBuilding)
+	{
+		return gold>=250 && stones>=150 && wood>=200 && !oneUnitBuilding;
+	}
 }

@@ -18,6 +18,8 @@ public class Tribe {
     // -----------------------------------------------------------------
 	private int gold;
 	private int food;
+	private int stones;
+	private int wood;
 	private Cell townhall;
 	private ArrayList<Unit> units;
 	private int memberSize;
@@ -27,12 +29,13 @@ public class Tribe {
     // Constructor
     // -----------------------------------------------------------------
 	
-	public Tribe(AID id, int gold, int food, Cell townhall) {
+	public Tribe(AID id, int gold, int food, int stones, int wood) {
 		super();
 		this.id = id;
 		this.gold = gold;
 		this.food = food;
-		this.townhall = townhall;
+		this.stones = stones;
+		this.wood = wood;
 		this.units = new ArrayList<Unit>();
 		this.discoveredCells = new ArrayList<Cell>();
 		this.memberSize = 0;
@@ -83,9 +86,11 @@ public class Tribe {
 	}
 	
 	//Always overload the gold and food cost for world actions
-	public void deductCost(int goldCost, int foodCost) {
+	public void deductCost(int goldCost, int foodCost, int stones, int wood) {
 		setGold(getGold()-goldCost);
 		setFood(getFood()-foodCost);
+		setFood(getStones()-stones);
+		setFood(getWood()-wood);
 	}
 
 	public void setUnits(ArrayList<Unit> units) {
@@ -115,6 +120,23 @@ public class Tribe {
 	public void setDiscoveredCells(ArrayList<Cell> discoveredCells) {
 		this.discoveredCells = discoveredCells;
 	}
+	
+	public int getStones() {
+		return stones;
+	}
+
+	public void setStones(int stones) {
+		this.stones = stones;
+	}
+
+	public int getWood() {
+		return wood;
+	}
+
+	public void setWood(int wood) {
+		this.wood = wood;
+	}
+
 	/**
 	 * 
 	 * @param cell
@@ -135,5 +157,25 @@ public class Tribe {
 		if(isNew)
 			discoveredCells.add(cell);
 		return isNew;
+	}
+	
+	public int getUnitByIndex(Unit unitToSearch)
+	{
+		for (int i = 0; i < units.size(); i++) {
+			Unit unit = units.get(i);
+			if(unit.getId()==unitToSearch.getId())
+				return i;
+		}
+		return -1;
+	}
+	
+	public Unit isAnyUnitBuilding() {
+		
+		for (int i = 0; i < units.size(); i++) {
+			Unit unit = units.get(i);
+			if(unit.getAction()!=null && unit.getAction().equals("MOVING"))
+				return unit;
+		}
+		return null;
 	}
 }

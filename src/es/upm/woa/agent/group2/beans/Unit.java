@@ -15,6 +15,7 @@ public class Unit {
     // -----------------------------------------------------------------
 	private AID id;
 	private Cell position;
+	private String action;
 	
 	// -----------------------------------------------------------------
     // Constructor
@@ -24,6 +25,7 @@ public class Unit {
 		super();
 		this.id = id;
 		this.position = position;
+		this.action = null;
 	}
 	
 	public Unit(AID id) {
@@ -49,6 +51,14 @@ public class Unit {
 
 	public void setPosition(Cell position) {
 		this.position = position;
+	}
+
+	public String getAction() {
+		return action;
+	}
+
+	public void setAction(String action) {
+		this.action = action;
 	}
 	
 	
