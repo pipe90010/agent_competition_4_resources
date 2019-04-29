@@ -478,7 +478,7 @@ public class AgWorld extends Agent {
 											//INFORMS TRIBE ABOUT CELL UPDATE WITH TOWNHALL
 											ACLMessage informMsgTribe = MessageFormatter.createMessage(
 													getLocalName(), ACLMessage.INFORM, "informBuildingCreation",
-													tribeSender.getId());
+													unitUpdated.getId());
 											getContentManager().fillContent(informMsgTribe, agAction);
 											send(informMsgTribe);
 											tribeSender.setTownhall(currentPosition);
