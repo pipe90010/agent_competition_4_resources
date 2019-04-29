@@ -137,8 +137,8 @@ public class AgWorld extends Agent {
 			 */
 			Unit u = createUnit(true,"UnitX1", tg2);
 			
-			Cell u2Position = map[tg2.getTownhall().getX()+1][tg2.getTownhall().getY()];
-			Cell u3Position = map[tg2.getTownhall().getX()-1][tg2.getTownhall().getY()];
+			//Cell u2Position = map[tg2.getTownhall().getX()+1][tg2.getTownhall().getY()];
+			//Cell u3Position = map[tg2.getTownhall().getX()-1][tg2.getTownhall().getY()];
 
 			//Unit u2 = createUnit(false,"UnitX2", tg2);
 
@@ -615,9 +615,9 @@ public class AgWorld extends Agent {
 
 		try {
 			Cell position;
-			if(isFirst)
+			/*if(isFirst)
 				position = tribe.getTownhall();
-			else
+			else*/
 			 position = bookNextRandomCell();
 
 			Object[] args = new Object[2];
