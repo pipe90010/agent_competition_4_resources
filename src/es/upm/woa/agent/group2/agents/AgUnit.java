@@ -46,7 +46,9 @@ public class AgUnit extends Agent{
 	// Building Constants
 	// -----------------------------------------------------------------
 
-	public final static String TOWNHALL = "Townhall";
+	public final static String TOWNHALL = "Town Hall";
+	public final static String FARM = "Farm";
+	public final static String STORE = "Store";
 	
 	// Codec for the SL language used and instance of the ontology
 	// GameOntology that we have created this part always goes
@@ -198,7 +200,7 @@ public class AgUnit extends Agent{
         	
 		});
         
-        
+        /*
 		//Behavior for moving
 		addBehaviour(new SimpleBehaviour(this)
 		{
@@ -257,7 +259,7 @@ public class AgUnit extends Agent{
 			}
 			
 		});
-		
+		*/
 		// Adds a behavior to process the answer to a creation request
 		addBehaviour(new SimpleBehaviour(this)
 		{

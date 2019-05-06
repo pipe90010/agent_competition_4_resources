@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.Properties;
 import java.util.Random;
 
-//import es.upm.woa.agent.group5.AgUnit;
-//import es.upm.woa.agent.group5.AgTribe;
+/*import es.upm.woa.agent.group1.AgUnit;
+import es.upm.woa.agent.group1.AgTribe;*/
 import es.upm.woa.agent.group2.beans.Tribe;
 import es.upm.woa.agent.group2.beans.Unit;
 import es.upm.woa.agent.group2.common.MessageFormatter;
@@ -69,7 +69,9 @@ public class AgWorld extends Agent {
 	// Building Constants
 	// -----------------------------------------------------------------
 
-	public final static String TOWNHALL = "Townhall";
+	public final static String TOWNHALL = "Town Hall";
+	public final static String FARM = "Farm";
+	public final static String STORE = "Store";
 
 	// -----------------------------------------------------------------
 	// Atributes
