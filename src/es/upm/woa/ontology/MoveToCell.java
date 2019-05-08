@@ -8,19 +8,31 @@ import jade.core.*;
 /**
 * Protege name: MoveToCell
 * @author ontology bean generator
-* @version 2019/04/26, 13:38:37
+* @version 2019/05/8, 16:06:26
 */
 public class MoveToCell implements AgentAction {
 
    /**
-* Protege name: target
+* Protege name: targetDirection
    */
-   private Cell target;
-   public void setTarget(Cell value) { 
-    this.target=value;
+   private int targetDirection;
+   public void setTargetDirection(int value) { 
+    this.targetDirection=value;
    }
-   public Cell getTarget() {
-     return this.target;
+   public int getTargetDirection() {
+     return this.targetDirection;
+   }
+
+   /**
+   * This property shall only be filled in the INFORM informative, after the protocol has been completed.
+* Protege name: newlyArrivedCell
+   */
+   private Cell newlyArrivedCell;
+   public void setNewlyArrivedCell(Cell value) { 
+    this.newlyArrivedCell=value;
+   }
+   public Cell getNewlyArrivedCell() {
+     return this.newlyArrivedCell;
    }
 
 }

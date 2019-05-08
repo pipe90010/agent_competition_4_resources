@@ -6,10 +6,10 @@ import jade.util.leap.*;
 import jade.core.*;
 
 /**
-* Protege name: CreateUnit
+* Protege name: CellContent
 * @author ontology bean generator
-* @version 2019/05/8, 16:06:26
+* @version 2019/05/8, 16:06:25
 */
-public class CreateUnit implements AgentAction {
+public class CellContent implements Concept {
 
 }

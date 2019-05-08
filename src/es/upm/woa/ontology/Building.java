@@ -1,15 +1,26 @@
 package es.upm.woa.ontology;
 
-
 import jade.content.*;
+import jade.util.leap.*;
 import jade.core.*;
 
 /**
 * Protege name: Building
 * @author ontology bean generator
-* @version 2019/04/26, 13:38:37
+* @version 2019/05/8, 16:06:25
 */
-public class Building implements Concept {
+public class Building extends CellContent{ 
+
+   /**
+* Protege name: type
+   */
+   private String type;
+   public void setType(String value) { 
+    this.type=value;
+   }
+   public String getType() {
+     return this.type;
+   }
 
    /**
 * Protege name: owner
@@ -20,18 +31,6 @@ public class Building implements Concept {
    }
    public AID getOwner() {
      return this.owner;
-   }
-
-   /**
-* Protege name: type
-   */
-   private String type;
-   
-   public void setType(String value) { 
-    this.type=value;
-   }
-   public String getType() {
-     return this.type;
    }
 
 }
