@@ -25,11 +25,21 @@ public class Tribe {
 	private int memberSize;
 	private AID id;
 	private ArrayList<Cell> discoveredCells;
+	private int teamNumber;
+	
 	// -----------------------------------------------------------------
     // Constructor
     // -----------------------------------------------------------------
 	
-	public Tribe(AID id, int gold, int food, int stones, int wood) {
+	public int getTeamNumber() {
+		return teamNumber;
+	}
+
+	public void setTeamNumber(int teamNumber) {
+		this.teamNumber = teamNumber;
+	}
+
+	public Tribe(AID id, int gold, int food, int stones, int wood, int teamNumber) {
 		super();
 		this.id = id;
 		this.gold = gold;
@@ -39,6 +49,7 @@ public class Tribe {
 		this.units = new ArrayList<Unit>();
 		this.discoveredCells = new ArrayList<Cell>();
 		this.memberSize = 0;
+		this.teamNumber = teamNumber;
 	}
 	
 	public Tribe(AID id) {

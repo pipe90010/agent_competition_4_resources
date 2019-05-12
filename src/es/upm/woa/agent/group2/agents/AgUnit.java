@@ -396,10 +396,12 @@ public class AgUnit extends Agent{
 								{
 									MoveToCell agActionN = (MoveToCell)agAction.getAction();
 									
-									Cell cell= agActionN.getTarget();
+									//TODO: new logic to be fixed --> getTargetDirection
+									int targetDirection = agActionN.getTargetDirection();
 									isBusy=false;
-									setCurrentPosition(cell);
-									Printer.printSuccess(getLocalName(), "New position has been updated to: "+cell.getX()+" and "+cell.getY());
+									//setCurrentPosition(cell);
+									//Printer.printSuccess(getLocalName(), "New position has been updated to: "+cell.getX()+" and "+cell.getY());
+									
 								}
 								else if(conc instanceof CreateBuilding)
 								{

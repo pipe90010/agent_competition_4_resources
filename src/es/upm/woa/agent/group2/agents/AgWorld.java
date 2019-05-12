@@ -18,10 +18,12 @@ import es.upm.woa.ontology.CreateBuilding;
 import es.upm.woa.ontology.CreateUnit;
 import es.upm.woa.ontology.Empty;
 import es.upm.woa.ontology.GameOntology;
+import es.upm.woa.ontology.InitalizeTribe;
 import es.upm.woa.ontology.MoveToCell;
 import es.upm.woa.ontology.NotifyCellDetail;
 import es.upm.woa.ontology.NotifyNewUnit;
-
+import es.upm.woa.ontology.RegisterTribe;
+import es.upm.woa.ontology.ResourceAccount;
 import jade.content.Concept;
 import jade.content.ContentElement;
 import jade.content.lang.Codec;
@@ -90,6 +92,9 @@ public class AgWorld extends Agent {
 	private Properties properties = new Properties();
 
 	private boolean gameOver;
+	private boolean registrationPeriod; 
+	
+	
 	// -----------------------------------------------------------------
 	// Constructor
 	// -----------------------------------------------------------------
@@ -123,39 +128,9 @@ public class AgWorld extends Agent {
 			/**
 			 * Initialize everything
 			 */
+
 			initialize();
-
-			/**
-			 * TRIBE IS CREATED FROM THE WORLD
-			 */
-			Tribe tg2 = createTribe("TribeX");
-			// Tribe tg1 = createTribe("TribeY");
-			// Tribe tg3 = createTribe("TribeY");
-			// Tribe tg4 = createTribe("TribeY");
-			// Tribe tg5 = createTribe("TribeY");
-
-			/**
-			 * TEST UNIT IS CREATED FROM THE WORLD
-			 */
-			Unit u = createUnit(true,"UnitX1", tg2);
 			
-			//Cell u2Position = map[tg2.getTownhall().getX()+1][tg2.getTownhall().getY()];
-			//Cell u3Position = map[tg2.getTownhall().getX()-1][tg2.getTownhall().getY()];
-
-			//Unit u2 = createUnit(false,"UnitX2", tg2);
-
-			//Unit u3 = createUnit(false,"UnitX3", tg2);
-
-			// adds created unit to the tribe and deduct cost of each unit creation
-			tg2.addUnit(u);
-			//tg2.addUnit(u2);
-			//tg2.addUnit(u3);
-			tg2.deductCost(150, 50,0,0);
-			tg2.deductCost(150, 50,0,0);
-			tg2.deductCost(150, 50,0,0);
-
-			tribes.add(tg2);
-
 		} catch (FIPAException e) {
 			e.printStackTrace();
 		}
@@ -283,7 +258,9 @@ public class AgWorld extends Agent {
 							Concept conc = ((Action) movementRequest).getAction();
 							if (conc instanceof MoveToCell) {
 								MoveToCell moveAction = ((MoveToCell) conc);
-								Cell requestedPosition = moveAction.getTarget();
+								
+								//TODO: new logic to be fixed --> getTargetDirection
+								Cell requestedPosition = null; //moveAction.getTarget();
 
 								if (requestedPosition != null) {
 									// ACLMessage reply;
@@ -315,7 +292,10 @@ public class AgWorld extends Agent {
 										//creates and sends a reply to the unit that requested the movement
 										
 										MoveToCell createAction = new MoveToCell();
-										createAction.setTarget(requestedPosition);
+										
+										//TODO: new logic to be fixed --> getTargetDirection
+										//createAction.setTarget(requestedPosition);
+										
 										Action agAction = new Action(sender, createAction);
 										reply = MessageFormatter.createReplyMessage(getLocalName(), msg,
 												ACLMessage.AGREE, "MoveToCell");
@@ -418,7 +398,7 @@ public class AgWorld extends Agent {
 		addBehaviour(new CyclicBehaviour(this) {
 			@Override
 			public void action() {
-				// Wait for a units request to move to a new position
+				// Wait for a units request to request a new building creation
 				ACLMessage msg = receive(MessageTemplate.and(MessageTemplate.MatchPerformative(ACLMessage.REQUEST),
 						MessageTemplate.MatchProtocol("CreateBuilding")));
 				if (msg != null) {
@@ -528,6 +508,115 @@ public class AgWorld extends Agent {
 				}
 			}
 		});
+		
+		addBehaviour(new CyclicBehaviour(this) {
+			@Override
+			public void action() {
+				// TODO Auto-generated method stub
+
+				// Wait for a units request to request a new building creation
+				ACLMessage msg = receive(MessageTemplate.and(MessageTemplate.MatchPerformative(ACLMessage.REQUEST),
+						MessageTemplate.MatchProtocol("RegisterTribe")));
+				
+				if (msg != null) {
+					AID unitAID = msg.getSender();
+					String senderName = (unitAID).getLocalName();					
+
+					try {
+						ContentElement registeredTribeRequest = getContentManager().extractContent(msg);
+
+						// validates that the movementRequest is and action and cast it to MoveToCell
+						if (registeredTribeRequest instanceof Action) {
+							Concept conc = ((Action) registeredTribeRequest).getAction();
+							AID sender = msg.getSender();
+							
+							
+							if (conc instanceof RegisterTribe) {
+								RegisterTribe registeredTribeAction = ((RegisterTribe) conc);
+								int teamNumber = registeredTribeAction.getTeamNumber();
+								
+								if (!registrationPeriod || findTribePositionByTeamNumber(teamNumber) != -1) {
+									Printer.printSuccess(getLocalName(),"CANNOT REGISTER TRIBE");	
+									
+									ACLMessage reply = MessageFormatter.createReplyMessage(getLocalName(), msg,
+											ACLMessage.REFUSE, "RegisterTribe");
+									getContentManager().fillContent(reply, registeredTribeAction);
+									send(reply);									
+								}
+								else
+								{
+									Printer.printSuccess(getLocalName(),"CANNOT REGISTER TRIBE");	
+									
+									ACLMessage reply = MessageFormatter.createReplyMessage(getLocalName(), msg,
+											ACLMessage.AGREE, "RegisterTribe");
+									getContentManager().fillContent(reply, registeredTribeAction);
+									send(reply);
+									
+									//Create Tribe
+									Tribe tg2 = createTribe("TribeX", teamNumber);
+									
+									/**
+									 * TEST UNIT IS CREATED FROM THE WORLD
+									 */
+									Unit u = createUnit(true,"UnitX1", tg2);
+									
+									// adds created unit to the tribe and deduct cost of each unit creation
+									tg2.addUnit(u);
+									//tg2.addUnit(u2);
+									//tg2.addUnit(u3);
+									tg2.deductCost(150, 50,0,0);
+									tg2.deductCost(150, 50,0,0);
+									tg2.deductCost(150, 50,0,0);
+
+									tribes.add(tg2);
+									
+									AID ag = tg2.getId();
+
+									
+									
+									ACLMessage msgInform = MessageFormatter.createMessage(getLocalName(), ACLMessage.INFORM,
+											"InitalizeTribe", ag);
+									
+									
+									InitalizeTribe initTribe = new InitalizeTribe();
+									
+									ResourceAccount resource = new ResourceAccount();
+									resource.setFood(FOOD);
+									resource.setGold(GOLD);
+									resource.setStone(STONES);
+									resource.setWood(WOOD);
+									
+									initTribe.setStartingResources(resource);
+									initTribe.setStartingPosition(tg2.getTownhall());
+									initTribe.setUnitList((List)tg2.getUnits());
+									
+									getContentManager().fillContent(msgInform, initTribe);
+									send(msgInform);
+									
+								}
+								
+								ACLMessage reply = msg.createReply();
+								reply.setLanguage(codec.getName());
+								reply.setOntology(ontology.getName());
+							}
+							else
+							{
+								ACLMessage reply = MessageFormatter.createReplyMessage(getLocalName(), msg, ACLMessage.NOT_UNDERSTOOD, null);
+								send(reply);
+							}
+								
+						}
+					}
+					catch (Exception e) {
+						// TODO: handle exception
+						e.printStackTrace();
+					}
+				}
+					
+			}
+			
+			});	
+		
 	}
 
 	// -----------------------------------------------------------------
@@ -541,6 +630,9 @@ public class AgWorld extends Agent {
 		worldTimer = new WorldTimer(1000);
 		this.initializeMap();
 		gameOver = false;
+		registrationPeriod = true;
+		startRegistrationTime();
+		
 	}
 
 	private void initializeMap() {
@@ -571,7 +663,7 @@ public class AgWorld extends Agent {
 		return map[x][y];
 	}
 
-	private Tribe createTribe(String nickname) {
+	private Tribe createTribe(String nickname, int teamNumber) {
 		ContainerController cc = getContainerController();
 
 		AgTribe agentTribe = new AgTribe();
@@ -585,7 +677,7 @@ public class AgWorld extends Agent {
 			Cell townhallCell = bookNextRandomCell();*/
 									
 			//creates the tribe and assign it an initial amount of resources and a TownHall cell 
-			Tribe tribe = new Tribe(agentTribe.getAID(), GOLD, FOOD,STONES,WOOD);
+			Tribe tribe = new Tribe(agentTribe.getAID(), GOLD, FOOD,STONES,WOOD,teamNumber);
 			return tribe;
 		} catch (StaleProxyException e) {
 			e.printStackTrace();
@@ -674,6 +766,16 @@ public class AgWorld extends Agent {
 				if (tribes.get(i).getUnits().get(j).getId().getName().equals(aid.getName()))
 					return i;
 			}
+		}
+		return -1;
+	}
+	
+	private int findTribePositionByTeamNumber(int teamNumber) {
+		
+		for (int i = 0; i < tribes.size(); i++) 
+		{
+			if (tribes.get(i).getTeamNumber() == teamNumber)
+				return i;
 		}
 		return -1;
 	}
@@ -795,6 +897,27 @@ public class AgWorld extends Agent {
 
 	public void setWorldTimer(WorldTimer worldTimer) {
 		this.worldTimer = worldTimer;
+	}
+	
+	public void startRegistrationTime()
+	{
+		Thread t = new Thread(new Runnable() {
+	         @Override
+	         public void run() {
+	              // Insert some method call here.
+	        	 try
+	        	 {
+	        		 Thread.sleep(10000);
+	        		 registrationPeriod = false;
+	        			
+	        	 }
+	        	 catch (Exception e) {
+	     			e.printStackTrace();
+	     		}
+	        	 
+	         }
+		});
+		t.start();
 	}
 
 }

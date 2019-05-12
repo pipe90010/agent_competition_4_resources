@@ -148,7 +148,9 @@ public class MovementRequestBehaviour extends CyclicBehaviour {
                 	if(conc instanceof MoveToCell)
                 	{
                 		MoveToCell moveAction = ((MoveToCell) conc);
-                    	Cell requestedPosition = moveAction.getTarget();
+                		
+                		//TODO: new logic to be fixed --> getTargetDirection
+                    	Cell requestedPosition = null; //moveAction.getTarget();
                     
                     	if(requestedPosition!=null)
                     	{
@@ -175,7 +177,10 @@ public class MovementRequestBehaviour extends CyclicBehaviour {
                         else {
                         		Printer.printSuccess( AgWorldInstance.getLocalName(),"Unit " + senderName + " IS ABLE TO MOVE TO NEW POSITION, START WAIT TIME");
                         		MoveToCell createAction = new MoveToCell();
-                        		createAction.setTarget(requestedPosition);
+                        		
+                        		//TODO: new logic to be fixed --> getTargetDirection
+                        		//createAction.setTarget(requestedPosition);
+                        		
                              Action agAction = new Action(sender,createAction);
                         		reply = MessageFormatter.createReplyMessage(AgWorldInstance.getLocalName(),msg, ACLMessage.AGREE, "MoveToCell");
                         		AgWorldInstance.getContentManager().fillContent(reply, agAction);
