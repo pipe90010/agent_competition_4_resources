@@ -2,6 +2,7 @@ package es.upm.woa.agent.group2.beans;
 
 import java.util.ArrayList;
 
+import es.upm.woa.ontology.Building;
 import es.upm.woa.ontology.Cell;
 import jade.core.AID;
 
@@ -19,6 +20,7 @@ public class Tribe {
 	private int gold;
 	private int food;
 	private int stones;
+	private ArrayList<Building> cities;
 	private int wood;
 	private Cell townhall;
 	private ArrayList<Unit> units;
@@ -38,6 +40,7 @@ public class Tribe {
 		this.wood = wood;
 		this.units = new ArrayList<Unit>();
 		this.discoveredCells = new ArrayList<Cell>();
+		this.cities = new ArrayList<Building>();
 		this.memberSize = 0;
 	}
 	
@@ -135,6 +138,24 @@ public class Tribe {
 
 	public void setWood(int wood) {
 		this.wood = wood;
+	}
+
+	
+	public ArrayList<Building> getCities() {
+		return cities;
+	}
+
+	public void setCities(ArrayList<Building> cities) {
+		this.cities = cities;
+	}
+	
+	/**
+	 * 
+	 * @param cell
+	 * @return
+	 */
+	public void addNewCity(Building building) {
+		cities.add(building);
 	}
 
 	/**

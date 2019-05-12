@@ -465,6 +465,7 @@ public class AgWorld extends Agent {
 										Building townHall = new Building();
 										townHall.setType(TOWNHALL);
 										map[currentPosition.getX()][currentPosition.getY()].setContent(townHall);
+										tribeSender.addNewCity(townHall);
 										
 										long time = worldTimer.getBuildTownhallTime();
 										Printer.printSuccess(getLocalName(), "Townhall from "+tribeSender.getId().getLocalName()+" creation time started");
@@ -545,8 +546,8 @@ public class AgWorld extends Agent {
 
 	private void initializeMap() {
 		map = new Cell[X_BOUNDARY][Y_BOUNDARY];
-		for (int i = 0; i < X_BOUNDARY; i++) {
-			for (int j = 0; j < Y_BOUNDARY; j++) {
+		for (int i = 1; i < X_BOUNDARY; i++) {
+			for (int j = 1; j < Y_BOUNDARY; j++) {
 				map[i][j] = new Cell();
 				map[i][j].setContent(new Empty());
 				map[i][j].setX(i);
@@ -739,6 +740,42 @@ public class AgWorld extends Agent {
 		int deltaY = Math.abs(posA.getY() - posB.getY());
 
 		return (deltaX <= 2 && deltaY <= 1);
+	}
+	
+	
+	public Cell getTargetPosition(Cell currentPosition, int nextMove) {
+		
+		Cell targetPosition = null;
+		int x = currentPosition.getX();
+		int y = currentPosition.getY();
+		switch (nextMove) {
+		case 1:
+			if(x-2>=1)
+				targetPosition = map[x-2][y];
+			break;
+		case 2:
+			if(x-->=1 && y++<=Y_BOUNDARY)
+				targetPosition = map[x][y];
+			break;	
+		case 3:
+			if(x++<=X_BOUNDARY && y++<=Y_BOUNDARY)
+				targetPosition = map[x][y];
+			break;
+		case 4:
+			if(x+2<=X_BOUNDARY)
+				targetPosition = map[x+2][y];
+			break;
+		case 5:
+			if(x++<=X_BOUNDARY && y-->=1)
+				targetPosition = map[x][y];
+			break;	
+		default:
+			if(x-->=1 && y-->=1)
+				targetPosition = map[x][y];
+			break;
+		}
+		
+		return targetPosition;
 	}
 
 	// TODO: Move to another class
