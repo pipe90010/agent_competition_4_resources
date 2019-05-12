@@ -546,7 +546,7 @@ public class AgWorld extends Agent {
 								}
 								else
 								{
-									Printer.printSuccess(getLocalName(),"CANNOT REGISTER TRIBE");	
+									Printer.printSuccess(getLocalName(),"TRIBE REGISTERED!");	
 									
 									ACLMessage reply = MessageFormatter.createReplyMessage(getLocalName(), msg,
 											ACLMessage.AGREE, "RegisterTribe");
@@ -554,7 +554,8 @@ public class AgWorld extends Agent {
 									send(reply);
 									
 									//Create Tribe
-									Tribe tg2 = createTribe("TribeX", teamNumber);
+									
+									Tribe tg2 = new Tribe(sender, GOLD, FOOD,STONES,WOOD,teamNumber);
 									
 									/**
 									 * TEST UNIT IS CREATED FROM THE WORLD
@@ -563,24 +564,16 @@ public class AgWorld extends Agent {
 									
 									// adds created unit to the tribe and deduct cost of each unit creation
 									tg2.addUnit(u);
-									//tg2.addUnit(u2);
-									//tg2.addUnit(u3);
 									tg2.deductCost(150, 50,0,0);
-									tg2.deductCost(150, 50,0,0);
-									tg2.deductCost(150, 50,0,0);
-
+									
 									tribes.add(tg2);
 									
+									
 									AID ag = tg2.getId();
-
-									
-									
 									ACLMessage msgInform = MessageFormatter.createMessage(getLocalName(), ACLMessage.INFORM,
 											"InitalizeTribe", ag);
-									
-									
-									InitalizeTribe initTribe = new InitalizeTribe();
-									
+																	
+									InitalizeTribe initTribe = new InitalizeTribe();	
 									ResourceAccount resource = new ResourceAccount();
 									resource.setFood(FOOD);
 									resource.setGold(GOLD);
@@ -590,11 +583,11 @@ public class AgWorld extends Agent {
 									initTribe.setStartingResources(resource);
 									initTribe.setStartingPosition(bookNextRandomCell());
 									
-								//	jade.util.leap.ArrayList hiddenList = new jade.util.leap.ArrayList(tg2.getUnits());
 									
 									initTribe.setUnitList(tg2.getOntologyUnitsAID());
 									
-									getContentManager().fillContent(msgInform, initTribe);
+									Action initializeAction = new Action(sender, initTribe);									
+									getContentManager().fillContent(msgInform, initializeAction);
 									send(msgInform);
 									
 								}
@@ -636,7 +629,7 @@ public class AgWorld extends Agent {
 		gameOver = false;
 		registrationPeriod = true;
 		startRegistrationTime();
-		
+		//registrationPeriod = true;
 	}
 
 	private void initializeMap() {
@@ -667,18 +660,19 @@ public class AgWorld extends Agent {
 		return map[x][y];
 	}
 
+	/*
 	private Tribe createTribe(String nickname, int teamNumber) {
-		ContainerController cc = getContainerController();
+		//ContainerController cc = getContainerController();
 
 		AgTribe agentTribe = new AgTribe();
 		try {
-			cc.acceptNewAgent(nickname, agentTribe).start();
+			//cc.acceptNewAgent(nickname, agentTribe).start();
 
-			/*Building townhall = new Building();
+			Building townhall = new Building();
 			townhall.setOwner(agentTribe.getAID());
 			townhall.setType(TOWNHALL);
 
-			Cell townhallCell = bookNextRandomCell();*/
+			Cell townhallCell = bookNextRandomCell();
 									
 			//creates the tribe and assign it an initial amount of resources and a TownHall cell 
 			Tribe tribe = new Tribe(agentTribe.getAID(), GOLD, FOOD,STONES,WOOD,teamNumber);
@@ -688,6 +682,7 @@ public class AgWorld extends Agent {
 		}
 		return null;
 	}
+	*/
 
 	private Integer canCreateUnit(Tribe t, Cell position, Integer index) {
 		if (!worldRules.isItsOwnTownhall(t.getTownhall(), tribes.get(index).getTownhall())) {

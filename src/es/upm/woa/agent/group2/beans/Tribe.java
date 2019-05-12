@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import es.upm.woa.ontology.Building;
 import es.upm.woa.ontology.Cell;
 import jade.core.AID;
+import jade.util.leap.Iterator;
 
 public class Tribe {
 
@@ -119,6 +120,19 @@ public class Tribe {
 		this.units = units;
 	}
 
+	public void convertAidToUnits(jade.util.leap.List aids) {
+		Iterator iterator = aids.iterator();
+		while(iterator.hasNext())
+		{	
+			AID aid = (AID) iterator.next();			
+			Unit unit = new Unit(aid);
+			this.units.add(unit); 
+		}
+		
+		
+	}
+
+	
 	public AID getId() {
 		return id;
 	}

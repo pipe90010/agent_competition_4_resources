@@ -109,7 +109,7 @@ public class AgTribe extends Agent {
 			@Override
 			public boolean done() {
 				// TODO Auto-generated method stub
-				return false;
+				return true;
 			};
 		});
 
@@ -340,7 +340,7 @@ public class AgTribe extends Agent {
 									Cell cell = agActionN.getStartingPosition();
 									ResourceAccount resource = agActionN.getStartingResources();
 									
-									tribe.setUnits((ArrayList<Unit>) unitLIst); 
+									tribe.convertAidToUnits(unitLIst); 
 									
 									tribe.setFood(resource.getFood());
 									tribe.setGold(resource.getGold());
