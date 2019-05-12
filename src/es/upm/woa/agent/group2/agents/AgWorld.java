@@ -59,10 +59,10 @@ public class AgWorld extends Agent {
 	public final static String WORLD = "World";
 	public final static String TRIBE = "Tribe";
 
-	private final static int GOLD = 1500;
-	private final static int FOOD = 500;
-	private final static int STONES = 500;
-	private final static int WOOD = 500;
+	private final static Integer GOLD = 1500;
+	private final static Integer FOOD = 500;
+	private final static Integer STONES = 500;
+	private final static Integer WOOD = 500;
 
 	private final static int X_BOUNDARY = 100;
 	private final static int Y_BOUNDARY = 100;
@@ -588,8 +588,11 @@ public class AgWorld extends Agent {
 									resource.setWood(WOOD);
 									
 									initTribe.setStartingResources(resource);
-									initTribe.setStartingPosition(tg2.getTownhall());
-									initTribe.setUnitList((List)tg2.getUnits());
+									initTribe.setStartingPosition(bookNextRandomCell());
+									
+								//	jade.util.leap.ArrayList hiddenList = new jade.util.leap.ArrayList(tg2.getUnits());
+									
+									initTribe.setUnitList(tg2.getOntologyUnitsAID());
 									
 									getContentManager().fillContent(msgInform, initTribe);
 									send(msgInform);
@@ -879,6 +882,20 @@ public class AgWorld extends Agent {
 		
 		return targetPosition;
 	}
+	
+	public Cell getMirrorCell(Cell position)
+	{
+		int x = position.getX();
+		int y = position.getY();
+		if(x%2==0)
+		{
+			if(x+1>=X_BOUNDARY)
+				return map[2][y];
+			else
+				return map[X_BOUNDARY][y];
+		}
+		return null;
+	}
 
 	// TODO: Move to another class
 	@SuppressWarnings("BooleanMethodIsAlwaysInverted")
@@ -955,6 +972,51 @@ public class AgWorld extends Agent {
 	         }
 		});
 		t.start();
+	}
+	/*
+	 * 100 × cells_explored(i) + 500 × cities_owned(i) + 250 × stores_owned(i) + 300 × farms_owned(i) + 400 × units_owned(i) + 10 × gold_owned(i) + 2 × stone_owned(i) + 1 × wood_owned(i) + 5 × food_owned(i)
+	 */
+	public int calculateScore(Tribe tribe)
+	{
+		
+		int score = ((100*tribe.getDiscoveredCells().size())
+				+(500*tribe.getCities().size())
+				+(250*tribe.getBuildingsByType(STORE).size())
+				+(300*tribe.getBuildingsByType(FARM).size())
+				+(400*tribe.getMemberSize())
+				+(10*tribe.getGold())
+				+(2*tribe.getStones())
+				+(tribe.getWood())
+				+(5*tribe.getFood()));
+		
+		Printer.printSuccess("Team: "+tribe.getTeamNumber(), "THE CURRENT SCORE IS= "+score);
+		return score;
+	}
+	/*
+	 * cells_explored: Number of cells explored by the tribe.
+- cities_owned: Number of cities owned by the tribe.
+- stores_owned: Number of stores owned by the tribe.
+- farms_owned: Number of farm owned by the tribe.
+- units_owned: Number of units owned by the tribe.
+- gold_owned: Amount of gold owned by the tribe.
+- stone_owned: Amount of stone owned by the tribe.
+- wood_owned: Amount of wood owned by the tribe.
+- food_owned: Amount of food owned by the tribe.
+	 */
+	public void printFinalScore()
+	{
+		for (Tribe tribe: tribes) {
+			Printer.printSuccess("Team: "+tribe.getTeamNumber(), "THE FINAL NUMBER OF CELLS EXPORED= "+tribe.getDiscoveredCells().size());
+			Printer.printSuccess("Team: "+tribe.getTeamNumber(), "THE FINAL NUMBER OF CITIES OWNED= "+tribe.getCities().size());
+			Printer.printSuccess("Team: "+tribe.getTeamNumber(), "THE FINAL NUMBER OF STORES OWNED= "+tribe.getBuildingsByType(STORE).size());
+			Printer.printSuccess("Team: "+tribe.getTeamNumber(), "THE FINAL NUMBER OF FARMS OWNED= "+tribe.getBuildingsByType(FARM).size());
+			Printer.printSuccess("Team: "+tribe.getTeamNumber(), "THE FINAL NUMBER OF UNITS OWNED= "+tribe.getUnits().size());
+			Printer.printSuccess("Team: "+tribe.getTeamNumber(), "THE FINAL AMOUNT OF GOLD OWNED= "+tribe.getGold());
+			Printer.printSuccess("Team: "+tribe.getTeamNumber(), "THE FINAL AMOUNT OF STONES OWNED= "+tribe.getStones());
+			Printer.printSuccess("Team: "+tribe.getTeamNumber(), "THE FINAL AMOUNT OF WOOD OWNED= "+tribe.getWood());
+			Printer.printSuccess("Team: "+tribe.getTeamNumber(), "THE FINAL AMOUNT OF FOOD OWNED= "+tribe.getFood());
+			calculateScore(tribe);
+		}
 	}
 
 }

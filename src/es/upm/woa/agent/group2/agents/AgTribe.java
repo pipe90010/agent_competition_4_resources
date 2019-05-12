@@ -261,7 +261,7 @@ public class AgTribe extends Agent {
 								MessageTemplate.or(
 										MessageTemplate.MatchProtocol("CreateUnit"),
 										MessageTemplate.MatchProtocol("informMove")),
-								MessageTemplate.MatchProtocol("RegisterTribe")
+								MessageTemplate.MatchProtocol("InitalizeTribe")
 						)));
 				if (msg != null)
 			    {

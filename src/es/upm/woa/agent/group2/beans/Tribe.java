@@ -14,6 +14,14 @@ public class Tribe {
 	
 	public static final String TRIBE="Tribe";
 	
+	
+	// -----------------------------------------------------------------
+	// Building Constants
+	// -----------------------------------------------------------------
+
+	public final static String TOWNHALL = "Town Hall";
+	public final static String FARM = "Farm";
+	public final static String STORE = "Store";
 	// -----------------------------------------------------------------
     // Atributes
     // -----------------------------------------------------------------
@@ -201,6 +209,19 @@ public class Tribe {
 		return -1;
 	}
 	
+	public ArrayList<Building> getBuildingsByType(String type){
+		
+		ArrayList<Building> builds = new ArrayList<Building>();
+		for (Building building : cities) {
+			
+			if(building.getType().equals(type))
+			{
+				builds.add(building);
+			}
+		}
+		return builds;
+	}
+	
 	public Unit isAnyUnitBuilding() {
 		
 		for (int i = 0; i < units.size(); i++) {
@@ -210,4 +231,14 @@ public class Tribe {
 		}
 		return null;
 	}
+	
+	public jade.util.leap.ArrayList getOntologyUnitsAID(){
+		ArrayList<AID> aids = new ArrayList<AID>();
+		for (Unit unit : units) {
+			aids.add(unit.getId());
+		}
+		jade.util.leap.ArrayList list = new jade.util.leap.ArrayList(aids);
+		return list;
+	}
+	
 }
