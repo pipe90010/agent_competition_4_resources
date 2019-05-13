@@ -4,8 +4,9 @@ import java.util.ArrayList;
 import java.util.Properties;
 import java.util.Random;
 
-/*import es.upm.woa.agent.group1.AgUnit;
-import es.upm.woa.agent.group1.AgTribe;*/
+import es.upm.woa.group4.agent.AgUnit;
+//import es.upm.woa.group4.agent.AgTribe;
+
 import es.upm.woa.agent.group2.beans.Tribe;
 import es.upm.woa.agent.group2.beans.Unit;
 import es.upm.woa.agent.group2.common.MessageFormatter;
@@ -59,6 +60,9 @@ public class AgWorld extends Agent {
 	public final static String WORLD = "World";
 	public final static String TRIBE = "Tribe";
 
+	public final static String REGISTRATION_DESK = "REGISTRATION DESK";
+	
+	
 	private final static Integer GOLD = 1500;
 	private final static Integer FOOD = 500;
 	private final static Integer STONES = 500;
@@ -121,7 +125,19 @@ public class AgWorld extends Agent {
 			ServiceDescription sd = new ServiceDescription();
 			sd.setName(this.getName());
 			sd.setType(WORLD);
+			//sd.setType(REGISTRATION_DESK);
+			
 			dfd.addServices(sd);
+			
+			//Reg Desk
+			
+			ServiceDescription sdReg = new ServiceDescription();
+			sdReg.setName(this.getName());
+			sdReg.setType(REGISTRATION_DESK);
+			
+			dfd.addServices(sdReg);
+			
+			
 			// Registers its description in the DF
 			DFService.register(this, dfd);
 			Printer.printSuccess(getLocalName(), "registered in the DF");
