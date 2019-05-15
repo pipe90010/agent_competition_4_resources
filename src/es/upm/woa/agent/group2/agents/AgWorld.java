@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Properties;
 import java.util.Random;
 
-import es.upm.woa.group4.agent.AgUnit;
+//import es.upm.woa.group4.agent.AgUnit;
 //import es.upm.woa.group4.agent.AgTribe;
 
 import es.upm.woa.agent.group2.beans.Tribe;
@@ -894,7 +894,7 @@ public class AgWorld extends Agent {
 		return targetPosition;
 	}
 	
-	public Cell getMirrorCell(Cell position)
+	/*public Cell getMirrorCell(Cell position)
 	{
 		int x = position.getX();
 		int y = position.getY();
@@ -906,6 +906,143 @@ public class AgWorld extends Agent {
 				return map[X_BOUNDARY][y];
 		}
 		return null;
+	}*/
+	
+	public Cell getMirrorCellX(Cell position)
+	{
+		int x = position.getX();
+		int y = position.getY();
+		
+		//validates that a map is squared 		
+		if(X_BOUNDARY == Y_BOUNDARY) { 
+			//validates that a position is even, else it is odd 
+			if(X_BOUNDARY%2==0) {
+				if(x%2==0)
+				{
+					//validates that the movement is upside or downside
+					//case 3X3
+					if(x+1 > X_BOUNDARY )
+						return map[2][y];				
+					if(x-2==0)
+						return map[ X_BOUNDARY - 1 ][y];
+					else
+						return null;
+				}
+				else
+				{
+					//validates that the movement is upside or downside
+					if(x+1 == X_BOUNDARY )
+						return map[1][y];				
+					if(x-1==0)
+						return map[ X_BOUNDARY ][y];
+					else
+						return null;
+				}
+			}
+			else {
+				if(x%2==0)
+				{	
+					//case 4X4
+					//up
+					if(x-2==0)
+						return map[ X_BOUNDARY ][y];
+					//down
+					if(x==X_BOUNDARY)
+						return map[2][y];
+					else
+						return null;					
+				}
+				else {
+					//case 4X4
+					//up
+					if(x-1==0)
+						return map[ X_BOUNDARY - 1 ][y];
+					//down
+					if(x+1 == X_BOUNDARY)
+						return map[1][y];
+					else
+						return null;	
+				}
+			}
+		}
+		//When the map is not a square
+		else
+		{
+			if(X_BOUNDARY < Y_BOUNDARY) {
+				//validates that a position is even, else it is odd 
+				if(x%2==0)
+				{
+					//validates that the movement is upside or downside
+					//case 3X4
+					//down
+					if(x == X_BOUNDARY )//unit is in the boundary
+						return map[2][y];				
+					//up
+					if(x-2==0) // check for unit is in second row
+						return map[ X_BOUNDARY ][y];
+					//case 4X5
+					//down
+					if(x+1 == X_BOUNDARY)//unit is in a even unit close to the boundary
+						return map[ 2 ][y];
+					else
+						return null;
+				}
+				else
+				{
+					//validates that the movement is upside or downside					
+					//case 3X4
+					//down
+					if(x+1 == X_BOUNDARY )
+						return map[1][y];					
+					//up
+					if(x-1==0)
+						return map[ X_BOUNDARY -1 ][y];
+					//case 4X5
+					//down
+					if(x == X_BOUNDARY )
+						return map[1][y];
+					else
+						return null;
+				}
+			}
+			else {
+				//validates that a position is even, else it is odd 
+				if(x%2==0)
+				{
+					//validates that the movement is upside or downside 
+					//case 4X3
+					// down
+					if(x+1 == X_BOUNDARY )
+						return map[2][y];				
+					// up
+					if(x-2==0)
+						return map[ X_BOUNDARY - 1 ][y];
+					//case 5X4
+					//down
+					if(x == X_BOUNDARY )
+						return map[2][y];
+					else
+						return null;
+				}
+				else
+				{
+					//case 4X3
+					//down
+					if(x == X_BOUNDARY )
+						return map[1][y];
+					//up
+					if(x-1==0)
+						return map[ X_BOUNDARY ][y];
+					//case 5X4
+					//down
+					if(x + 1 == X_BOUNDARY )
+						return map[1][y];
+					else
+						return null;
+				}
+			}
+		}
+		
 	}
 
 	// TODO: Move to another class
