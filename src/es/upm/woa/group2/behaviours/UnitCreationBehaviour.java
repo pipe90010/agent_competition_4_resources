@@ -28,6 +28,7 @@ import jade.content.onto.basic.Action;
 import jade.core.AID;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
+import jade.lang.acl.MessageTemplate;
 import jade.wrapper.AgentController;
 import jade.wrapper.ContainerController;
 import jade.wrapper.StaleProxyException;
@@ -35,55 +36,22 @@ import jade.wrapper.StaleProxyException;
 public class UnitCreationBehaviour extends CyclicBehaviour {
 
 	private AgWorld AgWorldInstance;
-	private ACLMessage msg;
-	private String platformName;
 	private AgWorldRules worldRules;
-	private ContentElement movementRequest;
-	private ArrayList<Tribe> tribes;
 	private Codec codec = new SLCodec();
 	private Ontology ontology = GameOntology.getInstance();
-	private Properties properties = new Properties();
 	private Cell[][] map;
 
-	private final static int X_BOUNDARY = 100;
-	private final static int Y_BOUNDARY = 100;
 
-	public UnitCreationBehaviour(AgWorld AgWorldInstance, ACLMessage msg) {
+	public UnitCreationBehaviour(AgWorld AgWorldInstance) {
 		this.AgWorldInstance = AgWorldInstance;
 		this.map = AgWorldInstance.getMap();
-		this.properties = AgWorldInstance.getProperties();
-		if (msg != null) {
-			this.platformName = AgWorldInstance.getName();
-			try {
-				this.movementRequest = AgWorldInstance.getContentManager().extractContent(msg);
-			} catch (Codec.CodecException | OntologyException e) {
-				e.printStackTrace();
-			}
-		}
-	}
-
-	private Integer canCreateUnit(Tribe t, Cell position, Integer index) {
-		if (!worldRules.isItsOwnTownhall(t.getTownhall(), tribes.get(index).getTownhall())) {
-			return 2;
-		}
-		if (!worldRules.isInTownhall(t.getTownhall().getX(), t.getTownhall().getY(), position)) {
-			return 3;
-		}
-		if (!worldRules.hasEnoughGold(t.getGold())) {
-			return 4;
-		}
-		if (!worldRules.hasEnoughFood(t.getFood())) {
-			return 5;
-		}
-		if(AgWorldInstance.isGameOver())
-			return 6;
-		return 1;
 	}
 
 	@Override
 	public void action() {
 		// Waits for creation requests
-
+		ACLMessage msg = AgWorldInstance.receive(MessageTemplate.and(MessageTemplate.MatchPerformative(ACLMessage.REQUEST),
+				MessageTemplate.MatchProtocol("createUnit")));
 		if (msg != null) {
 			try {
 				ContentElement ce = null;
@@ -103,22 +71,19 @@ public class UnitCreationBehaviour extends CyclicBehaviour {
 							AID sender = msg.getSender();
 
 							// Finding Unit by AID
-							int indexTribe = Searching.findTribePositionByUnitAID(AgWorldInstance, sender);
-							Tribe tribeSender = tribes.get(indexTribe);
-							Unit senderUnit = Searching.findUnitByAID(sender, tribeSender);
+							int indexTribe = AgWorldInstance.findTribePositionByUnitAID(sender);
+							Tribe tribeSender = AgWorldInstance.getTribes().get(indexTribe);
+							Unit senderUnit = AgWorldInstance.findUnitByAID(sender, tribeSender);
 
 							// Validate unit creation
-							Integer code = canCreateUnit(tribeSender, senderUnit.getPosition(), indexTribe);
-							String newUnitName = "UnitY" + Math.random();
+							Integer code = AgWorldInstance.canCreateUnit(tribeSender, senderUnit.getPosition(), indexTribe);
+							String newUnitName = "Unit-" + tribeSender.getId().getName()
+									+ tribeSender.getMemberSize();
 							int performative;
 							switch (code) {
 							case 1:
-
 								Printer.printSuccess(AgWorldInstance.getLocalName(),
 										"received creation request from " + "creating unit:" + newUnitName);
-								//Unit u = createUnit(newUnitName, tribeSender);
-								//tribes.get(indexTribe).addUnit(u, 150, 50);
-								
 								performative = ACLMessage.AGREE;
 								break;
 							case 2:
@@ -140,9 +105,9 @@ public class UnitCreationBehaviour extends CyclicBehaviour {
 								performative = ACLMessage.REFUSE;
 								break;
 							case 6:
-								Printer.printSuccess( AgWorldInstance.getLocalName(),"unit" + newUnitName + "game is over");
+								Printer.printSuccess(AgWorldInstance.getLocalName(), "unit" + newUnitName + "game is over");
 								performative = ACLMessage.REFUSE;
-								break;		
+								break;
 							default:
 								performative = ACLMessage.NOT_UNDERSTOOD;
 								break;
@@ -151,16 +116,14 @@ public class UnitCreationBehaviour extends CyclicBehaviour {
 							ACLMessage reply = MessageFormatter.createReplyMessage(AgWorldInstance.getLocalName(), msg,
 									performative, "createUnit");
 							myAgent.send(reply);
-							if(code==1)
-							{
-								Unit u = createUnit(newUnitName, tribeSender);
-								if(u!=null)
-								{
-									tribes.get(indexTribe).addUnit(u);
-									tribes.get(indexTribe).deductCost(150, 50,0,0);
+
+							if (code == 1) {
+								Unit u = AgWorldInstance.createUnit(false,newUnitName, tribeSender);
+								if (u != null) {
+									AgWorldInstance.getTribes().get(indexTribe).addUnit(u);
+									AgWorldInstance.getTribes().get(indexTribe).deductCost(150, 50,0,0);
 								}
 							}
-
 						}
 					}
 				}
@@ -173,66 +136,5 @@ public class UnitCreationBehaviour extends CyclicBehaviour {
 			// If no message arrives
 			block();
 		}
-	}
-
-	private Unit createUnit(String nickname, Tribe tribe) {
-
-		ContainerController cc = AgWorldInstance.getContainerController();
-		// es.upm.woa.agent.group1.AgUnit agentUnit = new
-		// es.upm.woa.agent.group1.AgUnit();
-		try {
-			// cc.acceptNewAgent(nickname, agentUnit).start();
-			Cell position = bookNextRandomCell(new Empty());
-
-			Object[] args = new Object[2];
-			args[0] = position.getX();
-			args[1] = position.getY();
-			
-			long waitTime= AgWorldInstance.getWorldTimer().getCreationTime();
-            
-			AgWorldInstance.doWait(waitTime);
-            if(!AgWorldInstance.isGameOver())
-            {
-				AgentController ac = cc.createNewAgent(nickname, AgUnit.class.getName(), args);
-				ac.start();
-				// TODO: CHECK IF WE NEED TO ADD THE UNIT AS A CONTENT FOR THE CELL
-				Unit newUnit = new Unit(AgWorldInstance.getAID(nickname), position);
-				// agentUnit.setCurrentPosition(position);
-	
-				if (tribe != null) {
-					AID ag = tribe.getId();
-	
-					ACLMessage msgInform = MessageFormatter.createMessage(AgWorldInstance.getLocalName(), ACLMessage.INFORM,
-							"CreateUnit", ag);
-					// Creates a notifyNewUnit action
-					NotifyNewUnit notify = new NotifyNewUnit();
-	
-					notify.setLocation(position);
-					notify.setNewUnit(AgWorldInstance.getAID(nickname));
-					Action agActionNotification = new Action(ag, notify);
-					AgWorldInstance.getContentManager().fillContent(msgInform, agActionNotification);
-					AgWorldInstance.send(msgInform);
-				}
-				return newUnit;
-            }
-            return null;
-		} catch (StaleProxyException e) {
-			// TODO: handle exception
-			e.printStackTrace();
-		} catch (CodecException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (OntologyException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
-	}
-
-	private Cell bookNextRandomCell(Concept conc) {
-		int x = new Random().nextInt(X_BOUNDARY);
-		int y = new Random().nextInt(Y_BOUNDARY);
-			return map[x][y];
-		
 	}
 }

@@ -6,6 +6,10 @@ import java.util.Random;
 
 import es.upm.woa.group2.beans.Tribe;
 import es.upm.woa.group2.beans.Unit;
+import es.upm.woa.group2.behaviours.CreateBuildingBehaviour;
+import es.upm.woa.group2.behaviours.MovementRequestBehaviour;
+import es.upm.woa.group2.behaviours.RegisterTribeBehaviour;
+import es.upm.woa.group2.behaviours.UnitCreationBehaviour;
 import es.upm.woa.group2.common.MessageFormatter;
 import es.upm.woa.group2.common.Printer;
 import es.upm.woa.group2.common.WorldTimer;
@@ -60,10 +64,10 @@ public class AgWorld extends Agent {
 	public final static String REGISTRATION_DESK = "REGISTRATION DESK";
 	
 	
-	private final static Integer GOLD = 1500;
-	private final static Integer FOOD = 500;
-	private final static Integer STONES = 500;
-	private final static Integer WOOD = 500;
+	public final static Integer GOLD = 1500;
+	public final static Integer FOOD = 500;
+	public final static Integer STONES = 500;
+	public final static Integer WOOD = 500;
 
 	private final static int X_BOUNDARY = 100;
 	private final static int Y_BOUNDARY = 100;
@@ -152,480 +156,17 @@ public class AgWorld extends Agent {
 		 * BEHAVIORS--------------------------------------------------------------------
 		 * ----------------------
 		 */
-		addBehaviour(new CyclicBehaviour(this) {
-
-			@Override
-			public void action() {
-				// Waits for creation requests
-				ACLMessage msg = receive(MessageTemplate.and(MessageTemplate.MatchPerformative(ACLMessage.REQUEST),
-						MessageTemplate.MatchProtocol("createUnit")));
-				if (msg != null) {
-					try {
-						ContentElement ce = null;
-						if (msg.getPerformative() == ACLMessage.REQUEST) {
-							ce = getContentManager().extractContent(msg);
-							// We expect an action inside the message
-							if (ce instanceof Action) {
-								Action agAction = (Action) ce;
-								Concept conc = agAction.getAction();
-								// If the action is CreateUnit...
-								if (conc instanceof CreateUnit) {
-									System.out.println("Group2 - " + myAgent.getLocalName()
-											+ ": received creation request from " + (msg.getSender()).getLocalName());
-									Printer.printSuccess(getLocalName(),
-											"received creation request from " + (msg.getSender()).getLocalName());
-									// Getting AID of message sender
-									AID sender = msg.getSender();
-
-									// Finding Unit by AID
-									int indexTribe = findTribePositionByUnitAID(sender);
-									Tribe tribeSender = tribes.get(indexTribe);
-									Unit senderUnit = findUnitByAID(sender, tribeSender);
-
-									// Validate unit creation
-									Integer code = canCreateUnit(tribeSender, senderUnit.getPosition(), indexTribe);
-									String newUnitName = "Unit-" + tribeSender.getId().getName()
-											+ tribeSender.getMemberSize();
-									int performative;
-									switch (code) {
-									case 1:
-										Printer.printSuccess(getLocalName(),
-												"received creation request from " + "creating unit:" + newUnitName);
-										performative = ACLMessage.AGREE;
-										break;
-									case 2:
-										Printer.printSuccess(getLocalName(), "Not enough gold");
-										performative = ACLMessage.REFUSE;
-										break;
-									case 3:
-										Printer.printSuccess(getLocalName(), "Not enough food");
-										performative = ACLMessage.REFUSE;
-										break;
-									case 4:
-										Printer.printSuccess(getLocalName(),
-												"unit" + newUnitName + "not positioned in the townhall");
-										performative = ACLMessage.REFUSE;
-										break;
-									case 5:
-										Printer.printSuccess(getLocalName(),
-												"unit" + newUnitName + "not positioned in the right townhall");
-										performative = ACLMessage.REFUSE;
-										break;
-									case 6:
-										Printer.printSuccess(getLocalName(), "unit" + newUnitName + "game is over");
-										performative = ACLMessage.REFUSE;
-										break;
-									default:
-										performative = ACLMessage.NOT_UNDERSTOOD;
-										break;
-									}
-
-									ACLMessage reply = MessageFormatter.createReplyMessage(getLocalName(), msg,
-											performative, "createUnit");
-									myAgent.send(reply);
-
-									if (code == 1) {
-										Unit u = createUnit(false,newUnitName, tribeSender);
-										if (u != null) {
-											tribes.get(indexTribe).addUnit(u);
-											tribes.get(indexTribe).deductCost(150, 50,0,0);
-										}
-									}
-								}
-							}
-						}
-					} catch (CodecException e) {
-						e.printStackTrace();
-					} catch (OntologyException oe) {
-						oe.printStackTrace();
-					}
-				} else {
-					// If no message arrives
-					block();
-				}
-			}
-
-		});
-
-		addBehaviour(new CyclicBehaviour(this) {
-			/*
-			 * (non-Javadoc)
-			 * 
-			 * @see jade.core.behaviours.Behaviour#action()
-			 */
-			@Override
-			public void action() {
-				// Wait for a units request to move to a new position
-				ACLMessage msg = receive(MessageTemplate.and(MessageTemplate.MatchPerformative(ACLMessage.REQUEST),
-						MessageTemplate.MatchProtocol("MoveToCell")));
-				if (msg != null) {// && msg.getPerformative() == ACLMessage.REQUEST) {
-					AID unitAID = msg.getSender();
-					String senderName = (unitAID).getLocalName();					
-
-					try {
-
-						ContentElement movementRequest = getContentManager().extractContent(msg);
-
-						// validates that the movementRequest is and action and cast it to MoveToCell
-						if (movementRequest instanceof Action) {
-							Concept conc = ((Action) movementRequest).getAction();
-							if (conc instanceof MoveToCell) {
-								MoveToCell moveAction = ((MoveToCell) conc);
-								
-								//TODO: new logic to be fixed --> getTargetDirection
-								Cell requestedPosition = null; //moveAction.getTarget();
-
-								if (requestedPosition != null) {
-									// ACLMessage reply;
-									ACLMessage reply = msg.createReply();
-									reply.setLanguage(codec.getName());
-									reply.setOntology(ontology.getName());
-
-									AID sender = msg.getSender();
-
-									int indexTribe = findTribePositionByUnitAID(sender);
-									Tribe tribeSender = tribes.get(indexTribe);
-									Unit senderUnit = findUnitByAID(sender, tribeSender);
-
-									Cell currentPosition = senderUnit.getPosition(); // TODO: DANIEL
-																						// findUnitFromAnyTribe(unitAID).getPosition();
-
-									// validate that current and requested positions are adjacent
-
-									if (!areAdjacentPositions(currentPosition, requestedPosition)) {
-										Printer.printSuccess(getLocalName(),
-												"Unit " + senderName + " can't move there...");
-										reply = MessageFormatter.createReplyMessage(getLocalName(), msg,
-												ACLMessage.REFUSE, "MoveToCell");
-										send(reply);
-									} else {
-										Printer.printSuccess(getLocalName(), "Unit " + senderName
-												+ " IS ABLE TO MOVE TO NEW POSITION, START WAIT TIME");
-										
-										//creates and sends a reply to the unit that requested the movement
-										
-										MoveToCell createAction = new MoveToCell();
-										
-										//TODO: new logic to be fixed --> getTargetDirection
-										//createAction.setTarget(requestedPosition);
-										
-										Action agAction = new Action(sender, createAction);
-										reply = MessageFormatter.createReplyMessage(getLocalName(), msg,
-												ACLMessage.AGREE, "MoveToCell");
-										getContentManager().fillContent(reply, agAction);
-										send(reply);
-										
-										senderUnit.setAction("MOVING");
-										updateUnitInTribeByUnitAID(senderUnit);
-										
-										//starts the unit movement
-										
-										try {
-											
-											//sets the waiting time
-											long waitTime = worldTimer.getMovementTime();
-
-											doWait(waitTime);
-
-											Printer.printSuccess(getLocalName(),
-													"Unit " + senderName + " WAIT TIME FINISHED");
-
-											// Find the unit based on sender AID
-											Unit unit = findUnitByAID(unitAID, tribeSender);
-											ACLMessage informMsg = null;
-											
-											
-											if (!gameOver) {
-												// Move the unit
-												Cell cell = moveUnitToPosition(unit, requestedPosition);
-
-												boolean isNew = tribeSender.addDiscoveredCell(cell);
-												
-												
-												Printer.printSuccess(getLocalName(),
-														"Unit " + senderName + "POSITION UPDATED");
-												
-												//INFORMS UNIT WHO REQUESTED THE MOVEMENT
-												informMsg = MessageFormatter.createReplyMessage(getLocalName(), msg,
-														ACLMessage.INFORM, "informMove");
-												getContentManager().fillContent(informMsg, agAction);
-												send(informMsg);
-												
-												
-												NotifyCellDetail notify = new NotifyCellDetail();
-												notify.setNewCell(cell);
-
-												// INFORMS TRIBE ABOUT NEW CELL DISCOVERY
-												ACLMessage informMsgTribe = MessageFormatter.createMessage(
-														getLocalName(), ACLMessage.INFORM, "NotifyCellDetail",
-														tribeSender.getId());
-												Action notifyCellDiscovery = new Action(tribeSender.getId(), notify);
-												getContentManager().fillContent(informMsgTribe, notifyCellDiscovery);
-												send(informMsgTribe);
-
-												ACLMessage informMsgUnit = MessageFormatter.createMessage(
-														getLocalName(), ACLMessage.INFORM, "NotifyCellDetail",
-														senderUnit.getId());
-												Action notifyCellDiscoveryUnit = new Action(senderUnit.getId(), notify);
-												getContentManager().fillContent(informMsgUnit, notifyCellDiscoveryUnit);
-												send(informMsgUnit);
-												
-												senderUnit.setAction(null);
-												updateUnitInTribeByUnitAID(senderUnit);
-												
-											} else {
-												informMsg = MessageFormatter.createReplyMessage(getLocalName(), msg,
-														ACLMessage.FAILURE, "NotifyCellDetail");
-												send(informMsg);
-												
-												senderUnit.setAction(null);
-												updateUnitInTribeByUnitAID(senderUnit);
-											}
-
-										} catch (Codec.CodecException | OntologyException e) {
-											e.printStackTrace();
-										}
-									}
-								} else {
-									ACLMessage reply = MessageFormatter.createReplyMessage(getLocalName(), msg,
-											ACLMessage.NOT_UNDERSTOOD, null);
-									send(reply);
-								}
-							} else {
-								Printer.printSuccess(getLocalName(), "Wrong position.");
-							}
-						} else {
-							Printer.printSuccess(getLocalName(), "You lost");
-						}
-					} catch (Codec.CodecException | OntologyException e) {
-						e.printStackTrace();
-					}
-				} else {
-					// If no message arrives
-					block();
-				}
-			}
-		});
 		
-		//BEHAVIOR FOR CHECKING BUILDING CREATION
-		addBehaviour(new CyclicBehaviour(this) {
-			@Override
-			public void action() {
-				// Wait for a units request to request a new building creation
-				ACLMessage msg = receive(MessageTemplate.and(MessageTemplate.MatchPerformative(ACLMessage.REQUEST),
-						MessageTemplate.MatchProtocol("CreateBuilding")));
-				if (msg != null) {
-					AID unitAID = msg.getSender();
-					String senderName = (unitAID).getLocalName();					
+		RegisterTribeBehaviour registerTribeBehaviour = new RegisterTribeBehaviour(this);
+		UnitCreationBehaviour unitTribeBehaviour = new UnitCreationBehaviour(this);
+		CreateBuildingBehaviour createBuildingBehaviour = new CreateBuildingBehaviour(this);
+		MovementRequestBehaviour movementRequestBehaviour = new MovementRequestBehaviour(this);
+	
 
-					try {
-						ContentElement createBuildingRequest = getContentManager().extractContent(msg);
-
-						// validates that the movementRequest is and action and cast it to MoveToCell
-						if (createBuildingRequest instanceof Action) {
-							Concept conc = ((Action) createBuildingRequest).getAction();
-							AID sender = msg.getSender();
-							int indexTribe = findTribePositionByUnitAID(sender);
-							Tribe tribeSender = tribes.get(indexTribe);
-							Unit unit = findUnitByAID(unitAID, tribeSender);
-							
-							if (conc instanceof CreateBuilding) {
-								CreateBuilding createBuildingAction = ((CreateBuilding) conc);
-								String buildingType = createBuildingAction.getBuildingType();
-								
-								ACLMessage reply = msg.createReply();
-								reply.setLanguage(codec.getName());
-								reply.setOntology(ontology.getName());
-								
-								if(buildingType.equals(TOWNHALL)) {
-									
-									boolean oneUnitBilding = tribeSender.isAnyUnitBuilding()!=null;
-									boolean meetConditions = worldRules.meetTownhallCreationCondition(tribeSender.getGold(), tribeSender.getStones(), tribeSender.getWood(),  oneUnitBilding);
-									
-									if(meetConditions && unit.getPosition().getContent() instanceof Empty)
-									{
-										Action agAction = new Action(sender, createBuildingAction);
-										reply = MessageFormatter.createReplyMessage(getLocalName(), msg,
-												ACLMessage.AGREE, "CreateBuilding");
-										getContentManager().fillContent(reply, agAction);
-										send(reply);
-										
-										unit.setAction("BUILDING");
-										updateUnitInTribeByUnitAID(unit);
-										
-										
-										Cell currentPosition = unit.getPosition();
-										Building townHall = new Building();
-										townHall.setType(TOWNHALL);
-										map[currentPosition.getX()][currentPosition.getY()].setContent(townHall);
-										tribeSender.addNewCity(townHall);
-										
-										long time = worldTimer.getBuildTownhallTime();
-										Printer.printSuccess(getLocalName(), "Townhall from "+tribeSender.getId().getLocalName()+" creation time started");
-										doWait(time);
-										Printer.printSuccess(getLocalName(), "Townhall from "+tribeSender.getId().getLocalName()+" creation time finished");
-										
-										//updateTribeByTribeAID(tribeSender);
-										
-										
-										Unit unitUpdated = findUnitByAID(unitAID, tribeSender);
-										if(unitUpdated.getAction().equals("BUILDING"))
-										{
-											//INFORMS TRIBE ABOUT CELL UPDATE WITH TOWNHALL
-											ACLMessage informMsgTribe = MessageFormatter.createMessage(
-													getLocalName(), ACLMessage.INFORM, "informBuildingCreation",
-													unitUpdated.getId());
-											getContentManager().fillContent(informMsgTribe, agAction);
-											send(informMsgTribe);
-											tribeSender.setTownhall(currentPosition);
-											tribeSender.deductCost(250,0,150,200);
-										}
-										else
-										{
-											ACLMessage informMsg = MessageFormatter.createReplyMessage(getLocalName(), msg,
-													ACLMessage.FAILURE, "NotifyCellDetail");
-											send(informMsg);
-										}
-										
-										unit.setAction(null);
-										//UPDATES TRIBES ARRAY
-										updateUnitInTribeByUnitAID(unit);
-										updateTribeByTribeAID(tribeSender);		
-										
-									}
-									else
-									{
-										Printer.printSuccess(getLocalName(),
-												"Unit " + senderName + " CANNOT CREATE BUILDING");
-										reply = MessageFormatter.createReplyMessage(getLocalName(), msg,
-												ACLMessage.REFUSE, "CreateBuilding");
-										send(reply);
-									}
-								}
-								
-							}
-							else
-							{
-								Printer.printSuccess(getLocalName(),
-										"CREATE BUILDING MESSAGE NOT UNDERSTOOD");
-								ACLMessage reply = MessageFormatter.createReplyMessage(getLocalName(), msg,
-										ACLMessage.NOT_UNDERSTOOD, null);
-								send(reply);
-							}
-								
-						}
-					}
-					catch (Exception e) {
-						// TODO: handle exception
-						e.printStackTrace();
-					}
-				}
-			}
-		});
-		
-		addBehaviour(new CyclicBehaviour(this) {
-			@Override
-			public void action() {
-				// TODO Auto-generated method stub
-
-				// Wait for a units request to request a new building creation
-				ACLMessage msg = receive(MessageTemplate.and(MessageTemplate.MatchPerformative(ACLMessage.REQUEST),
-						MessageTemplate.MatchProtocol("RegisterTribe")));
-				
-				if (msg != null) {
-					AID unitAID = msg.getSender();
-					String senderName = (unitAID).getLocalName();					
-
-					try {
-						ContentElement registeredTribeRequest = getContentManager().extractContent(msg);
-
-						// validates that the movementRequest is and action and cast it to MoveToCell
-						if (registeredTribeRequest instanceof Action) {
-							Concept conc = ((Action) registeredTribeRequest).getAction();
-							AID sender = msg.getSender();
-							
-							
-							if (conc instanceof RegisterTribe) {
-								RegisterTribe registeredTribeAction = ((RegisterTribe) conc);
-								int teamNumber = registeredTribeAction.getTeamNumber();
-								
-								if (!registrationPeriod || findTribePositionByTeamNumber(teamNumber) != -1) {
-									Printer.printSuccess(getLocalName(),"CANNOT REGISTER TRIBE");	
-									
-									ACLMessage reply = MessageFormatter.createReplyMessage(getLocalName(), msg,
-											ACLMessage.REFUSE, "RegisterTribe");
-									getContentManager().fillContent(reply, registeredTribeAction);
-									send(reply);									
-								}
-								else
-								{
-									Printer.printSuccess(getLocalName(),"TRIBE REGISTERED!");	
-									
-									ACLMessage reply = MessageFormatter.createReplyMessage(getLocalName(), msg,
-											ACLMessage.AGREE, "RegisterTribe");
-									getContentManager().fillContent(reply, registeredTribeAction);
-									send(reply);
-									
-									//Create Tribe
-									
-									Tribe tg2 = new Tribe(sender, GOLD, FOOD,STONES,WOOD,teamNumber);
-									
-									/**
-									 * TEST UNIT IS CREATED FROM THE WORLD
-									 */
-									Unit u = createUnit(true,"UnitX1", tg2);
-									
-									// adds created unit to the tribe and deduct cost of each unit creation
-									tg2.addUnit(u);
-									tg2.deductCost(150, 50,0,0);
-									
-									tribes.add(tg2);
-									
-									
-									AID ag = tg2.getId();
-									ACLMessage msgInform = MessageFormatter.createMessage(getLocalName(), ACLMessage.INFORM,
-											"InitalizeTribe", ag);
-																	
-									InitalizeTribe initTribe = new InitalizeTribe();	
-									ResourceAccount resource = new ResourceAccount();
-									resource.setFood(FOOD);
-									resource.setGold(GOLD);
-									resource.setStone(STONES);
-									resource.setWood(WOOD);
-									
-									initTribe.setStartingResources(resource);
-									initTribe.setStartingPosition(bookNextRandomCell());
-									
-									
-									initTribe.setUnitList(tg2.getOntologyUnitsAID());
-									
-									Action initializeAction = new Action(sender, initTribe);									
-									getContentManager().fillContent(msgInform, initializeAction);
-									send(msgInform);
-									
-								}
-								
-								ACLMessage reply = msg.createReply();
-								reply.setLanguage(codec.getName());
-								reply.setOntology(ontology.getName());
-							}
-							else
-							{
-								ACLMessage reply = MessageFormatter.createReplyMessage(getLocalName(), msg, ACLMessage.NOT_UNDERSTOOD, null);
-								send(reply);
-							}
-								
-						}
-					}
-					catch (Exception e) {
-						// TODO: handle exception
-						e.printStackTrace();
-					}
-				}
-					
-			}
-			
-			});	
+		addBehaviour(registerTribeBehaviour);
+		addBehaviour(unitTribeBehaviour);
+		addBehaviour(createBuildingBehaviour);
+		addBehaviour(movementRequestBehaviour);
 		
 	}
 
@@ -666,7 +207,7 @@ public class AgWorld extends Agent {
 	 * @param conc
 	 * @return
 	 */
-	private Cell bookNextRandomCell() {
+	public Cell bookNextRandomCell() {
 
 		int x = new Random().nextInt(X_BOUNDARY);
 		int y = new Random().nextInt(Y_BOUNDARY);
@@ -697,7 +238,7 @@ public class AgWorld extends Agent {
 	}
 	*/
 
-	private Integer canCreateUnit(Tribe t, Cell position, Integer index) {
+	public Integer canCreateUnit(Tribe t, Cell position, Integer index) {
 		if (!worldRules.isItsOwnTownhall(t.getTownhall(), tribes.get(index).getTownhall())) {
 			return 2;
 		}
@@ -715,7 +256,7 @@ public class AgWorld extends Agent {
 		return 1;
 	}
 
-	private Unit createUnit(boolean isFirst,String nickname, Tribe tribe) {
+	public Unit createUnit(boolean isFirst,String nickname, Tribe tribe) {
 
 		ContainerController cc = getContainerController();
 
@@ -772,7 +313,7 @@ public class AgWorld extends Agent {
 		return null;
 	}
 
-	private int findTribePositionByUnitAID(AID aid) {
+	public int findTribePositionByUnitAID(AID aid) {
 		for (int i = 0; i < tribes.size(); i++) {
 			for (int j = 0; j < tribes.get(i).getUnits().size(); j++) {
 				if (tribes.get(i).getUnits().get(j).getId().getName().equals(aid.getName()))
@@ -782,7 +323,7 @@ public class AgWorld extends Agent {
 		return -1;
 	}
 	
-	private int findTribePositionByTeamNumber(int teamNumber) {
+	public int findTribePositionByTeamNumber(int teamNumber) {
 		
 		for (int i = 0; i < tribes.size(); i++) 
 		{
@@ -800,7 +341,7 @@ public class AgWorld extends Agent {
 		return -1;
 	}
 
-	private boolean updateUnitInTribeByUnitAID(Unit unit) {
+	public boolean updateUnitInTribeByUnitAID(Unit unit) {
 		for (int i = 0; i < tribes.size(); i++) {
 			for (int j = 0; j < tribes.get(i).getUnits().size(); j++) {
 				if (tribes.get(i).getUnits().get(j).getId().getName().equals(unit.getId().getName())) {
@@ -813,7 +354,7 @@ public class AgWorld extends Agent {
 		return false;
 	}
 	
-	private boolean updateTribeByTribeAID(Tribe tribe) {
+	public boolean updateTribeByTribeAID(Tribe tribe) {
 		for (int i = 0; i < tribes.size(); i++) {
 			if (tribes.get(i).getId().getName().equals(tribe.getId().getName())) {
 				tribes.set(i, tribe);
@@ -823,7 +364,7 @@ public class AgWorld extends Agent {
 		return false;
 	}
 
-	private Unit findUnitByAID(AID aid, Tribe tribe) {
+	public Unit findUnitByAID(AID aid, Tribe tribe) {
 		ArrayList<Unit> units = tribe.getUnits();
 		for (int i = 0; i < units.size(); i++) {
 			if (units.get(i).getId().getName().equals(aid.getName()))
@@ -841,7 +382,7 @@ public class AgWorld extends Agent {
 	 * @param posB Second position
 	 * @return boolean Whether the two positions are adjacent
 	 */
-	private boolean areAdjacentPositions(Cell posA, Cell posB) {
+	public boolean areAdjacentPositions(Cell posA, Cell posB) {
 		// First, both positions need to be valid
 		if (!isValidPosition(posA) || !isValidPosition(posB)) {
 			Printer.printSuccess(getLocalName(), "This position doesn't exist on our hexagonal map $$$");
@@ -1064,7 +605,7 @@ public class AgWorld extends Agent {
 		return Integer.parseInt(properties.getProperty(property));
 	}
 
-	private Cell moveUnitToPosition(Unit unit, Cell cell) {
+	public Cell moveUnitToPosition(Unit unit, Cell cell) {
 		map[cell.getX()][cell.getY()] = cell;
 		// TODO: UPDATE WITH THE NEW ONTOLOGY
 		map[cell.getX()][cell.getY()].setContent(new Empty());
@@ -1072,6 +613,15 @@ public class AgWorld extends Agent {
 		updateUnitInTribeByUnitAID(unit);
 
 		return map[cell.getX()][cell.getY()];
+	}
+	
+	
+	public boolean isRegistrationPeriod() {
+		return registrationPeriod;
+	}
+
+	public void setRegistrationPeriod(boolean registrationPeriod) {
+		this.registrationPeriod = registrationPeriod;
 	}
 
 	public ArrayList<Tribe> getTribes() {
