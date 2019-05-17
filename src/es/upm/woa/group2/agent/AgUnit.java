@@ -1,4 +1,4 @@
-package es.upm.woa.agent.group2.agents;
+package es.upm.woa.group2.agent;
 
 import jade.core.AID;
 import jade.core.Agent;
@@ -13,11 +13,11 @@ import jade.lang.acl.MessageTemplate;
 
 import java.util.ArrayList;
 
-import es.upm.woa.agent.group2.beans.Tribe;
-import es.upm.woa.agent.group2.beans.Unit;
-import es.upm.woa.agent.group2.behaviours.MovementRequestBehaviour;
-import es.upm.woa.agent.group2.common.MessageFormatter;
-import es.upm.woa.agent.group2.common.Printer;
+import es.upm.woa.group2.beans.Tribe;
+import es.upm.woa.group2.beans.Unit;
+import es.upm.woa.group2.behaviours.MovementRequestBehaviour;
+import es.upm.woa.group2.common.MessageFormatter;
+import es.upm.woa.group2.common.Printer;
 import es.upm.woa.ontology.Building;
 import es.upm.woa.ontology.Cell;
 import es.upm.woa.ontology.CreateBuilding;

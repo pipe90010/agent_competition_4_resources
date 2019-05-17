@@ -1,8 +1,8 @@
-package es.upm.woa.agent.group2.rules;
+package es.upm.woa.group2.rules;
 
 import es.upm.woa.ontology.Cell;
-import es.upm.woa.agent.group2.agents.AgWorld;
-import es.upm.woa.agent.group2.beans.Tribe;
+import es.upm.woa.group2.agent.AgWorld;
+import es.upm.woa.group2.beans.Tribe;
 
 public class AgWorldRules {
 	public boolean hasEnoughGold(Integer gold) {

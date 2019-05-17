@@ -1,4 +1,4 @@
-package es.upm.woa.agent.group2.common;
+package es.upm.woa.group2.common;
 
 public class WorldTimer {
 

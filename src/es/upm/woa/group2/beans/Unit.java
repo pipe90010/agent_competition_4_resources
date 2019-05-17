@@ -1,4 +1,4 @@
-package es.upm.woa.agent.group2.beans;
+package es.upm.woa.group2.beans;
 
 import es.upm.woa.ontology.Cell;
 import jade.core.AID;

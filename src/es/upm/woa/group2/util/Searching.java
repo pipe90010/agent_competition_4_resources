@@ -1,10 +1,10 @@
-package es.upm.woa.agent.group2.util;
+package es.upm.woa.group2.util;
 
 import java.util.ArrayList;
 
-import es.upm.woa.agent.group2.agents.AgWorld;
-import es.upm.woa.agent.group2.beans.Tribe;
-import es.upm.woa.agent.group2.beans.Unit;
+import es.upm.woa.group2.agent.AgWorld;
+import es.upm.woa.group2.beans.Tribe;
+import es.upm.woa.group2.beans.Unit;
 import jade.core.AID;
 
 public class Searching {

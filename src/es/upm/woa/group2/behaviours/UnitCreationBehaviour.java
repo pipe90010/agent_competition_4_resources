@@ -1,17 +1,17 @@
-package es.upm.woa.agent.group2.behaviours;
+package es.upm.woa.group2.behaviours;
 
 import java.util.ArrayList;
 import java.util.Properties;
 import java.util.Random;
 
-import es.upm.woa.agent.group2.agents.AgUnit;
-import es.upm.woa.agent.group2.agents.AgWorld;
-import es.upm.woa.agent.group2.beans.Tribe;
-import es.upm.woa.agent.group2.beans.Unit;
-import es.upm.woa.agent.group2.common.MessageFormatter;
-import es.upm.woa.agent.group2.common.Printer;
-import es.upm.woa.agent.group2.rules.AgWorldRules;
-import es.upm.woa.agent.group2.util.Searching;
+import es.upm.woa.group2.agent.AgUnit;
+import es.upm.woa.group2.agent.AgWorld;
+import es.upm.woa.group2.beans.Tribe;
+import es.upm.woa.group2.beans.Unit;
+import es.upm.woa.group2.common.MessageFormatter;
+import es.upm.woa.group2.common.Printer;
+import es.upm.woa.group2.rules.AgWorldRules;
+import es.upm.woa.group2.util.Searching;
 import es.upm.woa.ontology.Cell;
 import es.upm.woa.ontology.CreateUnit;
 import es.upm.woa.ontology.Empty;
