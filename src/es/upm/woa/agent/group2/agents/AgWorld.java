@@ -931,8 +931,10 @@ public class AgWorld extends Agent {
 				else
 				{
 					//validates that the movement is upside or downside
+					//down
 					if(x+1 == X_BOUNDARY )
 						return map[1][y];				
+					//up
 					if(x-1==0)
 						return map[ X_BOUNDARY ][y];
 					else
@@ -1041,8 +1043,7 @@ public class AgWorld extends Agent {
 						return null;
 				}
 			}
-		}
-		
+		}		
 	}
 
 	// TODO: Move to another class
