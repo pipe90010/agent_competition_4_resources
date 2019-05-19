@@ -139,6 +139,16 @@ public class AgTribe extends Agent {
 									
 									Unit u = new Unit(aid, cell);
 									tribe.addUnit(u);
+									
+									//SENDS ORIGIN POSITION TO THE UNIT
+									ACLMessage msgInform = MessageFormatter.createMessage(getLocalName(), ACLMessage.INFORM,
+											"InformOriginPosition", aid);
+									
+									Action agActionNotification = new Action(aid, agActionN);
+									getContentManager().fillContent(msgInform, agActionNotification);
+									send(msgInform);
+									
+									
 									Printer.printSuccess( getLocalName(),"received unit creation from "+ (msg.getSender()).getLocalName()+" with AID: "+aid.getName()+" and its location is "+cell.getX()+" and "+cell.getY());
 								}
 							}

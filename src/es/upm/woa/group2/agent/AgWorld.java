@@ -293,9 +293,9 @@ public class AgWorld extends Agent {
 			else*/
 			position = bookNextRandomCell();
 
-			Object[] args = new Object[2];
+			/*Object[] args = new Object[2];
 			args[0] = position.getX();
-			args[1] = position.getY();
+			args[1] = position.getY();*/
 			long waitTime = worldTimer.getCreationTime();
 
 			//there should be implemented a FSM behavior here
@@ -303,7 +303,7 @@ public class AgWorld extends Agent {
 			doWait(waitTime);
 			
 			if (!isGameOver()) {
-				AgentController ac = cc.createNewAgent(nickname, AgUnit.class.getName(), args);
+				AgentController ac = cc.createNewAgent(nickname, AgUnit.class.getName(),null);
 				ac.start();
 				// TODO: CHECK IF WE NEED TO ADD THE UNIT AS A CONTENT FOR THE CELL
 				Unit newUnit = new Unit(getAID(nickname), position);

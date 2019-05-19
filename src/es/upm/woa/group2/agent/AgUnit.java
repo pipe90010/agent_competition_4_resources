@@ -65,6 +65,8 @@ public class AgUnit extends Agent{
     
     private Boolean isBusy;
     
+    private SimpleBehaviour movement;
+    
 	public AgUnit() {
 		// TODO Auto-generated constructor stub
 	}
@@ -79,21 +81,6 @@ public class AgUnit extends Agent{
 		//Register language and ontology this part always goes
         getContentManager().registerLanguage(codec);
         getContentManager().registerOntology(ontology);
-        
-        Object[] args = getArguments();
-        int x,y;
-        if (args != null) {
-            if (args.length==2) {
-                x = (Integer)args[0];
-                y =  (Integer)args[1];
-                Cell cell= new Cell();
-                cell.setX(x);
-                cell.setY(y);
-                setCurrentPosition(cell);
-                Printer.printSuccess( getLocalName(),"CURRENT POSITION IS SET FOR X: "+x+" and Y: "+y);
-            }            
-
-        }
         
 		/*
          * BEHAVIORS------------------------------------------------------------------------------------------
@@ -204,7 +191,8 @@ public class AgUnit extends Agent{
         
         
 		//Behavior for moving
-		addBehaviour(new SimpleBehaviour(this)
+        
+        movement = new SimpleBehaviour(this)
 		{
 			
 			@Override
@@ -264,7 +252,7 @@ public class AgUnit extends Agent{
 				return true;
 			}
 			
-		});
+		};
 		
 		// Adds a behavior to process the answer to a creation request
 		addBehaviour(new SimpleBehaviour(this)
@@ -358,7 +346,9 @@ public class AgUnit extends Agent{
 						MessageTemplate.or(
 								MessageTemplate.or(
 										MessageTemplate.MatchProtocol("NotifyCellDetail"),
-										MessageTemplate.MatchProtocol("informMove")),
+										MessageTemplate.or(
+												MessageTemplate.MatchProtocol("InformOriginPosition"), 
+												MessageTemplate.MatchProtocol("informMove"))),
 								MessageTemplate.MatchProtocol("CreateBuilding")
 						)));
 				if (msg != null)
@@ -416,6 +406,16 @@ public class AgUnit extends Agent{
 									isBusy=false;
 									//setCurrentPosition(cell);
 									Printer.printSuccess(getLocalName(), "New Building: "+type+"  has been created succesfully ");
+								}
+								else if(conc instanceof NotifyNewUnit)
+								{
+									NotifyNewUnit agActionN = (NotifyNewUnit)agAction.getAction();
+
+									Cell cell= agActionN.getLocation();
+									
+									setCurrentPosition(cell);
+									addBehaviour(movement);
+									Printer.printSuccess(getLocalName(), "Origin Position has been set: "+cell.getX()+", "+cell.getY());
 								}
 								
 							}
