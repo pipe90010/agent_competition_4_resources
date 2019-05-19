@@ -68,8 +68,7 @@ public class AgWorld extends Agent {
 	public final static String REGISTRATION_DESK = "REGISTRATION DESK";
 	public int MAX_REGISTRATION_TIME = 0;
 	public int GAME_TIME = 0;
-	
-	
+
 	public final static Integer GOLD = 1500;
 	public final static Integer FOOD = 500;
 	public final static Integer STONES = 500;
@@ -103,9 +102,8 @@ public class AgWorld extends Agent {
 	private Properties properties = new Properties();
 
 	private boolean gameOver;
-	private boolean registrationPeriod; 
-	
-	
+	private boolean registrationPeriod;
+
 	// -----------------------------------------------------------------
 	// Constructor
 	// -----------------------------------------------------------------
@@ -121,8 +119,8 @@ public class AgWorld extends Agent {
 	protected void setup() {
 		System.out.println("Group2 - " + getLocalName() + ": has entered into the system ");
 
-		 readPropertiesFile();
-				
+		readPropertiesFile();
+
 		// Register of the codec and the ontology to be used in the ContentManager
 		// Register language and ontology this part always goes
 		getContentManager().registerLanguage(codec);
@@ -134,19 +132,18 @@ public class AgWorld extends Agent {
 			ServiceDescription sd = new ServiceDescription();
 			sd.setName(this.getName());
 			sd.setType(WORLD);
-			//sd.setType(REGISTRATION_DESK);
-			
+			// sd.setType(REGISTRATION_DESK);
+
 			dfd.addServices(sd);
-			
-			//Reg Desk
-			
+
+			// Reg Desk
+
 			ServiceDescription sdReg = new ServiceDescription();
 			sdReg.setName(this.getName());
 			sdReg.setType(REGISTRATION_DESK);
-			
+
 			dfd.addServices(sdReg);
-			
-			
+
 			// Registers its description in the DF
 			DFService.register(this, dfd);
 			Printer.printSuccess(getLocalName(), "registered in the DF");
@@ -155,7 +152,7 @@ public class AgWorld extends Agent {
 			 */
 
 			initialize();
-			
+
 		} catch (FIPAException e) {
 			e.printStackTrace();
 		}
@@ -164,37 +161,35 @@ public class AgWorld extends Agent {
 		 * BEHAVIORS--------------------------------------------------------------------
 		 * ----------------------
 		 */
-		
+
 		RegisterTribeBehaviour registerTribeBehaviour = new RegisterTribeBehaviour(this);
 		UnitCreationBehaviour unitTribeBehaviour = new UnitCreationBehaviour(this);
 		CreateBuildingBehaviour createBuildingBehaviour = new CreateBuildingBehaviour(this);
 		MovementRequestBehaviour movementRequestBehaviour = new MovementRequestBehaviour(this);
-	
 
 		addBehaviour(registerTribeBehaviour);
 		addBehaviour(unitTribeBehaviour);
 		addBehaviour(createBuildingBehaviour);
 		addBehaviour(movementRequestBehaviour);
-		
+
 	}
 
 	private void readPropertiesFile() {
-        File file = new File("woa.properties");
-        try {
-            properties.load(new FileInputStream(file));
-            System.out.println("Properties file loaded");
+		File file = new File("woa.properties");
+		try {
+			properties.load(new FileInputStream(file));
+			System.out.println("Properties file loaded");
 
-            // Fill properties
-            this.MAX_REGISTRATION_TIME = Integer.parseInt(properties.getProperty("reg_time"));
-            this.GAME_TIME = Integer.parseInt(properties.getProperty("game_time"));
-        } catch (FileNotFoundException e) {
-            System.err.println("File " + file.getAbsolutePath() + " was not found!");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-	
-	
+			// Fill properties
+			this.MAX_REGISTRATION_TIME = Integer.parseInt(properties.getProperty("reg_time"));
+			this.GAME_TIME = Integer.parseInt(properties.getProperty("game_time"));
+		} catch (FileNotFoundException e) {
+			System.err.println("File " + file.getAbsolutePath() + " was not found!");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
 	// -----------------------------------------------------------------
 	// Initialize Methods
 	// -----------------------------------------------------------------
@@ -208,7 +203,7 @@ public class AgWorld extends Agent {
 		gameOver = false;
 		registrationPeriod = true;
 		startRegistrationTime();
-		//registrationPeriod = true;
+		// registrationPeriod = true;
 	}
 
 	private void initializeMap() {
@@ -228,41 +223,36 @@ public class AgWorld extends Agent {
 	// -----------------------------------------------------------------
 
 	/**
-	 * Randomly books the next empty available cell 
+	 * Randomly books the next empty available cell
+	 * 
 	 * @param conc
 	 * @return
 	 */
 	public Cell bookNextRandomCell() {
 
-		int x = new Random().nextInt((X_BOUNDARY - 1) )+1;
-		int y = new Random().nextInt((Y_BOUNDARY - 1) )+1;
-		
-		return map[x][y];		
+		int x = new Random().nextInt((X_BOUNDARY - 1)) + 1;
+		int y = new Random().nextInt((Y_BOUNDARY - 1)) + 1;
+
+		return map[x][y];
 	}
 
 	/*
-	private Tribe createTribe(String nickname, int teamNumber) {
-		//ContainerController cc = getContainerController();
-
-		AgTribe agentTribe = new AgTribe();
-		try {
-			//cc.acceptNewAgent(nickname, agentTribe).start();
-
-			Building townhall = new Building();
-			townhall.setOwner(agentTribe.getAID());
-			townhall.setType(TOWNHALL);
-
-			Cell townhallCell = bookNextRandomCell();
-									
-			//creates the tribe and assign it an initial amount of resources and a TownHall cell 
-			Tribe tribe = new Tribe(agentTribe.getAID(), GOLD, FOOD,STONES,WOOD,teamNumber);
-			return tribe;
-		} catch (StaleProxyException e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
-	*/
+	 * private Tribe createTribe(String nickname, int teamNumber) {
+	 * //ContainerController cc = getContainerController();
+	 * 
+	 * AgTribe agentTribe = new AgTribe(); try { //cc.acceptNewAgent(nickname,
+	 * agentTribe).start();
+	 * 
+	 * Building townhall = new Building(); townhall.setOwner(agentTribe.getAID());
+	 * townhall.setType(TOWNHALL);
+	 * 
+	 * Cell townhallCell = bookNextRandomCell();
+	 * 
+	 * //creates the tribe and assign it an initial amount of resources and a
+	 * TownHall cell Tribe tribe = new Tribe(agentTribe.getAID(), GOLD,
+	 * FOOD,STONES,WOOD,teamNumber); return tribe; } catch (StaleProxyException e) {
+	 * e.printStackTrace(); } return null; }
+	 */
 
 	public Integer canCreateUnit(Tribe t, Cell position, Integer index) {
 		if (!worldRules.isItsOwnTownhall(t.getTownhall(), tribes.get(index).getTownhall())) {
@@ -282,15 +272,15 @@ public class AgWorld extends Agent {
 		return 1;
 	}
 
-	public Unit createUnit(boolean isFirst,String nickname, Tribe tribe) {
+	public Unit createUnit(boolean isFirst, String nickname, Tribe tribe) {
 
 		ContainerController cc = getContainerController();
 
 		try {
 			Cell position;
-			/*if(isFirst)
-				position = tribe.getTownhall();
-			else*/
+			/*
+			 * if(isFirst) position = tribe.getTownhall(); else
+			 */
 			position = bookNextRandomCell();
 
 			Object[] args = new Object[2];
@@ -298,16 +288,16 @@ public class AgWorld extends Agent {
 			args[1] = position.getY();
 			long waitTime = worldTimer.getCreationTime();
 
-			//there should be implemented a FSM behavior here
-			//to refuse incoming request messages while the agent is in waiting state  
+			// there should be implemented a FSM behavior here
+			// to refuse incoming request messages while the agent is in waiting state
 			doWait(waitTime);
-			
+
 			if (!isGameOver()) {
 				AgentController ac = cc.createNewAgent(nickname, AgUnit.class.getName(), args);
 				ac.start();
 				// TODO: CHECK IF WE NEED TO ADD THE UNIT AS A CONTENT FOR THE CELL
 				Unit newUnit = new Unit(getAID(nickname), position);
-				//map[position.getX()][position.getY()].setOwner(tribe.getId());
+				// map[position.getX()][position.getY()].setOwner(tribe.getId());
 
 				if (tribe != null) {
 					AID ag = tribe.getId();
@@ -348,21 +338,20 @@ public class AgWorld extends Agent {
 		}
 		return -1;
 	}
-	
+
 	public int findTribePositionByTeamNumber(int teamNumber) {
-		
-		for (int i = 0; i < tribes.size(); i++) 
-		{
+
+		for (int i = 0; i < tribes.size(); i++) {
 			if (tribes.get(i).getTeamNumber() == teamNumber)
 				return i;
 		}
 		return -1;
 	}
-	
+
 	private int findTribePositionByTribeAID(AID aid) {
 		for (int i = 0; i < tribes.size(); i++) {
 			if (tribes.get(i).getId().getLocalName().equals(aid.getLocalName()))
-					return i;
+				return i;
 		}
 		return -1;
 	}
@@ -372,14 +361,14 @@ public class AgWorld extends Agent {
 			for (int j = 0; j < tribes.get(i).getUnits().size(); j++) {
 				if (tribes.get(i).getUnits().get(j).getId().getName().equals(unit.getId().getName())) {
 					tribes.get(i).getUnits().set(j, unit);
-					
+
 					return true;
 				}
 			}
 		}
 		return false;
 	}
-	
+
 	public boolean updateTribeByTribeAID(Tribe tribe) {
 		for (int i = 0; i < tribes.size(); i++) {
 			if (tribes.get(i).getId().getName().equals(tribe.getId().getName())) {
@@ -421,92 +410,71 @@ public class AgWorld extends Agent {
 
 		return (deltaX <= 2 && deltaY <= 1);
 	}
-	
-	
+
 	public Cell getTargetPosition(Cell currentPosition, int nextMove) {
-		
+
 		Cell targetPosition = null;
+		Cell tempTarget = null;
 		int x = currentPosition.getX();
 		int y = currentPosition.getY();
 		switch (nextMove) {
 		case 1:
-			if(x-2>=1)
-				targetPosition = map[x-2][y];
+			if (x - 2 >= 1)
+				// targetPosition = map[x-2][y];
+				tempTarget = getMirrorCellX(currentPosition);
+			targetPosition = tempTarget != null ? tempTarget : map[x - 2][y];
 			break;
 		case 2:
-			if(x-->=1 && y++<=Y_BOUNDARY)
+			if (x-- >= 1 && y++ <= Y_BOUNDARY)
 				targetPosition = map[x][y];
-			break;	
+			break;
 		case 3:
-			if(x++<=X_BOUNDARY && y++<=Y_BOUNDARY)
+			if (x++ <= X_BOUNDARY && y++ <= Y_BOUNDARY)
 				targetPosition = map[x][y];
 			break;
 		case 4:
-			if(x+2<=X_BOUNDARY)
-				targetPosition = map[x+2][y];
+			if (x + 2 <= X_BOUNDARY)
+				// targetPosition = map[x+2][y];
+				tempTarget = getMirrorCellX(currentPosition);
+			targetPosition = tempTarget != null ? tempTarget : map[x + 2][y];
 			break;
 		case 5:
-			if(x++<=X_BOUNDARY && y-->=1)
+			if (x++ <= X_BOUNDARY && y-- >= 1)
 				targetPosition = map[x][y];
-			break;	
+			break;
 		default:
-			if(x-->=1 && y-->=1)
+			if (x-- >= 1 && y-- >= 1)
 				targetPosition = map[x][y];
 			break;
 		}
-		
+
 		return targetPosition;
 	}
-	
-	/*public Cell getMirrorCell(Cell position)
-	{
-		int x = position.getX();
-		int y = position.getY();
-		if(x%2==0)
-		{
-			if(x+1>=X_BOUNDARY)
-				return map[2][y];
-			else
-				return map[X_BOUNDARY][y];
-		}
-		return null;
-	}*/
-	
-	public Cell getMirrorCellX(Cell position)
-	{
+
+	public Cell getMirrorCellX(Cell position) {
 		int x = position.getX();
 		int y = position.getY();
 		
-		//validates that a map is squared		
-		if(X_BOUNDARY == Y_BOUNDARY) { 
-			//validates that a position is even, else it is odd 
-				if(x%2==0)
-				{	
-					//case 4X4
-					//up
-					if(x-2<=0)
-						return map[ X_BOUNDARY ][y];
-					//down
-					if(x>=X_BOUNDARY)
-						return map[2][y];
-					else
-						return null;					
-				}
-				else {
-					//case 4X4
-					//up
-					if(x-1<=0)
-						return map[ X_BOUNDARY - 1 ][y];
-					//down
-					if(x+1 >= X_BOUNDARY)
-						return map[1][y];
-					else
-						return null;	
-				}
-			}else {
-				
+		// validates that a position is even, else it is odd
+		if (x % 2 == 0) {
+			// up
+			if (x - 2 <= 0)
+				return map[X_BOUNDARY][y];
+			// down
+			if (x >= X_BOUNDARY)
+				return map[2][y];
+			else
 				return null;
-			}	
+		} else {
+			// up
+			if (x - 1 <= 0)
+				return map[X_BOUNDARY - 1][y];
+			// down
+			if (x + 1 >= X_BOUNDARY)
+				return map[1][y];
+			else
+				return null;
+		}
 	}
 
 	// TODO: Move to another class
@@ -539,8 +507,7 @@ public class AgWorld extends Agent {
 
 		return map[cell.getX()][cell.getY()];
 	}
-	
-	
+
 	public boolean isRegistrationPeriod() {
 		return registrationPeriod;
 	}
@@ -573,69 +540,70 @@ public class AgWorld extends Agent {
 	public void setWorldTimer(WorldTimer worldTimer) {
 		this.worldTimer = worldTimer;
 	}
-	
-	public void startRegistrationTime()
-	{
+
+	public void startRegistrationTime() {
 		Thread t = new Thread(new Runnable() {
-	         @Override
-	         public void run() {
-	              // Insert some method call here.
-	        	 try
-	        	 {
-	        		 Thread.sleep(MAX_REGISTRATION_TIME*1000);
-	        		 registrationPeriod = false;
-	        			
-	        	 }
-	        	 catch (Exception e) {
-	     			e.printStackTrace();
-	     		}
-	        	 
-	         }
+			@Override
+			public void run() {
+				// Insert some method call here.
+				try {
+					Thread.sleep(MAX_REGISTRATION_TIME * 1000);
+					registrationPeriod = false;
+
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+
+			}
 		});
 		t.start();
 	}
+
 	/*
-	 * 100 × cells_explored(i) + 500 × cities_owned(i) + 250 × stores_owned(i) + 300 × farms_owned(i) + 400 × units_owned(i) + 10 × gold_owned(i) + 2 × stone_owned(i) + 1 × wood_owned(i) + 5 × food_owned(i)
+	 * 100 × cells_explored(i) + 500 × cities_owned(i) + 250 × stores_owned(i) +
+	 * 300 × farms_owned(i) + 400 × units_owned(i) + 10 × gold_owned(i) + 2 ×
+	 * stone_owned(i) + 1 × wood_owned(i) + 5 × food_owned(i)
 	 */
-	public int calculateScore(Tribe tribe)
-	{
-		
-		int score = ((100*tribe.getDiscoveredCells().size())
-				+(500*tribe.getCities().size())
-				+(250*tribe.getBuildingsByType(STORE).size())
-				+(300*tribe.getBuildingsByType(FARM).size())
-				+(400*tribe.getMemberSize())
-				+(10*tribe.getGold())
-				+(2*tribe.getStones())
-				+(tribe.getWood())
-				+(5*tribe.getFood()));
-		
-		Printer.printSuccess("Team: "+tribe.getTeamNumber(), "THE CURRENT SCORE IS= "+score);
+	public int calculateScore(Tribe tribe) {
+
+		int score = ((100 * tribe.getDiscoveredCells().size()) + (500 * tribe.getCities().size())
+				+ (250 * tribe.getBuildingsByType(STORE).size()) + (300 * tribe.getBuildingsByType(FARM).size())
+				+ (400 * tribe.getMemberSize()) + (10 * tribe.getGold()) + (2 * tribe.getStones()) + (tribe.getWood())
+				+ (5 * tribe.getFood()));
+
+		Printer.printSuccess("Team: " + tribe.getTeamNumber(), "THE CURRENT SCORE IS= " + score);
 		return score;
 	}
+
 	/*
-	 * cells_explored: Number of cells explored by the tribe.
-- cities_owned: Number of cities owned by the tribe.
-- stores_owned: Number of stores owned by the tribe.
-- farms_owned: Number of farm owned by the tribe.
-- units_owned: Number of units owned by the tribe.
-- gold_owned: Amount of gold owned by the tribe.
-- stone_owned: Amount of stone owned by the tribe.
-- wood_owned: Amount of wood owned by the tribe.
-- food_owned: Amount of food owned by the tribe.
+	 * cells_explored: Number of cells explored by the tribe. - cities_owned: Number
+	 * of cities owned by the tribe. - stores_owned: Number of stores owned by the
+	 * tribe. - farms_owned: Number of farm owned by the tribe. - units_owned:
+	 * Number of units owned by the tribe. - gold_owned: Amount of gold owned by the
+	 * tribe. - stone_owned: Amount of stone owned by the tribe. - wood_owned:
+	 * Amount of wood owned by the tribe. - food_owned: Amount of food owned by the
+	 * tribe.
 	 */
-	public void printFinalScore()
-	{
-		for (Tribe tribe: tribes) {
-			Printer.printSuccess("Team: "+tribe.getTeamNumber(), "THE FINAL NUMBER OF CELLS EXPORED= "+tribe.getDiscoveredCells().size());
-			Printer.printSuccess("Team: "+tribe.getTeamNumber(), "THE FINAL NUMBER OF CITIES OWNED= "+tribe.getCities().size());
-			Printer.printSuccess("Team: "+tribe.getTeamNumber(), "THE FINAL NUMBER OF STORES OWNED= "+tribe.getBuildingsByType(STORE).size());
-			Printer.printSuccess("Team: "+tribe.getTeamNumber(), "THE FINAL NUMBER OF FARMS OWNED= "+tribe.getBuildingsByType(FARM).size());
-			Printer.printSuccess("Team: "+tribe.getTeamNumber(), "THE FINAL NUMBER OF UNITS OWNED= "+tribe.getUnits().size());
-			Printer.printSuccess("Team: "+tribe.getTeamNumber(), "THE FINAL AMOUNT OF GOLD OWNED= "+tribe.getGold());
-			Printer.printSuccess("Team: "+tribe.getTeamNumber(), "THE FINAL AMOUNT OF STONES OWNED= "+tribe.getStones());
-			Printer.printSuccess("Team: "+tribe.getTeamNumber(), "THE FINAL AMOUNT OF WOOD OWNED= "+tribe.getWood());
-			Printer.printSuccess("Team: "+tribe.getTeamNumber(), "THE FINAL AMOUNT OF FOOD OWNED= "+tribe.getFood());
+	public void printFinalScore() {
+		for (Tribe tribe : tribes) {
+			Printer.printSuccess("Team: " + tribe.getTeamNumber(),
+					"THE FINAL NUMBER OF CELLS EXPORED= " + tribe.getDiscoveredCells().size());
+			Printer.printSuccess("Team: " + tribe.getTeamNumber(),
+					"THE FINAL NUMBER OF CITIES OWNED= " + tribe.getCities().size());
+			Printer.printSuccess("Team: " + tribe.getTeamNumber(),
+					"THE FINAL NUMBER OF STORES OWNED= " + tribe.getBuildingsByType(STORE).size());
+			Printer.printSuccess("Team: " + tribe.getTeamNumber(),
+					"THE FINAL NUMBER OF FARMS OWNED= " + tribe.getBuildingsByType(FARM).size());
+			Printer.printSuccess("Team: " + tribe.getTeamNumber(),
+					"THE FINAL NUMBER OF UNITS OWNED= " + tribe.getUnits().size());
+			Printer.printSuccess("Team: " + tribe.getTeamNumber(),
+					"THE FINAL AMOUNT OF GOLD OWNED= " + tribe.getGold());
+			Printer.printSuccess("Team: " + tribe.getTeamNumber(),
+					"THE FINAL AMOUNT OF STONES OWNED= " + tribe.getStones());
+			Printer.printSuccess("Team: " + tribe.getTeamNumber(),
+					"THE FINAL AMOUNT OF WOOD OWNED= " + tribe.getWood());
+			Printer.printSuccess("Team: " + tribe.getTeamNumber(),
+					"THE FINAL AMOUNT OF FOOD OWNED= " + tribe.getFood());
 			calculateScore(tribe);
 		}
 	}
