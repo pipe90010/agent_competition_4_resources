@@ -411,19 +411,21 @@ public class AgWorld extends Agent {
 		return (deltaX <= 2 && deltaY <= 1);
 	}
 
-	public Cell getTargetPosition(Cell currentPosition, int nextMove2) {
+	public Cell getTargetPosition(Cell currentPosition, int nextMove) {
 
 		Cell targetPosition = null;
 		Cell tempTarget = null;
-		int x = 2;//currentPosition.getX();
-		int y = 2;//currentPosition.getY();
-		int nextMove = 1;
+		int x = currentPosition.getX();
+		int y = currentPosition.getY();
 		switch (nextMove) {
 		case 1:
-			if (x - 2 >= 1)
-				// targetPosition = map[x-2][y];
-				tempTarget = getMirrorCellX(currentPosition);
-			targetPosition = tempTarget != null ? tempTarget : map[x - 2][y];
+			tempTarget = getMirrorCellX(currentPosition);
+			if (tempTarget!=null) {
+				targetPosition= tempTarget;
+			}
+			else {
+				targetPosition = map[x - 2][y];
+			}
 			break;
 		case 2:
 			if (x-- >= 1 && y++ <= Y_BOUNDARY)
@@ -434,10 +436,13 @@ public class AgWorld extends Agent {
 				targetPosition = map[x][y];
 			break;
 		case 4:
-			if (x + 2 <= X_BOUNDARY)
-				// targetPosition = map[x+2][y];
-				tempTarget = getMirrorCellX(currentPosition);
-			targetPosition = tempTarget != null ? tempTarget : map[x + 2][y];
+			tempTarget = getMirrorCellX(currentPosition);
+			if (tempTarget!=null) {
+				targetPosition= tempTarget;
+			}
+			else {
+				targetPosition = map[x + 2][y];
+			}
 			break;
 		case 5:
 			if (x++ <= X_BOUNDARY && y-- >= 1)
