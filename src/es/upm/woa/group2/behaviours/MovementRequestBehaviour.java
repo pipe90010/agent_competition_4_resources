@@ -61,36 +61,29 @@ public class MovementRequestBehaviour extends CyclicBehaviour {
 					if (conc instanceof MoveToCell) {
 						MoveToCell moveAction = ((MoveToCell) conc);
 						
-						//TODO: new logic to be fixed --> getTargetDirection
-						Cell requestedPosition = null; //moveAction.getTarget();
-
+						//instantiates unit, positions and tribe objects based on message
+						int tribePosition =AgWorldInstance.findTribePositionByUnitAID(unitAID);
+						Unit senderUnit = AgWorldInstance.findUnitByAID(unitAID, AgWorldInstance.getTribes().get(tribePosition));
+						Cell currentPosition = senderUnit.getPosition();
+						Cell requestedPosition = AgWorldInstance.getTargetPosition(currentPosition , moveAction.getTargetDirection());
+						Tribe tribeSender =  AgWorldInstance.getTribes().get(tribePosition);
+						
+						Printer.printSuccess(AgWorldInstance.getLocalName(),
+								"Unit " + senderName 
+								+ " is currently in [" + currentPosition.getX() + "] [" + currentPosition.getY() + "]");
+						
+						Printer.printSuccess(AgWorldInstance.getLocalName(),
+								"Unit " + senderName 
+								+ " requested to move to cell [" + requestedPosition.getX() + "] [" + requestedPosition.getY() + "]");
+						
 						if (requestedPosition != null) {
 							// ACLMessage reply;
 							ACLMessage reply = msg.createReply();
 							reply.setLanguage(codec.getName());
 							reply.setOntology(ontology.getName());
 
-							AID sender = msg.getSender();
+							AID sender = msg.getSender();	
 
-							int indexTribe = AgWorldInstance.findTribePositionByUnitAID(sender);
-							Tribe tribeSender = AgWorldInstance.getTribes().get(indexTribe);
-							Unit senderUnit = AgWorldInstance.findUnitByAID(sender, tribeSender);
-
-							Cell currentPosition = senderUnit.getPosition(); // TODO: DANIEL
-																				// findUnitFromAnyTribe(unitAID).getPosition();
-
-							// validate that current and requested positions are adjacent
-
-							if (!AgWorldInstance.areAdjacentPositions(currentPosition, requestedPosition)) {
-								Printer.printSuccess(AgWorldInstance.getLocalName(),
-										"Unit " + senderName + " can't move there...");
-								reply = MessageFormatter.createReplyMessage(AgWorldInstance.getLocalName(), msg,
-										ACLMessage.REFUSE, "MoveToCell");
-								AgWorldInstance.send(reply);
-							} else {
-								Printer.printSuccess(AgWorldInstance.getLocalName(), "Unit " + senderName
-										+ " IS ABLE TO MOVE TO NEW POSITION, START WAIT TIME");
-								
 								//creates and sends a reply to the unit that requested the movement
 								
 								MoveToCell createAction = new MoveToCell();
@@ -174,7 +167,7 @@ public class MovementRequestBehaviour extends CyclicBehaviour {
 								} catch (Codec.CodecException | OntologyException e) {
 									e.printStackTrace();
 								}
-							}
+							
 						} else {
 							ACLMessage reply = MessageFormatter.createReplyMessage(AgWorldInstance.getLocalName(), msg,
 									ACLMessage.NOT_UNDERSTOOD, null);

@@ -12,12 +12,14 @@ import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 import es.upm.woa.group2.beans.Tribe;
 import es.upm.woa.group2.beans.Unit;
 import es.upm.woa.group2.behaviours.MovementRequestBehaviour;
 import es.upm.woa.group2.common.MessageFormatter;
 import es.upm.woa.group2.common.Printer;
+import es.upm.woa.group2.util.Moving;
 import es.upm.woa.ontology.Building;
 import es.upm.woa.ontology.Cell;
 import es.upm.woa.ontology.CreateBuilding;
@@ -200,7 +202,7 @@ public class AgUnit extends Agent{
         	
 		});
         
-        /*
+        
 		//Behavior for moving
 		addBehaviour(new SimpleBehaviour(this)
 		{
@@ -230,7 +232,11 @@ public class AgUnit extends Agent{
 						targetPosition.setX(currentPosition.getX()+1);
 						targetPosition.setY(currentPosition.getY()+1);						
 						targetPosition.setContent(new Empty());
-						createAction.setTarget(targetPosition);
+						
+						//Moving movement = new Moving();
+						int cellNumber = new Random().nextInt((5)+1);  // [0...6]
+						
+						createAction.setTargetDirection(cellNumber);
 						Action agAction = new Action(ag,createAction);
 						// Here you pass in arguments the message and the content that it will be filled with
 						getContentManager().fillContent(createMsg, agAction);
@@ -259,7 +265,7 @@ public class AgUnit extends Agent{
 			}
 			
 		});
-		*/
+		
 		// Adds a behavior to process the answer to a creation request
 		addBehaviour(new SimpleBehaviour(this)
 		{
