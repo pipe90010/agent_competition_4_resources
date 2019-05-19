@@ -75,8 +75,8 @@ public class AgWorld extends Agent {
 	public final static Integer STONES = 500;
 	public final static Integer WOOD = 500;
 
-	private final static int X_BOUNDARY = 100;
-	private final static int Y_BOUNDARY = 100;
+	private final static int X_BOUNDARY = 8;
+	private final static int Y_BOUNDARY = 8;
 
 	// -----------------------------------------------------------------
 	// Building Constants
@@ -234,9 +234,10 @@ public class AgWorld extends Agent {
 	 */
 	public Cell bookNextRandomCell() {
 
-		int x = new Random().nextInt(X_BOUNDARY);
-		int y = new Random().nextInt(Y_BOUNDARY);
-		return map[x][y];
+		int x = new Random().nextInt((X_BOUNDARY - 1) )+1;
+		int y = new Random().nextInt((Y_BOUNDARY - 1) )+1;
+		
+		return map[x][y];		
 	}
 
 	/*
@@ -290,7 +291,7 @@ public class AgWorld extends Agent {
 			/*if(isFirst)
 				position = tribe.getTownhall();
 			else*/
-			 position = bookNextRandomCell();
+			position = bookNextRandomCell();
 
 			Object[] args = new Object[2];
 			args[0] = position.getX();
@@ -682,7 +683,7 @@ public class AgWorld extends Agent {
 	              // Insert some method call here.
 	        	 try
 	        	 {
-	        		 Thread.sleep(10000);
+	        		 Thread.sleep(MAX_REGISTRATION_TIME*1000);
 	        		 registrationPeriod = false;
 	        			
 	        	 }
