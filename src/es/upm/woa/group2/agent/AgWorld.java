@@ -1,5 +1,9 @@
 package es.upm.woa.group2.agent;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Properties;
 import java.util.Random;
@@ -62,6 +66,8 @@ public class AgWorld extends Agent {
 	public final static String TRIBE = "Tribe";
 
 	public final static String REGISTRATION_DESK = "REGISTRATION DESK";
+	public int MAX_REGISTRATION_TIME = 0;
+	public int GAME_TIME = 0;
 	
 	
 	public final static Integer GOLD = 1500;
@@ -115,6 +121,8 @@ public class AgWorld extends Agent {
 	protected void setup() {
 		System.out.println("Group2 - " + getLocalName() + ": has entered into the system ");
 
+		 readPropertiesFile();
+				
 		// Register of the codec and the ontology to be used in the ContentManager
 		// Register language and ontology this part always goes
 		getContentManager().registerLanguage(codec);
@@ -170,6 +178,23 @@ public class AgWorld extends Agent {
 		
 	}
 
+	private void readPropertiesFile() {
+        File file = new File("woa.properties");
+        try {
+            properties.load(new FileInputStream(file));
+            System.out.println("Properties file loaded");
+
+            // Fill properties
+            this.MAX_REGISTRATION_TIME = Integer.parseInt(properties.getProperty("reg_time"));
+            this.GAME_TIME = Integer.parseInt(properties.getProperty("game_time"));
+        } catch (FileNotFoundException e) {
+            System.err.println("File " + file.getAbsolutePath() + " was not found!");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+	
+	
 	// -----------------------------------------------------------------
 	// Initialize Methods
 	// -----------------------------------------------------------------
@@ -178,7 +203,7 @@ public class AgWorld extends Agent {
 		tribes = new ArrayList<Tribe>();
 		worldRules = new AgWorldRules();
 		// PASS ATRIBUTE IN MILISECONDS
-		worldTimer = new WorldTimer(1000);
+		worldTimer = new WorldTimer(Long.parseLong(properties.getProperty("tick_millis")));
 		this.initializeMap();
 		gameOver = false;
 		registrationPeriod = true;
