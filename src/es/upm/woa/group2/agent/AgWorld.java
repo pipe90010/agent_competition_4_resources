@@ -207,9 +207,9 @@ public class AgWorld extends Agent {
 	}
 
 	private void initializeMap() {
-		map = new Cell[X_BOUNDARY][Y_BOUNDARY];
-		for (int i = 1; i < X_BOUNDARY; i++) {
-			for (int j = 1; j < Y_BOUNDARY; j++) {
+		map = new Cell[X_BOUNDARY+1][Y_BOUNDARY+1];
+		for (int i = 1; i <= X_BOUNDARY; i++) {
+			for (int j = 1; j <= Y_BOUNDARY; j++) {
 				map[i][j] = new Cell();
 				map[i][j].setContent(new Empty());
 				map[i][j].setX(i);
@@ -411,12 +411,13 @@ public class AgWorld extends Agent {
 		return (deltaX <= 2 && deltaY <= 1);
 	}
 
-	public Cell getTargetPosition(Cell currentPosition, int nextMove) {
+	public Cell getTargetPosition(Cell currentPosition, int nextMove2) {
 
 		Cell targetPosition = null;
 		Cell tempTarget = null;
-		int x = currentPosition.getX();
-		int y = currentPosition.getY();
+		int x = 2;//currentPosition.getX();
+		int y = 2;//currentPosition.getY();
+		int nextMove = 1;
 		switch (nextMove) {
 		case 1:
 			if (x - 2 >= 1)
