@@ -10,8 +10,8 @@ import es.upm.woa.group2.common.Printer;
 import es.upm.woa.ontology.Building;
 import es.upm.woa.ontology.Cell;
 import es.upm.woa.ontology.CreateBuilding;
-import es.upm.woa.ontology.Empty;
 import es.upm.woa.ontology.GameOntology;
+import es.upm.woa.ontology.Ground;
 import es.upm.woa.ontology.InitalizeTribe;
 import es.upm.woa.ontology.MoveToCell;
 import es.upm.woa.ontology.NotifyCellDetail;
@@ -228,7 +228,7 @@ public class AgTribe extends Agent {
 										if(content instanceof Building) {
 											Printer.printSuccess(getLocalName(), "New cell is a building");
 										}
-										else if(content instanceof Empty) {
+										else if(content instanceof Ground) {
 											Printer.printSuccess(getLocalName(), "New cell is empty");
 										}
 										else if(content instanceof Resource) {
@@ -329,7 +329,7 @@ public class AgTribe extends Agent {
 										if(content instanceof Building) {
 											Printer.printSuccess(getLocalName(), "New cell is a building");
 										}
-										else if(content instanceof Empty) {
+										else if(content instanceof Ground) {
 											Printer.printSuccess(getLocalName(), "New cell is empty");
 										}
 										else if(content instanceof Resource) {

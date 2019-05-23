@@ -22,7 +22,7 @@ import es.upm.woa.ontology.Building;
 import es.upm.woa.ontology.Cell;
 import es.upm.woa.ontology.CreateBuilding;
 import es.upm.woa.ontology.CreateUnit;
-import es.upm.woa.ontology.Empty;
+import es.upm.woa.ontology.Ground;
 import es.upm.woa.ontology.GameOntology;
 import es.upm.woa.ontology.InitalizeTribe;
 import es.upm.woa.ontology.MoveToCell;
@@ -211,7 +211,7 @@ public class AgWorld extends Agent {
 		for (int i = 1; i <= X_BOUNDARY; i++) {
 			for (int j = 1; j <= Y_BOUNDARY; j++) {
 				map[i][j] = new Cell();
-				map[i][j].setContent(new Empty());
+				map[i][j].setContent(new Ground());
 				map[i][j].setX(i);
 				map[i][j].setY(j);
 			}
@@ -507,7 +507,7 @@ public class AgWorld extends Agent {
 	public Cell moveUnitToPosition(Unit unit, Cell cell) {
 		map[cell.getX()][cell.getY()] = cell;
 		// TODO: UPDATE WITH THE NEW ONTOLOGY
-		map[cell.getX()][cell.getY()].setContent(new Empty());
+		map[cell.getX()][cell.getY()].setContent(new Ground());
 
 		updateUnitInTribeByUnitAID(unit);
 

@@ -24,7 +24,7 @@ import es.upm.woa.ontology.Building;
 import es.upm.woa.ontology.Cell;
 import es.upm.woa.ontology.CreateBuilding;
 import es.upm.woa.ontology.CreateUnit;
-import es.upm.woa.ontology.Empty;
+import es.upm.woa.ontology.Ground;
 import es.upm.woa.ontology.GameOntology;
 import es.upm.woa.ontology.MoveToCell;
 import es.upm.woa.ontology.NotifyCellDetail;
@@ -219,7 +219,7 @@ public class AgUnit extends Agent{
 						Cell targetPosition = new Cell();
 						targetPosition.setX(currentPosition.getX()+1);
 						targetPosition.setY(currentPosition.getY()+1);						
-						targetPosition.setContent(new Empty());
+						targetPosition.setContent(new Ground());
 						
 						//Moving movement = new Moving();
 						int cellNumber = new Random().nextInt((5)+1);  // [0...6]
@@ -378,7 +378,7 @@ public class AgUnit extends Agent{
 										if(content instanceof Building) {
 											Printer.printSuccess(getLocalName(), "New cell is a building");
 										}
-										else if(content instanceof Empty) {
+										else if(content instanceof Ground) {
 											Printer.printSuccess(getLocalName(), "New cell is empty");
 										}
 										else if(content instanceof Resource) {

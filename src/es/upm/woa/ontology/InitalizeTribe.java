@@ -8,9 +8,31 @@ import jade.core.*;
 /**
 * Protege name: InitalizeTribe
 * @author ontology bean generator
-* @version 2019/05/8, 16:06:26
+* @version 2019/05/22, 18:53:14
 */
 public class InitalizeTribe implements AgentAction {
+
+   /**
+* Protege name: mapHeight
+   */
+   private int mapHeight;
+   public void setMapHeight(int value) { 
+    this.mapHeight=value;
+   }
+   public int getMapHeight() {
+     return this.mapHeight;
+   }
+
+   /**
+* Protege name: mapWidth
+   */
+   private int mapWidth;
+   public void setMapWidth(int value) { 
+    this.mapWidth=value;
+   }
+   public int getMapWidth() {
+     return this.mapWidth;
+   }
 
    /**
 * Protege name: startingResources
@@ -21,6 +43,17 @@ public class InitalizeTribe implements AgentAction {
    }
    public ResourceAccount getStartingResources() {
      return this.startingResources;
+   }
+
+   /**
+* Protege name: storageCapacityUpgrade
+   */
+   private int storageCapacityUpgrade;
+   public void setStorageCapacityUpgrade(int value) { 
+    this.storageCapacityUpgrade=value;
+   }
+   public int getStorageCapacityUpgrade() {
+     return this.storageCapacityUpgrade;
    }
 
    /**
@@ -54,5 +87,16 @@ public class InitalizeTribe implements AgentAction {
    public Iterator getAllUnitList() {return unitList.iterator(); }
    public List getUnitList() {return unitList; }
    public void setUnitList(List l) {unitList = l; }
+
+   /**
+* Protege name: initialStorageCapacity
+   */
+   private int initialStorageCapacity;
+   public void setInitialStorageCapacity(int value) { 
+    this.initialStorageCapacity=value;
+   }
+   public int getInitialStorageCapacity() {
+     return this.initialStorageCapacity;
+   }
 
 }

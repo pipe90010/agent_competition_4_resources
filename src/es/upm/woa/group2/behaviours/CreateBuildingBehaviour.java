@@ -9,7 +9,7 @@ import es.upm.woa.group2.rules.AgWorldRules;
 import es.upm.woa.ontology.Building;
 import es.upm.woa.ontology.Cell;
 import es.upm.woa.ontology.CreateBuilding;
-import es.upm.woa.ontology.Empty;
+import es.upm.woa.ontology.Ground;
 import es.upm.woa.ontology.GameOntology;
 import jade.content.Concept;
 import jade.content.ContentElement;
@@ -69,7 +69,7 @@ public class CreateBuildingBehaviour extends CyclicBehaviour{
 							boolean oneUnitBilding = tribeSender.isAnyUnitBuilding()!=null;
 							boolean meetConditions = worldRules.meetTownhallCreationCondition(tribeSender.getGold(), tribeSender.getStones(), tribeSender.getWood(),  oneUnitBilding);
 							
-							if(meetConditions && unit.getPosition().getContent() instanceof Empty)
+							if(meetConditions && unit.getPosition().getContent() instanceof Ground)
 							{
 								Action agAction = new Action(sender, createBuildingAction);
 								reply = MessageFormatter.createReplyMessage(AgWorldInstance.getLocalName(), msg,
