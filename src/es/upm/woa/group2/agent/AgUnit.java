@@ -22,8 +22,10 @@ import es.upm.woa.group2.common.Printer;
 import es.upm.woa.group2.util.Moving;
 import es.upm.woa.ontology.Building;
 import es.upm.woa.ontology.Cell;
+import es.upm.woa.ontology.CellContent;
 import es.upm.woa.ontology.CreateBuilding;
 import es.upm.woa.ontology.CreateUnit;
+import es.upm.woa.ontology.ExploitResource;
 import es.upm.woa.ontology.Ground;
 import es.upm.woa.ontology.GameOntology;
 import es.upm.woa.ontology.MoveToCell;
@@ -52,6 +54,7 @@ public class AgUnit extends Agent{
 	public final static String FARM = "Farm";
 	public final static String STORE = "Store";
 	
+	
 	// Codec for the SL language used and instance of the ontology
 	// GameOntology that we have created this part always goes
     private Codec codec = new SLCodec();
@@ -66,6 +69,8 @@ public class AgUnit extends Agent{
     private Boolean isBusy;
     
     private SimpleBehaviour movement;
+    
+    private SimpleBehaviour exploitResource;
     
 	public AgUnit() {
 		// TODO Auto-generated constructor stub
@@ -254,6 +259,56 @@ public class AgUnit extends Agent{
 			
 		};
 		
+//Behavior for exploitResource
+        
+		exploitResource = new SimpleBehaviour(this)
+		{
+			
+			@Override
+			public void action() {
+				
+				// Creates the description for the type of agent to be searched
+				DFAgentDescription dfd = new DFAgentDescription();
+				ServiceDescription sd = new ServiceDescription();
+				sd.setType(WORLD);
+				dfd.addServices(sd);
+				
+				try {
+					// It finds agents of the required type
+					DFAgentDescription[] res = new DFAgentDescription[1];
+					res = DFService.search(myAgent, dfd);
+					// Gets the first occurrence, if there was success
+					if (res.length > 0)
+					{
+						AID ag = (AID)res[0].getName();
+											
+						ACLMessage createMsg =	MessageFormatter.createMessage(getLocalName(),ACLMessage.REQUEST, "ExploitResources",ag);
+						Action agAction = new Action(ag,null);
+						getContentManager().fillContent(createMsg, agAction);
+						send(createMsg);
+					}
+					else
+						Printer.printSuccess( getLocalName(),"THERE ARE NO AGENTS REGISTERED WITH TYPE: "+sd.getType());
+				} catch (CodecException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (OntologyException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (FIPAException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+			}
+
+			@Override
+			public boolean done() {
+				// TODO Auto-generated method stub
+				return true;
+			}
+			
+		};
 		// Adds a behavior to process the answer to a creation request
 		addBehaviour(new SimpleBehaviour(this)
 		{
@@ -395,8 +450,18 @@ public class AgUnit extends Agent{
 									//TODO: new logic to be fixed --> getTargetDirection
 									int targetDirection = agActionN.getTargetDirection();
 									isBusy=false;
-									//setCurrentPosition(cell);
-									//Printer.printSuccess(getLocalName(), "New position has been updated to: "+cell.getX()+" and "+cell.getY());
+									
+									Cell newPosition = agActionN.getNewlyArrivedCell();
+									setCurrentPosition(newPosition);
+									
+									Resource resource = (Resource)newPosition.getContent();
+									if(resource.getGoldPercentage()>0)
+									{
+										addBehaviour(exploitResource);
+									}
+										
+										
+									Printer.printSuccess(getLocalName(), "New position has been updated to: "+newPosition.getX()+" and "+newPosition.getY());
 									
 								}
 								else if(conc instanceof CreateBuilding)

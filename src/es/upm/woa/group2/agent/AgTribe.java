@@ -43,6 +43,7 @@ import jade.util.leap.List;
 public class AgTribe extends Agent {
 
 	public final static String TRIBE = "Tribe";
+	public final static String REGISTRATION_DESK = "REGISTRATION DESK";
 
 	// Codec for the SL language used and instance of the ontology
 	// GameOntology that we have created
@@ -69,7 +70,7 @@ public class AgTribe extends Agent {
 				// TODO Auto-generated method stub
 				DFAgentDescription dfd = new DFAgentDescription();
 				ServiceDescription sd = new ServiceDescription();
-				//sd.setType(WORLD);
+				sd.setType(REGISTRATION_DESK);
 				dfd.addServices(sd);
 				
 				try {
@@ -357,7 +358,12 @@ public class AgTribe extends Agent {
 									tribe.setStones(resource.getStone());
 									tribe.setWood(resource.getWood());
 									
-									tribe.setTownhall(cell);
+									///tribe.setTownhall(cell);
+									
+									//Internal Strategy for unit role assignment
+									for (Unit unit : tribe.getUnits()) {
+										
+									}
 									
 									Printer.printSuccess( getLocalName(),
 											"create tribe "+ (msg.getSender()).getLocalName()+": "+

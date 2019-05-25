@@ -85,7 +85,9 @@ public class RegisterTribeBehaviour extends CyclicBehaviour{
 							/**
 							 * TEST UNIT IS CREATED FROM THE WORLD
 							 */
-							Unit u = AgWorldInstance.createUnit(true,"UnitX1", tg2);
+							Cell randomPosition = AgWorldInstance.bookNextRandomCell();
+							Unit u = AgWorldInstance.createUnit(true,"UnitX1", tg2,randomPosition);
+							
 							
 							// adds created unit to the tribe and deduct cost of each unit creation
 							tg2.addUnit(u);

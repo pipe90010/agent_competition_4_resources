@@ -272,7 +272,7 @@ public class AgWorld extends Agent {
 		return 1;
 	}
 
-	public Unit createUnit(boolean isFirst, String nickname, Tribe tribe) {
+	public Unit createUnit(boolean isFirst, String nickname, Tribe tribe,Cell initialPosition) {
 
 		ContainerController cc = getContainerController();
 
@@ -281,7 +281,10 @@ public class AgWorld extends Agent {
 			/*
 			 * if(isFirst) position = tribe.getTownhall(); else
 			 */
-			position = bookNextRandomCell();
+			if(initialPosition!=null)
+				position = initialPosition;
+			else
+				position = tribe.getTownhall();
 
 			/*Object[] args = new Object[2];
 			args[0] = position.getX();

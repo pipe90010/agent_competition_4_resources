@@ -16,6 +16,7 @@ public class Unit {
 	private AID id;
 	private Cell position;
 	private String action;
+	private String role;
 	
 	// -----------------------------------------------------------------
     // Constructor
@@ -59,6 +60,14 @@ public class Unit {
 
 	public void setAction(String action) {
 		this.action = action;
+	}
+
+	public String getRole() {
+		return role;
+	}
+
+	public void setRole(String role) {
+		this.role = role;
 	}
 	
 	

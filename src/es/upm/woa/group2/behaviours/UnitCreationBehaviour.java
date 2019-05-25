@@ -116,7 +116,7 @@ public class UnitCreationBehaviour extends CyclicBehaviour {
 							myAgent.send(reply);
 
 							if (code == 1) {
-								Unit u = AgWorldInstance.createUnit(false,newUnitName, tribeSender);
+								Unit u = AgWorldInstance.createUnit(false,newUnitName, tribeSender,null);
 								if (u != null) {
 									AgWorldInstance.getTribes().get(indexTribe).addUnit(u);
 									AgWorldInstance.getTribes().get(indexTribe).deductCost(150, 50,0,0);

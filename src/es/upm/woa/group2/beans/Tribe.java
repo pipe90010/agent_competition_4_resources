@@ -38,6 +38,15 @@ public class Tribe {
 	private ArrayList<Cell> discoveredCells;
 	private int teamNumber;
 	
+	//Unit that creates other units and buildings
+	private Unit unitBuilder;
+	
+	//Create unit collecters
+	private ArrayList<Unit> unitsCollecters;
+	
+	//Explore map and if they find any valuable resource they will exploit it
+	private ArrayList<Unit> unitsExplorers;
+	
 	// -----------------------------------------------------------------
     // Constructor
     // -----------------------------------------------------------------
@@ -62,6 +71,8 @@ public class Tribe {
 		this.cities = new ArrayList<Building>();
 		this.memberSize = 0;
 		this.teamNumber = teamNumber;
+		this.unitsCollecters = new ArrayList<Unit>();
+		this.unitsExplorers = new ArrayList<Unit>();
 	}
 	
 	public Tribe(AID id) {
@@ -254,5 +265,39 @@ public class Tribe {
 		jade.util.leap.ArrayList list = new jade.util.leap.ArrayList(aids);
 		return list;
 	}
+
+	public Unit getUnitBuilder() {
+		return unitBuilder;
+	}
+
+	public void setUnitBuilder(Unit unitBuilder) {
+		this.unitBuilder = unitBuilder;
+	}
+
+	public ArrayList<Unit> getUnitsCollecters() {
+		return unitsCollecters;
+	}
+	
+	public void addUnitsCollecters(Unit u)
+	{
+		this.unitsCollecters.add(u);
+	}
+	public void setUnitsCollecters(ArrayList<Unit> unitsCollecters) {
+		this.unitsCollecters = unitsCollecters;
+	}
+
+	public ArrayList<Unit> getUnitsExplorers() {
+		return unitsExplorers;
+	}
+	
+	public void addUnitsExplorers(Unit u)
+	{
+		this.unitsCollecters.add(u);
+	}
+	
+	public void setUnitsExplorers(ArrayList<Unit> unitsExplorers) {
+		this.unitsExplorers = unitsExplorers;
+	}
+	
 	
 }
