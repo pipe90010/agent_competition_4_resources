@@ -12,6 +12,7 @@ import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Random;
 
 import es.upm.woa.group2.beans.Tribe;
@@ -64,6 +65,8 @@ public class AgUnit extends Agent{
     
     private Unit unit;
 	
+    private Tribe tribe;
+	
     private ArrayList<Cell> discoveredCells;
     
     private Boolean isBusy;
@@ -71,6 +74,7 @@ public class AgUnit extends Agent{
     private SimpleBehaviour movement;
     
     private SimpleBehaviour exploitResource;
+
     
 	public AgUnit() {
 		// TODO Auto-generated constructor stub
@@ -403,9 +407,12 @@ public class AgUnit extends Agent{
 										MessageTemplate.MatchProtocol("NotifyCellDetail"),
 										MessageTemplate.or(
 												MessageTemplate.MatchProtocol("InformOriginPosition"), 
-												MessageTemplate.MatchProtocol("informMove"))),
+												MessageTemplate.or(
+														MessageTemplate.MatchProtocol("informMove"),
+														MessageTemplate.MatchProtocol("ExploitResources")))),
 								MessageTemplate.MatchProtocol("CreateBuilding")
 						)));
+				
 				if (msg != null)
 			    {
 					if(msg.getPerformative()==ACLMessage.INFORM)
@@ -476,12 +483,38 @@ public class AgUnit extends Agent{
 								{
 									NotifyNewUnit agActionN = (NotifyNewUnit)agAction.getAction();
 
+									tribe = new Tribe(msg.getSender());
+
 									Cell cell= agActionN.getLocation();
 									
 									setCurrentPosition(cell);
 									addBehaviour(movement);
 									Printer.printSuccess(getLocalName(), "Origin Position has been set: "+cell.getX()+", "+cell.getY());
 								}
+
+								else if(conc instanceof ExploitResource)
+								{
+									ExploitResource agActionN = (ExploitResource)agAction.getAction();
+
+									Iterator resources = agActionN.getAllResourceList();
+
+									ACLMessage reply = msg.createReply();
+									reply.setLanguage(codec.getName());
+									reply.setOntology(ontology.getName());
+									
+									Action explotationResources = new Action(tribe.getId(), agActionN);
+									
+									ACLMessage informUnit = MessageFormatter.createMessage(
+											getLocalName(), ACLMessage.INFORM, "informExploitResources",
+											msg.getSender());
+
+									Printer.printSuccess(getLocalName(), "The resource has been exploited");
+
+									getContentManager().fillContent(informUnit, explotationResources);
+									send(informUnit);
+									
+								}
+
 								
 							}
 						}

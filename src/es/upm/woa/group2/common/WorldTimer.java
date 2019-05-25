@@ -9,7 +9,8 @@ public class WorldTimer {
 		private final static long MOVE_CELL_TIME = 6; 
 		private final static long CREATE_UNIT_TIME = 15; 
 		private final static long BUILD_TOWN_HALL_TIME = 24; 
-		private final static long EXPOIT_RESOURCE_TIME = 8; 
+		private final static long EXPLOIT_ORE_TIME = 8;
+		private final static long EXPLOIT_WOOD_TIME = 10;
 		
 	// -----------------------------------------------------------------
 	// Atributes
@@ -47,8 +48,14 @@ public class WorldTimer {
 	}
 	
 	public long getExploitResourceTime() {
-		long time = parseTime(EXPOIT_RESOURCE_TIME);
+		long time = parseTime(EXPLOIT_ORE_TIME);
 		System.out.println("...waiting time for EXPOIT_RESOURCE_TIME:"+time+"ms");
+		return time;
+	}
+	
+	public long getExploitWoodTime() {
+		long time = parseTime(EXPLOIT_WOOD_TIME);
+		System.out.println("...waiting time for EXPOIT_WOOD_TIME:"+time+"ms");
 		return time;
 	}
 }

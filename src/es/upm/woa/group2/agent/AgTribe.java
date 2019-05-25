@@ -2,6 +2,7 @@ package es.upm.woa.group2.agent;
 
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import es.upm.woa.group2.beans.Tribe;
 import es.upm.woa.group2.beans.Unit;
@@ -10,6 +11,7 @@ import es.upm.woa.group2.common.Printer;
 import es.upm.woa.ontology.Building;
 import es.upm.woa.ontology.Cell;
 import es.upm.woa.ontology.CreateBuilding;
+import es.upm.woa.ontology.ExploitResource;
 import es.upm.woa.ontology.GameOntology;
 import es.upm.woa.ontology.Ground;
 import es.upm.woa.ontology.InitalizeTribe;
@@ -150,6 +152,7 @@ public class AgTribe extends Agent {
 									send(msgInform);
 									
 									
+									
 									Printer.printSuccess( getLocalName(),"received unit creation from "+ (msg.getSender()).getLocalName()+" with AID: "+aid.getName()+" and its location is "+cell.getX()+" and "+cell.getY());
 								}
 							}
@@ -268,12 +271,17 @@ public class AgTribe extends Agent {
 				ACLMessage msg = receive(MessageTemplate.and(
 						MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.INFORM),
 						MessageTemplate.MatchPerformative(ACLMessage.FAILURE)),
-						MessageTemplate.or(
+						MessageTemplate.or
+						(
 								MessageTemplate.or(
 										MessageTemplate.MatchProtocol("CreateUnit"),
-										MessageTemplate.MatchProtocol("informMove")),
+										MessageTemplate.or(
+												MessageTemplate.MatchProtocol("informMove"),
+												MessageTemplate.MatchProtocol("ExploitResources")
+												)),
 								MessageTemplate.MatchProtocol("InitalizeTribe")
-						)));
+						)
+						));
 				if (msg != null)
 			    {
 					if(msg.getPerformative()==ACLMessage.INFORM)
@@ -371,6 +379,37 @@ public class AgTribe extends Agent {
 
 								}
 								
+								else if(conc instanceof ExploitResource)
+								{
+									ExploitResource agActionN = (ExploitResource)agAction.getAction();
+
+									Iterator resources = agActionN.getAllResourceList();
+
+									while(resources.hasNext())
+									{
+										Resource resource = (Resource)resources.next();
+										switch (resource.getResourceType()) 
+										{
+											case GameOntology.RESOURCEACCOUNT_GOLD:
+												
+												break;
+											case GameOntology.RESOURCEACCOUNT_FOOD:
+												
+												break;
+	
+											case GameOntology.RESOURCEACCOUNT_STONE:
+												
+												break;
+	
+											case GameOntology.RESOURCEACCOUNT_WOOD:
+												
+												break;
+	
+											default:
+												break;
+										}										
+									}
+								}
 							}
 						}
 						catch (Exception e) {
