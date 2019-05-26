@@ -64,9 +64,11 @@ public class CreateBuildingBehaviour extends CyclicBehaviour{
 						reply.setLanguage(codec.getName());
 						reply.setOntology(ontology.getName());
 						
+						boolean oneUnitBilding = tribeSender.isAnyUnitBuilding()!=null;
+						
+						
 						if(buildingType.equals(AgWorldInstance.TOWNHALL)) {
 							
-							boolean oneUnitBilding = tribeSender.isAnyUnitBuilding()!=null;
 							boolean meetConditions = worldRules.meetTownhallCreationCondition(tribeSender.getGold(), tribeSender.getStones(), tribeSender.getWood(),  oneUnitBilding);
 							
 							if(meetConditions && unit.getPosition().getContent() instanceof Ground)
@@ -129,6 +131,134 @@ public class CreateBuildingBehaviour extends CyclicBehaviour{
 								AgWorldInstance.send(reply);
 							}
 						}
+						if(buildingType.equals(AgWorldInstance.FARM)) 
+						{
+							boolean meetConditions = worldRules.meetFarmCreationCondition(tribeSender.getGold(), tribeSender.getStones(), tribeSender.getWood(),  oneUnitBilding);
+							
+							if(meetConditions && unit.getPosition().getContent() instanceof Ground)
+							{
+								Action agAction = new Action(sender, createBuildingAction);
+								reply = MessageFormatter.createReplyMessage(AgWorldInstance.getLocalName(), msg,
+										ACLMessage.AGREE, "CreateBuilding");
+								AgWorldInstance.getContentManager().fillContent(reply, agAction);
+								AgWorldInstance.send(reply);
+								
+								unit.setAction("BUILDING");
+								AgWorldInstance.updateUnitInTribeByUnitAID(unit);
+								
+								
+								Cell currentPosition = unit.getPosition();
+								Building farm = new Building();
+								farm.setType(AgWorldInstance.FARM);
+								map[currentPosition.getX()][currentPosition.getY()].setContent(farm);
+								tribeSender.addNewCity(farm);
+								
+								long time = AgWorldInstance.getWorldTimer().getBuildFarmTime();
+								Printer.printSuccess(AgWorldInstance.getLocalName(), "farm from "+tribeSender.getId().getLocalName()+" creation time started");
+								AgWorldInstance.doWait(time);
+								Printer.printSuccess(AgWorldInstance.getLocalName(), "farm from "+tribeSender.getId().getLocalName()+" creation time finished");
+								
+								//updateTribeByTribeAID(tribeSender);
+								
+								
+								Unit unitUpdated = AgWorldInstance.findUnitByAID(unitAID, tribeSender);
+								if(unitUpdated.getAction().equals("BUILDING"))
+								{
+									//INFORMS TRIBE ABOUT CELL UPDATE WITH TOWNHALL
+									ACLMessage informMsgTribe = MessageFormatter.createMessage(
+											AgWorldInstance.getLocalName(), ACLMessage.INFORM, "informBuildingCreation",
+											unitUpdated.getId());
+									AgWorldInstance.getContentManager().fillContent(informMsgTribe, agAction);
+									AgWorldInstance.send(informMsgTribe);
+									tribeSender.deductCost(100,0,25,25);
+								}
+								else
+								{
+									ACLMessage informMsg = MessageFormatter.createReplyMessage(AgWorldInstance.getLocalName(), msg,
+											ACLMessage.FAILURE, "NotifyCellDetail");
+									AgWorldInstance.send(informMsg);
+								}
+								
+								unit.setAction(null);
+								//UPDATES TRIBES ARRAY
+								AgWorldInstance.updateUnitInTribeByUnitAID(unit);
+								AgWorldInstance.updateTribeByTribeAID(tribeSender);		
+								
+							}
+							else
+							{
+								Printer.printSuccess(AgWorldInstance.getLocalName(),
+										"Unit " + senderName + " CANNOT CREATE BUILDING");
+								reply = MessageFormatter.createReplyMessage(AgWorldInstance.getLocalName(), msg,
+										ACLMessage.REFUSE, "CreateBuilding");
+								AgWorldInstance.send(reply);
+							}
+							
+						}
+						if(buildingType.equals(AgWorldInstance.STORE)) 
+						{
+							boolean meetConditions = worldRules.meetStoreCreationCondition(tribeSender.getGold(), tribeSender.getStones(), tribeSender.getWood(),  oneUnitBilding);
+							
+							if(meetConditions && unit.getPosition().getContent() instanceof Ground)
+							{
+								Action agAction = new Action(sender, createBuildingAction);
+								reply = MessageFormatter.createReplyMessage(AgWorldInstance.getLocalName(), msg,
+										ACLMessage.AGREE, "CreateBuilding");
+								AgWorldInstance.getContentManager().fillContent(reply, agAction);
+								AgWorldInstance.send(reply);
+								
+								unit.setAction("BUILDING");
+								AgWorldInstance.updateUnitInTribeByUnitAID(unit);
+								
+								
+								Cell currentPosition = unit.getPosition();
+								Building store = new Building();
+								store.setType(AgWorldInstance.STORE);
+								map[currentPosition.getX()][currentPosition.getY()].setContent(store);
+								tribeSender.addNewCity(store);
+								
+								long time = AgWorldInstance.getWorldTimer().getBuildStoreTime();
+								Printer.printSuccess(AgWorldInstance.getLocalName(), "Store from "+tribeSender.getId().getLocalName()+" creation time started");
+								AgWorldInstance.doWait(time);
+								Printer.printSuccess(AgWorldInstance.getLocalName(), "Store from "+tribeSender.getId().getLocalName()+" creation time finished");
+								
+								//updateTribeByTribeAID(tribeSender);
+								
+								
+								Unit unitUpdated = AgWorldInstance.findUnitByAID(unitAID, tribeSender);
+								if(unitUpdated.getAction().equals("BUILDING"))
+								{
+									//INFORMS TRIBE ABOUT CELL UPDATE WITH TOWNHALL
+									ACLMessage informMsgTribe = MessageFormatter.createMessage(
+											AgWorldInstance.getLocalName(), ACLMessage.INFORM, "informBuildingCreation",
+											unitUpdated.getId());
+									AgWorldInstance.getContentManager().fillContent(informMsgTribe, agAction);
+									AgWorldInstance.send(informMsgTribe);
+									tribeSender.deductCost(50,0,50,50);
+								}
+								else
+								{
+									ACLMessage informMsg = MessageFormatter.createReplyMessage(AgWorldInstance.getLocalName(), msg,
+											ACLMessage.FAILURE, "NotifyCellDetail");
+									AgWorldInstance.send(informMsg);
+								}
+								
+								unit.setAction(null);
+								//UPDATES TRIBES ARRAY
+								AgWorldInstance.updateUnitInTribeByUnitAID(unit);
+								AgWorldInstance.updateTribeByTribeAID(tribeSender);		
+								
+							}
+							else
+							{
+								Printer.printSuccess(AgWorldInstance.getLocalName(),
+										"Unit " + senderName + " CANNOT CREATE BUILDING");
+								reply = MessageFormatter.createReplyMessage(AgWorldInstance.getLocalName(), msg,
+										ACLMessage.REFUSE, "CreateBuilding");
+								AgWorldInstance.send(reply);
+							}
+						}
+						
 						
 					}
 					else
@@ -141,6 +271,7 @@ public class CreateBuildingBehaviour extends CyclicBehaviour{
 					}
 						
 				}
+				
 			}
 			catch (Exception e) {
 				// TODO: handle exception

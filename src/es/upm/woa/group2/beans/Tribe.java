@@ -37,7 +37,24 @@ public class Tribe {
 	private AID id;
 	private ArrayList<Cell> discoveredCells;
 	private int teamNumber;
-	
+	private int x_boundary;
+	public int getX_boundary() {
+		return x_boundary;
+	}
+
+	public void setX_boundary(int x_boundary) {
+		this.x_boundary = x_boundary;
+	}
+
+	private int y_boundary;
+	public int getY_boundary() {
+		return y_boundary;
+	}
+
+	public void setY_boundary(int y_boundary) {
+		this.y_boundary = y_boundary;
+	}
+
 	//Unit that creates other units and buildings
 	private Unit unitBuilder;
 	

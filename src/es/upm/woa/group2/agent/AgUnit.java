@@ -42,11 +42,11 @@ import jade.content.onto.basic.Action;
 import jade.content.lang.sl.*;
 //import es.upm.woa.agent.group5.AgWorld;
 
-public class AgUnit extends Agent{
+public class AgUnit extends Agent {
 
 	public final static String WORLD = "World";
 	public final static String UNIT = "Unit";
-	
+
 	// -----------------------------------------------------------------
 	// Building Constants
 	// -----------------------------------------------------------------
@@ -54,80 +54,85 @@ public class AgUnit extends Agent{
 	public final static String TOWNHALL = "Town Hall";
 	public final static String FARM = "Farm";
 	public final static String STORE = "Store";
-	
-	
+
+	public String typeOfBuildingCreated = "Town Hall";
+
 	// Codec for the SL language used and instance of the ontology
 	// GameOntology that we have created this part always goes
-    private Codec codec = new SLCodec();
-    private Ontology ontology = GameOntology.getInstance();
-    
-    private Cell currentPosition;
-    
-    private Unit unit;
-	
-    private Tribe tribe;
-	
-    private ArrayList<Cell> discoveredCells;
-    
-    private Boolean isBusy;
-    
-    private SimpleBehaviour movement;
-    
-    private SimpleBehaviour exploitResource;
+	private Codec codec = new SLCodec();
+	private Ontology ontology = GameOntology.getInstance();
 
-    
+	private Cell currentPosition;
+
+	private Unit unit;
+
+	private Tribe tribe;
+
+	private ArrayList<Cell> discoveredCells;
+
+	private Boolean isBusy;
+
+	private SimpleBehaviour movement;
+	private SimpleBehaviour exploitResource;
+	private SimpleBehaviour createBuilding;
+	private SimpleBehaviour createUnit;
+
 	public AgUnit() {
 		// TODO Auto-generated constructor stub
 	}
-	
-	protected void setup()
-	{
+
+	protected void setup() {
 		unit = new Unit(getAID());
 		isBusy = false;
 		discoveredCells = new ArrayList<Cell>();
-		Printer.printSuccess( getLocalName(),"has entered into the system ");
-		//Register of the codec and the ontology to be used in the ContentManager
-		//Register language and ontology this part always goes
-        getContentManager().registerLanguage(codec);
-        getContentManager().registerOntology(ontology);
-        
+
+		if (unit.getRole().equals(Unit.BUILDER_ROLE)) {
+			addBehaviour(createBuilding);
+		}
+		Printer.printSuccess(getLocalName(), "has entered into the system ");
+		// Register of the codec and the ontology to be used in the ContentManager
+		// Register language and ontology this part always goes
+		getContentManager().registerLanguage(codec);
+		getContentManager().registerOntology(ontology);
+
 		/*
-         * BEHAVIORS------------------------------------------------------------------------------------------
-         */
-		
-		
-		/*addBehaviour(new SimpleBehaviour(this)
-		{
-			
+		 * BEHAVIORS--------------------------------------------------------------------
+		 * ----------------------
+		 */
+
+		// Behavior for requesting UNIT CREATION
+		createUnit = new SimpleBehaviour(this) {
+
 			@Override
 			public void action() {
-				
+
 				// Creates the description for the type of agent to be searched
 				DFAgentDescription dfd = new DFAgentDescription();
 				ServiceDescription sd = new ServiceDescription();
 				sd.setType(WORLD);
 				dfd.addServices(sd);
-				
+
 				try {
 					// It finds agents of the required type
 					DFAgentDescription[] res = new DFAgentDescription[1];
 					res = DFService.search(myAgent, dfd);
 					// Gets the first occurrence, if there was success
-					if (res.length > 0)
-					{
-						AID ag = (AID)res[0].getName();
-	        				
-						ACLMessage msg =	MessageFormatter.createMessage(getLocalName(),ACLMessage.REQUEST, "createUnit",ag);
-						
+					if (res.length > 0) {
+						AID ag = (AID) res[0].getName();
+
+						ACLMessage msg = MessageFormatter.createMessage(getLocalName(), ACLMessage.REQUEST,
+								"createUnit", ag);
+
 						CreateUnit create = new CreateUnit();
-						Action agAction = new Action(ag,create);
-						// Here you pass in arguments the message and the content that it will be filled with
+						Action agAction = new Action(ag, create);
+						// Here you pass in arguments the message and the content that it will be filled
+						// with
 						getContentManager().fillContent(msg, agAction);
 						send(msg);
-						Printer.printSuccess( getLocalName(),": REQUEST CREATION TO THE WORLD");
-					}
-					else
-					Printer.printSuccess( getLocalName(),"THERE ARE NO AGENTS REGISTERED WITH TYPE: "+sd.getType());
+						Printer.printSuccess(getLocalName(), ": REQUEST CREATION TO THE WORLD");
+					} else
+						Printer.printSuccess(getLocalName(),
+								"THERE ARE NO AGENTS REGISTERED WITH TYPE: " + sd.getType());
 				} catch (CodecException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -138,7 +143,7 @@ public class AgUnit extends Agent{
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				
+
 			}
 
 			@Override
@@ -146,12 +151,11 @@ public class AgUnit extends Agent{
 				// TODO Auto-generated method stub
 				return true;
 			}
-			
-		});
-		*/
-        //Behavior for requesting BUILDINGS
-        addBehaviour(new SimpleBehaviour(this)
-		{
+
+		};
+
+		// Behavior for requesting BUILDINGS
+		createBuilding = new SimpleBehaviour(this) {
 
 			@Override
 			public void action() {
@@ -160,30 +164,31 @@ public class AgUnit extends Agent{
 				ServiceDescription sd = new ServiceDescription();
 				sd.setType(WORLD);
 				dfd.addServices(sd);
-				
+
 				try {
 					// It finds agents of the required type
 					DFAgentDescription[] res = new DFAgentDescription[1];
 					res = DFService.search(myAgent, dfd);
 					// Gets the first occurrence, if there was success
-					if (res.length > 0)
-					{
-						AID ag = (AID)res[0].getName();
-						
-						ACLMessage createMsg =	MessageFormatter.createMessage(getLocalName(),ACLMessage.REQUEST, "CreateBuilding",ag);
+					if (res.length > 0) {
+						AID ag = (AID) res[0].getName();
+
+						ACLMessage createMsg = MessageFormatter.createMessage(getLocalName(), ACLMessage.REQUEST,
+								"CreateBuilding", ag);
 						CreateBuilding createTownhall = new CreateBuilding();
-						createTownhall.setBuildingType(TOWNHALL);
-						
-						Action agAction = new Action(ag,createTownhall);
-						// Here you pass in arguments the message and the content that it will be filled with
+						createTownhall.setBuildingType(typeOfBuildingCreated);
+
+						Action agAction = new Action(ag, createTownhall);
+						// Here you pass in arguments the message and the content that it will be filled
+						// with
 						getContentManager().fillContent(createMsg, agAction);
 						isBusy = true;
 						send(createMsg);
-					}
-					else
-						Printer.printSuccess( getLocalName(),"THERE ARE NO AGENTS REGISTERED WITH TYPE: "+sd.getType());
+					} else
+						Printer.printSuccess(getLocalName(),
+								"THERE ARE NO AGENTS REGISTERED WITH TYPE: " + sd.getType());
 				}
-				
+
 				catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -195,53 +200,52 @@ public class AgUnit extends Agent{
 				// TODO Auto-generated method stub
 				return true;
 			}
-        	
-		});
-        
-        
-		//Behavior for moving
-        
-        movement = new SimpleBehaviour(this)
-		{
-			
+
+		};
+
+		// Behavior for moving
+
+		movement = new SimpleBehaviour(this) {
+
 			@Override
 			public void action() {
-				
+
 				// Creates the description for the type of agent to be searched
 				DFAgentDescription dfd = new DFAgentDescription();
 				ServiceDescription sd = new ServiceDescription();
 				sd.setType(WORLD);
 				dfd.addServices(sd);
-				
+
 				try {
 					// It finds agents of the required type
 					DFAgentDescription[] res = new DFAgentDescription[1];
 					res = DFService.search(myAgent, dfd);
 					// Gets the first occurrence, if there was success
-					if (res.length > 0)
-					{
-						AID ag = (AID)res[0].getName();
-											
-						ACLMessage createMsg =	MessageFormatter.createMessage(getLocalName(),ACLMessage.REQUEST, "MoveToCell",ag);
+					if (res.length > 0) {
+						AID ag = (AID) res[0].getName();
+
+						ACLMessage createMsg = MessageFormatter.createMessage(getLocalName(), ACLMessage.REQUEST,
+								"MoveToCell", ag);
 						MoveToCell createAction = new MoveToCell();
-						
+
 						Cell targetPosition = new Cell();
-						targetPosition.setX(currentPosition.getX()+1);
-						targetPosition.setY(currentPosition.getY()+1);						
+						targetPosition.setX(currentPosition.getX() + 1);
+						targetPosition.setY(currentPosition.getY() + 1);
 						targetPosition.setContent(new Ground());
-						
-						//Moving movement = new Moving();
-						int cellNumber = new Random().nextInt((5)+1);  // [0...6]
-						
+
+						// Moving movement = new Moving();
+						int cellNumber = new Random().nextInt((5) + 1); // [0...6]
+
 						createAction.setTargetDirection(cellNumber);
-						Action agAction = new Action(ag,createAction);
-						// Here you pass in arguments the message and the content that it will be filled with
+						Action agAction = new Action(ag, createAction);
+						// Here you pass in arguments the message and the content that it will be filled
+						// with
 						getContentManager().fillContent(createMsg, agAction);
 						isBusy = true;
 						send(createMsg);
-					}
-					else
-						Printer.printSuccess( getLocalName(),"THERE ARE NO AGENTS REGISTERED WITH TYPE: "+sd.getType());
+					} else
+						Printer.printSuccess(getLocalName(),
+								"THERE ARE NO AGENTS REGISTERED WITH TYPE: " + sd.getType());
 				} catch (CodecException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -252,7 +256,7 @@ public class AgUnit extends Agent{
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				
+
 			}
 
 			@Override
@@ -260,39 +264,38 @@ public class AgUnit extends Agent{
 				// TODO Auto-generated method stub
 				return true;
 			}
-			
+
 		};
-		
+
 //Behavior for exploitResource
-        
-		exploitResource = new SimpleBehaviour(this)
-		{
-			
+
+		exploitResource = new SimpleBehaviour(this) {
+
 			@Override
 			public void action() {
-				
+
 				// Creates the description for the type of agent to be searched
 				DFAgentDescription dfd = new DFAgentDescription();
 				ServiceDescription sd = new ServiceDescription();
 				sd.setType(WORLD);
 				dfd.addServices(sd);
-				
+
 				try {
 					// It finds agents of the required type
 					DFAgentDescription[] res = new DFAgentDescription[1];
 					res = DFService.search(myAgent, dfd);
 					// Gets the first occurrence, if there was success
-					if (res.length > 0)
-					{
-						AID ag = (AID)res[0].getName();
-											
-						ACLMessage createMsg =	MessageFormatter.createMessage(getLocalName(),ACLMessage.REQUEST, "ExploitResources",ag);
-						Action agAction = new Action(ag,null);
+					if (res.length > 0) {
+						AID ag = (AID) res[0].getName();
+
+						ACLMessage createMsg = MessageFormatter.createMessage(getLocalName(), ACLMessage.REQUEST,
+								"ExploitResources", ag);
+						Action agAction = new Action(ag, null);
 						getContentManager().fillContent(createMsg, agAction);
 						send(createMsg);
-					}
-					else
-						Printer.printSuccess( getLocalName(),"THERE ARE NO AGENTS REGISTERED WITH TYPE: "+sd.getType());
+					} else
+						Printer.printSuccess(getLocalName(),
+								"THERE ARE NO AGENTS REGISTERED WITH TYPE: " + sd.getType());
 				} catch (CodecException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -303,7 +306,7 @@ public class AgUnit extends Agent{
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				
+
 			}
 
 			@Override
@@ -311,20 +314,19 @@ public class AgUnit extends Agent{
 				// TODO Auto-generated method stub
 				return true;
 			}
-			
+
 		};
 		// Adds a behavior to process the answer to a creation request
-		addBehaviour(new SimpleBehaviour(this)
-		{
+		addBehaviour(new SimpleBehaviour(this) {
 
 			@Override
 			public void action() {
-				
-				ACLMessage msg = receive(MessageTemplate.and(MessageTemplate.MatchPerformative(ACLMessage.AGREE), MessageTemplate.MatchProtocol("createUnit")));
-				if (msg != null)
-	            {
-					Printer.printSuccess( getLocalName(),"WORLD REPLIED SUCCESFULL CREATION OF UNIT");
-	            }
+
+				ACLMessage msg = receive(MessageTemplate.and(MessageTemplate.MatchPerformative(ACLMessage.AGREE),
+						MessageTemplate.MatchProtocol("createUnit")));
+				if (msg != null) {
+					Printer.printSuccess(getLocalName(), "WORLD REPLIED SUCCESFULL CREATION OF UNIT");
+				}
 			}
 
 			@Override
@@ -332,26 +334,28 @@ public class AgUnit extends Agent{
 				// TODO Auto-generated method stub
 				return false;
 			}
-			
+
 		});
-		
+
 		// Adds a behavior to process the answer to a movement request
-		addBehaviour(new SimpleBehaviour(this)
-		{
+		addBehaviour(new SimpleBehaviour(this) {
 
 			@Override
 			public void action() {
-					
-				ACLMessage msg = receive(MessageTemplate.and(MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.AGREE), MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.NOT_UNDERSTOOD), MessageTemplate.MatchPerformative(ACLMessage.REFUSE))), MessageTemplate.MatchProtocol("MoveToCell")));
-				if (msg != null)
-			    {
-					if(msg.getPerformative()==ACLMessage.AGREE )
-						Printer.printSuccess( getLocalName(),"MOVEMENT ACCEPTED");
-					else if(msg.getPerformative()==ACLMessage.REFUSE )
-						Printer.printSuccess( getLocalName(),"MOVEMENT REFUSED");
-					if(msg.getPerformative()==ACLMessage.NOT_UNDERSTOOD )
-						Printer.printSuccess( getLocalName(),"MOVEMENT NOT_UNDERSTOOD");
-			     }
+
+				ACLMessage msg = receive(MessageTemplate.and(
+						MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.AGREE),
+								MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.NOT_UNDERSTOOD),
+										MessageTemplate.MatchPerformative(ACLMessage.REFUSE))),
+						MessageTemplate.MatchProtocol("MoveToCell")));
+				if (msg != null) {
+					if (msg.getPerformative() == ACLMessage.AGREE)
+						Printer.printSuccess(getLocalName(), "MOVEMENT ACCEPTED");
+					else if (msg.getPerformative() == ACLMessage.REFUSE)
+						Printer.printSuccess(getLocalName(), "MOVEMENT REFUSED");
+					if (msg.getPerformative() == ACLMessage.NOT_UNDERSTOOD)
+						Printer.printSuccess(getLocalName(), "MOVEMENT NOT_UNDERSTOOD");
+				}
 			}
 
 			@Override
@@ -359,13 +363,11 @@ public class AgUnit extends Agent{
 				// TODO Auto-generated method stub
 				return false;
 			}
-					
-		});	
-		
-		
+
+		});
+
 		// Adds a behavior to process the answer to a movement request
-		addBehaviour(new SimpleBehaviour(this)
-		{
+		addBehaviour(new SimpleBehaviour(this) {
 
 			@Override
 			public void action() {
@@ -394,147 +396,149 @@ public class AgUnit extends Agent{
 		});
 
 		// Adds a behavior after a movement has done
-		addBehaviour(new CyclicBehaviour(this)
-		{
+		addBehaviour(new CyclicBehaviour(this) {
 
 			public void action() {
-					
+
 				ACLMessage msg = receive(MessageTemplate.and(
 						MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.INFORM),
-						MessageTemplate.MatchPerformative(ACLMessage.FAILURE)),
+								MessageTemplate.MatchPerformative(ACLMessage.FAILURE)),
 						MessageTemplate.or(
-								MessageTemplate.or(
-										MessageTemplate.MatchProtocol("NotifyCellDetail"),
-										MessageTemplate.or(
-												MessageTemplate.MatchProtocol("InformOriginPosition"), 
-												MessageTemplate.or(
-														MessageTemplate.MatchProtocol("informMove"),
+								MessageTemplate.or(MessageTemplate.MatchProtocol("NotifyCellDetail"),
+										MessageTemplate.or(MessageTemplate.MatchProtocol("InformOriginPosition"),
+												MessageTemplate.or(MessageTemplate.MatchProtocol("informMove"),
 														MessageTemplate.MatchProtocol("ExploitResources")))),
-								MessageTemplate.MatchProtocol("CreateBuilding")
-						)));
-				
-				if (msg != null)
-			    {
-					if(msg.getPerformative()==ACLMessage.INFORM)
-					{
+								MessageTemplate.MatchProtocol("CreateBuilding"))));
+
+				if (msg != null) {
+					if (msg.getPerformative() == ACLMessage.INFORM) {
 						try {
 							ContentElement ce = getContentManager().extractContent(msg);
 							if (ce instanceof Action) {
 								Action agAction = (Action) ce;
 								Concept conc = agAction.getAction();
-								//casting
-								
+								// casting
+
 								if (conc instanceof NotifyCellDetail) {
-									
-									NotifyCellDetail agActionN = (NotifyCellDetail)agAction.getAction();
-			
-									Cell cell= agActionN.getNewCell();
+
+									NotifyCellDetail agActionN = (NotifyCellDetail) agAction.getAction();
+
+									Cell cell = agActionN.getNewCell();
 									addNewCellDiscovered(cell);
-									
+
 									Object content = cell.getContent();
-									
-									Printer.printSuccess( getLocalName()," Movement has been made");
-									
-									if(content!=null)
-									{
-										if(content instanceof Building) {
+
+									Printer.printSuccess(getLocalName(), " Movement has been made");
+
+									if (content != null) {
+										if (content instanceof Building) {
 											Printer.printSuccess(getLocalName(), "New cell is a building");
-										}
-										else if(content instanceof Ground) {
+										} else if (content instanceof Ground) {
 											Printer.printSuccess(getLocalName(), "New cell is empty");
-										}
-										else if(content instanceof Resource) {
+										} else if (content instanceof Resource) {
 											Printer.printSuccess(getLocalName(), "New cell is a resource");
-										}
-										else
+										} else
 											Printer.printSuccess(getLocalName(), "New cell's content is unknown");
 									}
-								}
-								else if(conc instanceof MoveToCell)
-								{
-									MoveToCell agActionN = (MoveToCell)agAction.getAction();
-									
-									//TODO: new logic to be fixed --> getTargetDirection
+								} else if (conc instanceof MoveToCell) {
+									MoveToCell agActionN = (MoveToCell) agAction.getAction();
+
+									// TODO: new logic to be fixed --> getTargetDirection
 									int targetDirection = agActionN.getTargetDirection();
-									isBusy=false;
-									
+									isBusy = false;
+
 									Cell newPosition = agActionN.getNewlyArrivedCell();
 									setCurrentPosition(newPosition);
-									
-									Resource resource = (Resource)newPosition.getContent();
-									if(resource.getGoldPercentage()>0)
-									{
-										addBehaviour(exploitResource);
+
+									if (unit.getRole().equals(Unit.BUILDER_ROLE)) {
+										typeOfBuildingCreated = "Store";
+										addBehaviour(createBuilding);
+									} else {
+										if (unit.getRole().equals(Unit.EXPLOITER_ROLE)) {
+
+											if (newPosition.getContent() instanceof Resource) {
+												Resource resource = (Resource) newPosition.getContent();
+												if (resource.getGoldPercentage() > 0) {
+													addBehaviour(exploitResource);
+												}
+												if (resource.getResourceType()
+														.equals(GameOntology.RESOURCEACCOUNT_WOOD)) {
+													addBehaviour(exploitResource);
+												}
+											}
+											if (newPosition.getContent() instanceof Building
+													&& ((Building) newPosition.getContent()).equals(FARM)) {
+												addBehaviour(exploitResource);
+											}
+										}
 									}
-										
-										
-									Printer.printSuccess(getLocalName(), "New position has been updated to: "+newPosition.getX()+" and "+newPosition.getY());
-									
-								}
-								else if(conc instanceof CreateBuilding)
-								{
-									CreateBuilding agActionN = (CreateBuilding)agAction.getAction();
+
+									Printer.printSuccess(getLocalName(), "New position has been updated to: "
+											+ newPosition.getX() + " and " + newPosition.getY());
+
+								} else if (conc instanceof CreateBuilding) {
+									CreateBuilding agActionN = (CreateBuilding) agAction.getAction();
 									String type = agActionN.getBuildingType();
-									isBusy=false;
-									//setCurrentPosition(cell);
-									Printer.printSuccess(getLocalName(), "New Building: "+type+"  has been created succesfully ");
-								}
-								else if(conc instanceof NotifyNewUnit)
-								{
-									NotifyNewUnit agActionN = (NotifyNewUnit)agAction.getAction();
+									isBusy = false;
+									// setCurrentPosition(cell);
+									Printer.printSuccess(getLocalName(),
+											"New Building: " + type + "  has been created succesfully ");
+									if (type.equals(TOWNHALL)) {
+										addBehaviour(createUnit);
+										addBehaviour(movement);
+									}
+
+								} else if (conc instanceof NotifyNewUnit) {
+									NotifyNewUnit agActionN = (NotifyNewUnit) agAction.getAction();
 
 									tribe = new Tribe(msg.getSender());
 
-									Cell cell= agActionN.getLocation();
-									
+									Cell cell = agActionN.getLocation();
+
 									setCurrentPosition(cell);
 									addBehaviour(movement);
-									Printer.printSuccess(getLocalName(), "Origin Position has been set: "+cell.getX()+", "+cell.getY());
+									Printer.printSuccess(getLocalName(),
+											"Origin Position has been set: " + cell.getX() + ", " + cell.getY());
 								}
 
-								else if(conc instanceof ExploitResource)
-								{
-									ExploitResource agActionN = (ExploitResource)agAction.getAction();
+								else if (conc instanceof ExploitResource) {
+									ExploitResource agActionN = (ExploitResource) agAction.getAction();
 
 									Iterator resources = agActionN.getAllResourceList();
 
 									ACLMessage reply = msg.createReply();
 									reply.setLanguage(codec.getName());
 									reply.setOntology(ontology.getName());
-									
+
 									Action explotationResources = new Action(tribe.getId(), agActionN);
-									
-									ACLMessage informUnit = MessageFormatter.createMessage(
-											getLocalName(), ACLMessage.INFORM, "informExploitResources",
-											msg.getSender());
+
+									ACLMessage informUnit = MessageFormatter.createMessage(getLocalName(),
+											ACLMessage.INFORM, "informExploitResources", msg.getSender());
 
 									Printer.printSuccess(getLocalName(), "The resource has been exploited");
 
 									getContentManager().fillContent(informUnit, explotationResources);
 									send(informUnit);
-									
+
 								}
 
-								
 							}
-						}
-						catch (Exception e) {
+						} catch (Exception e) {
 							e.printStackTrace();
 						}
-					}
-					else
-						Printer.printSuccess( getLocalName()," Movement failure");
-			     }
-				else
+					} else
+						Printer.printSuccess(getLocalName(), " Movement failure");
+				} else
 					block();
 			}
-					
+
 		});
-		
+
 	}
+
 	protected void takeDown() {
 		// Printout a dismissal message
-		Printer.printSuccess( getLocalName(),"Agent has been exterminated");
+		Printer.printSuccess(getLocalName(), "Agent has been exterminated");
 	}
 
 	public Cell getCurrentPosition() {
@@ -544,20 +548,19 @@ public class AgUnit extends Agent{
 	public void setCurrentPosition(Cell currentPosition) {
 		this.currentPosition = currentPosition;
 	}
-	
+
 	public void addNewCellDiscovered(Cell cell) {
-	
-		boolean found=false;
+
+		boolean found = false;
 		for (int i = 0; i < discoveredCells.size(); i++) {
 			Cell currentCell = discoveredCells.get(i);
-			if(currentCell.getX()==cell.getX() && currentCell.getY()==cell.getY())
-			{
+			if (currentCell.getX() == cell.getX() && currentCell.getY() == cell.getY()) {
 				found = true;
 				discoveredCells.set(i, cell);
 			}
-				
+
 		}
-		if(!found)
+		if (!found)
 			discoveredCells.add(cell);
 	}
 }

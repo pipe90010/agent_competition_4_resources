@@ -116,6 +116,7 @@ public class AgTribe extends Agent {
 			};
 		});
 
+		//INFORM unict-creation behaviour
 		addBehaviour(new CyclicBehaviour(this) {
 
 			public void action() {
@@ -365,7 +366,8 @@ public class AgTribe extends Agent {
 									tribe.setGold(resource.getGold());
 									tribe.setStones(resource.getStone());
 									tribe.setWood(resource.getWood());
-									
+									tribe.setX_boundary(agActionN.getMapHeight());
+									tribe.setY_boundary(agActionN.getMapWidth());
 									///tribe.setTownhall(cell);
 									
 									//Internal Strategy for unit role assignment

@@ -109,7 +109,8 @@ public class RegisterTribeBehaviour extends CyclicBehaviour{
 							
 							initTribe.setStartingResources(resource);
 							initTribe.setStartingPosition(AgWorldInstance.bookNextRandomCell());
-							
+							initTribe.setMapHeight(AgWorldInstance.X_BOUNDARY);
+							initTribe.setMapWidth(AgWorldInstance.Y_BOUNDARY);
 							
 							initTribe.setUnitList(tg2.getOntologyUnitsAID());
 							

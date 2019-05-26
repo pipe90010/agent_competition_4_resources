@@ -74,8 +74,8 @@ public class AgWorld extends Agent {
 	public final static Integer STONES = 500;
 	public final static Integer WOOD = 500;
 
-	private final static int X_BOUNDARY = 64;
-	private final static int Y_BOUNDARY = 64;
+	public final static int X_BOUNDARY = 64;
+	public final static int Y_BOUNDARY = 64;
 
 	// -----------------------------------------------------------------
 	// Building Constants

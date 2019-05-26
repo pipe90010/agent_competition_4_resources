@@ -8,7 +8,9 @@ public class WorldTimer {
 		//REAL HOURS
 		private final static long MOVE_CELL_TIME = 6; 
 		private final static long CREATE_UNIT_TIME = 15; 
-		private final static long BUILD_TOWN_HALL_TIME = 24; 
+		private final static long BUILD_TOWN_HALL_TIME = 24;
+		private final static long BUILD_FARM_TIME = 12;
+		private final static long BUILD_STORE_TIME  = 12;
 		private final static long EXPLOIT_ORE_TIME = 8;
 		private final static long EXPLOIT_WOOD_TIME = 10;
 		
@@ -44,6 +46,18 @@ public class WorldTimer {
 	public long getBuildTownhallTime() {
 		long time = parseTime(BUILD_TOWN_HALL_TIME);
 		System.out.println("...waiting time for BUILD_TOWN_HALL_TIME:"+time+"ms");
+		return time;
+	}
+	
+	public long getBuildFarmTime() {
+		long time = parseTime(BUILD_FARM_TIME);
+		System.out.println("...waiting time for BUILD_FARM_TIME:"+time+"ms");
+		return time;
+	}
+	
+	public long getBuildStoreTime() {
+		long time = parseTime(BUILD_STORE_TIME);
+		System.out.println("...waiting time for BUILD_STORE_TIME:"+time+"ms");
 		return time;
 	}
 	

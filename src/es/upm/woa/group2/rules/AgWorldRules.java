@@ -25,4 +25,15 @@ public class AgWorldRules {
 	{
 		return gold>=250 && stones>=150 && wood>=200 && !oneUnitBuilding;
 	}
+	
+	public boolean meetFarmCreationCondition(Integer gold,Integer stones, Integer wood, boolean oneUnitBuilding)
+	{
+		return gold>=100 && stones>=25 && wood>=25 && !oneUnitBuilding;
+	}
+	
+	public boolean meetStoreCreationCondition(Integer gold,Integer stones, Integer wood, boolean oneUnitBuilding)
+	{
+		return gold>=50 && stones>=50 && wood>=50 && !oneUnitBuilding;
+	}
+	
 }
