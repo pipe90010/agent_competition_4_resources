@@ -89,6 +89,9 @@ public class AgUnit extends Agent {
 		if (unit.getRole().equals(Unit.BUILDER_ROLE)) {
 			addBehaviour(createBuilding);
 		}
+		else {
+			addBehaviour(movement);
+		}
 		Printer.printSuccess(getLocalName(), "has entered into the system ");
 		// Register of the codec and the ontology to be used in the ContentManager
 		// Register language and ontology this part always goes
