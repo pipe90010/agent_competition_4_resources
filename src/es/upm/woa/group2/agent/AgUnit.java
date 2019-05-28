@@ -85,13 +85,8 @@ public class AgUnit extends Agent {
 		unit = new Unit(getAID());
 		isBusy = false;
 		discoveredCells = new ArrayList<Cell>();
-
-		if (unit.getRole().equals(Unit.BUILDER_ROLE)) {
-			addBehaviour(createBuilding);
-		}
-		else {
-			addBehaviour(movement);
-		}
+		tribe = new Tribe();
+		
 		Printer.printSuccess(getLocalName(), "has entered into the system ");
 		// Register of the codec and the ontology to be used in the ContentManager
 		// Register language and ontology this part always goes
@@ -293,7 +288,7 @@ public class AgUnit extends Agent {
 
 						ACLMessage createMsg = MessageFormatter.createMessage(getLocalName(), ACLMessage.REQUEST,
 								"ExploitResources", ag);
-						Action agAction = new Action(ag, null);
+						Action agAction = new Action(ag, new ExploitResource());
 						getContentManager().fillContent(createMsg, agAction);
 						send(createMsg);
 					} else
@@ -464,7 +459,7 @@ public class AgUnit extends Agent {
 												if (resource.getGoldPercentage() > 0) {
 													addBehaviour(exploitResource);
 												}
-												if (resource.getResourceType()
+												else if (resource.getResourceType()
 														.equals(GameOntology.RESOURCEACCOUNT_WOOD)) {
 													addBehaviour(exploitResource);
 												}
@@ -487,14 +482,14 @@ public class AgUnit extends Agent {
 									Printer.printSuccess(getLocalName(),
 											"New Building: " + type + "  has been created succesfully ");
 									if (type.equals(TOWNHALL)) {
-										addBehaviour(createUnit);
+										//addBehaviour(createUnit);
 										addBehaviour(movement);
 									}
 
 								} else if (conc instanceof NotifyNewUnit) {
 									NotifyNewUnit agActionN = (NotifyNewUnit) agAction.getAction();
 
-									tribe = new Tribe(msg.getSender());
+									tribe.setId(msg.getSender());
 
 									Cell cell = agActionN.getLocation();
 
@@ -536,7 +531,15 @@ public class AgUnit extends Agent {
 			}
 
 		});
-
+		if (tribe.getUnits().size()==0) {
+			unit.setRole(Unit.EXPLOITER_ROLE);
+			addBehaviour(createBuilding);
+			
+		}
+		else {
+			unit.setRole(Unit.EXPLOITER_ROLE);
+			addBehaviour(movement);
+		}
 	}
 
 	protected void takeDown() {

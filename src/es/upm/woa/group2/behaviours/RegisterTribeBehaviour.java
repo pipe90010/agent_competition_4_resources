@@ -89,15 +89,15 @@ public class RegisterTribeBehaviour extends CyclicBehaviour{
 							Unit u1 = AgWorldInstance.createUnit(true,"UnitX1", tg2,randomPosition);
 							u1.setRole(Unit.BUILDER_ROLE);
 							
-							Unit u2 = AgWorldInstance.createUnit(true,"UnitX1", tg2,randomPosition);
-							u2.setRole(Unit.EXPLOITER_ROLE);
+							//Unit u2 = AgWorldInstance.createUnit(true,"UnitX2", tg2,randomPosition);
+							//u2.setRole(Unit.EXPLOITER_ROLE);
 														
 							// adds created unit to the tribe and deduct cost of each unit creation
 							tg2.addUnit(u1);
 							tg2.deductCost(150, 50,0,0);
 							
-							tg2.addUnit(u2);
-							tg2.deductCost(150, 50,0,0);
+							//tg2.addUnit(u2);
+							//tg2.deductCost(150, 50,0,0);
 							
 							AgWorldInstance.getTribes().add(tg2);
 							

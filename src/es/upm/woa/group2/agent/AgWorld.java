@@ -11,6 +11,7 @@ import java.util.Random;
 import es.upm.woa.group2.beans.Tribe;
 import es.upm.woa.group2.beans.Unit;
 import es.upm.woa.group2.behaviours.CreateBuildingBehaviour;
+import es.upm.woa.group2.behaviours.ExploitResourceBehaviour;
 import es.upm.woa.group2.behaviours.MovementRequestBehaviour;
 import es.upm.woa.group2.behaviours.RegisterTribeBehaviour;
 import es.upm.woa.group2.behaviours.UnitCreationBehaviour;
@@ -22,6 +23,7 @@ import es.upm.woa.ontology.Building;
 import es.upm.woa.ontology.Cell;
 import es.upm.woa.ontology.CreateBuilding;
 import es.upm.woa.ontology.CreateUnit;
+import es.upm.woa.ontology.ExploitResource;
 import es.upm.woa.ontology.Ground;
 import es.upm.woa.ontology.GameOntology;
 import es.upm.woa.ontology.InitalizeTribe;
@@ -29,6 +31,7 @@ import es.upm.woa.ontology.MoveToCell;
 import es.upm.woa.ontology.NotifyCellDetail;
 import es.upm.woa.ontology.NotifyNewUnit;
 import es.upm.woa.ontology.RegisterTribe;
+import es.upm.woa.ontology.Resource;
 import es.upm.woa.ontology.ResourceAccount;
 import jade.content.Concept;
 import jade.content.ContentElement;
@@ -166,11 +169,13 @@ public class AgWorld extends Agent {
 		UnitCreationBehaviour unitTribeBehaviour = new UnitCreationBehaviour(this);
 		CreateBuildingBehaviour createBuildingBehaviour = new CreateBuildingBehaviour(this);
 		MovementRequestBehaviour movementRequestBehaviour = new MovementRequestBehaviour(this);
-
+		ExploitResourceBehaviour exploitRequestBehaviour = new ExploitResourceBehaviour(this);
+		
 		addBehaviour(registerTribeBehaviour);
 		addBehaviour(unitTribeBehaviour);
 		addBehaviour(createBuildingBehaviour);
 		addBehaviour(movementRequestBehaviour);
+		addBehaviour(exploitRequestBehaviour);
 
 	}
 
@@ -211,7 +216,10 @@ public class AgWorld extends Agent {
 		for (int i = 1; i <= X_BOUNDARY; i++) {
 			for (int j = 1; j <= Y_BOUNDARY; j++) {
 				map[i][j] = new Cell();
-				map[i][j].setContent(new Ground());
+				//map[i][j].setContent(new Ground());
+				Resource resource = new Resource();
+				resource.setGoldPercentage(10);
+				map[i][j].setContent(resource);
 				map[i][j].setX(i);
 				map[i][j].setY(j);
 			}
@@ -510,7 +518,7 @@ public class AgWorld extends Agent {
 	public Cell moveUnitToPosition(Unit unit, Cell cell) {
 		map[cell.getX()][cell.getY()] = cell;
 		// TODO: UPDATE WITH THE NEW ONTOLOGY
-		map[cell.getX()][cell.getY()].setContent(new Ground());
+		//map[cell.getX()][cell.getY()].setContent(new Ground());
 
 		updateUnitInTribeByUnitAID(unit);
 

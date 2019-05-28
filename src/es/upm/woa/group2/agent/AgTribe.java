@@ -140,7 +140,7 @@ public class AgTribe extends Agent {
 
 									Cell cell= agActionN.getLocation();
 									AID aid = agActionN.getNewUnit();
-									
+								
 									Unit u = new Unit(aid, cell);
 									tribe.addUnit(u);
 									
@@ -275,7 +275,7 @@ public class AgTribe extends Agent {
 						MessageTemplate.or
 						(
 								MessageTemplate.or(
-										MessageTemplate.MatchProtocol("CreateUnit"),
+										MessageTemplate.MatchProtocol("informMove"),
 										MessageTemplate.or(
 												MessageTemplate.MatchProtocol("informMove"),
 												MessageTemplate.MatchProtocol("ExploitResources")
@@ -294,22 +294,7 @@ public class AgTribe extends Agent {
 								Concept conc = agAction.getAction();
 								//casting
 								
-								if (conc instanceof NotifyNewUnit) {
-									
-									//
-
-									//casting
-									NotifyNewUnit agActionN = (NotifyNewUnit)agAction.getAction();
-
-									Cell cell= agActionN.getLocation();
-									AID aid = agActionN.getNewUnit();
-									
-									Unit u = new Unit(aid, cell);
-									tribe.addUnit(u);
-									Printer.printSuccess( getLocalName(),"received unit creation from "+ (msg.getSender()).getLocalName()+" with AID: "+aid.getName()+" and its location is "+cell.getX()+" and "+cell.getY());
-							
-								}
-								else if(conc instanceof NotifyCellDetail)
+								if(conc instanceof NotifyCellDetail)
 								{
 									//
 									//casting

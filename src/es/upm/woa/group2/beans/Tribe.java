@@ -96,6 +96,13 @@ public class Tribe {
 		this.units = new ArrayList<Unit>();
 		this.discoveredCells = new ArrayList<Cell>();
 		this.memberSize = 0;
+		this.id= id;
+	}
+	
+	public Tribe() {
+		this.units = new ArrayList<Unit>();
+		this.discoveredCells = new ArrayList<Cell>();
+		this.memberSize = 0;
 	}
 	
 	// -----------------------------------------------------------------
