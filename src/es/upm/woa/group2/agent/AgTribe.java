@@ -8,6 +8,7 @@ import es.upm.woa.group2.beans.Tribe;
 import es.upm.woa.group2.beans.Unit;
 import es.upm.woa.group2.common.MessageFormatter;
 import es.upm.woa.group2.common.Printer;
+import es.upm.woa.group2.ontology.AssignRole;
 import es.upm.woa.ontology.Building;
 import es.upm.woa.ontology.Cell;
 import es.upm.woa.ontology.CreateBuilding;
@@ -52,6 +53,11 @@ public class AgTribe extends Agent {
 	private Codec codec = new SLCodec();
 	private Ontology ontology = GameOntology.getInstance();
 	private Tribe tribe;
+	
+	private SimpleBehaviour assignRole;
+	private SimpleBehaviour unitCreation;
+	public String role;
+	
 
 	public AgTribe() {
 		// TODO Auto-generated constructor stub
@@ -115,9 +121,12 @@ public class AgTribe extends Agent {
 				return true;
 			};
 		});
+		
+				
 
-		//INFORM unict-creation behaviour
-		addBehaviour(new CyclicBehaviour(this) {
+		//INFORM unit-creation behavior
+		unitCreation = new CyclicBehaviour(this) 
+		 {
 
 			public void action() {
 				// Waits for units creation
@@ -144,14 +153,23 @@ public class AgTribe extends Agent {
 									Unit u = new Unit(aid, cell);
 									tribe.addUnit(u);
 									
+									//SENDS ROLE TO THE UNIT
+									ACLMessage msgInform1 = MessageFormatter.createMessage(getLocalName(), ACLMessage.INFORM,
+											"AssignRole", aid);
+									
+									AssignRole agActionA = new AssignRole();
+									agActionA.setRole(role);
+									Action agActionRoleAssignation = new Action(aid, agActionA);									
+									getContentManager().fillContent(msgInform1, agActionRoleAssignation);							
+									send(msgInform1);
+									
 									//SENDS ORIGIN POSITION TO THE UNIT
-									ACLMessage msgInform = MessageFormatter.createMessage(getLocalName(), ACLMessage.INFORM,
+									ACLMessage msgInform2 = MessageFormatter.createMessage(getLocalName(), ACLMessage.INFORM,
 											"InformOriginPosition", aid);
 									
 									Action agActionNotification = new Action(aid, agActionN);
-									getContentManager().fillContent(msgInform, agActionNotification);
-									send(msgInform);
-									
+									getContentManager().fillContent(msgInform2, agActionNotification);
+									send(msgInform2);
 									
 									
 									Printer.printSuccess( getLocalName(),"received unit creation from "+ (msg.getSender()).getLocalName()+" with AID: "+aid.getName()+" and its location is "+cell.getX()+" and "+cell.getY());
@@ -161,7 +179,7 @@ public class AgTribe extends Agent {
 						else
 						{
 							// If what is received is not understood
-							Printer.printSuccess( getLocalName(),": Mamma mia!! non capisco il messaggio di "+(msg.getSender()).getLocalName());
+							Printer.printSuccess( getLocalName(),": The message of "+(msg.getSender()).getLocalName() + "wasn't understood!");
 							ACLMessage reply = msg.createReply();
 												
 							//A NOT_UNDERSTOOD is sent		
@@ -183,7 +201,7 @@ public class AgTribe extends Agent {
 				}
 
 			}
-		});
+		};
 		// Adds a behavior after a movement has done
 		addBehaviour(new CyclicBehaviour(this)
 		{
