@@ -3,9 +3,12 @@ package es.upm.woa.group2.behaviours;
 import java.util.ArrayList;
 import java.util.Properties;
 
+import org.json.simple.JSONObject;
+
 import es.upm.woa.group2.agent.AgWorld;
 import es.upm.woa.group2.beans.Tribe;
 import es.upm.woa.group2.beans.Unit;
+import es.upm.woa.group2.common.HttpRequest;
 import es.upm.woa.group2.common.MessageFormatter;
 import es.upm.woa.group2.common.Printer;
 import es.upm.woa.ontology.Cell;
@@ -157,6 +160,14 @@ public class MovementRequestBehaviour extends CyclicBehaviour {
 										senderUnit.setAction(null);
 										AgWorldInstance.updateUnitInTribeByUnitAID(senderUnit);
 										
+										JSONObject parameters = new JSONObject();
+										parameters.put("agent_id",senderUnit.getId().getLocalName());
+										JSONObject tile = new JSONObject();
+										tile.put("x",cell.getX());
+										tile.put("y",cell.getY());
+										parameters.put("tile", tile);
+										HttpRequest.sendPost("/agent/move", parameters);
+										
 									} else {
 										informMsg = MessageFormatter.createReplyMessage(AgWorldInstance.getLocalName(), msg,
 												ACLMessage.FAILURE, "NotifyCellDetail");
@@ -166,7 +177,7 @@ public class MovementRequestBehaviour extends CyclicBehaviour {
 										AgWorldInstance.updateUnitInTribeByUnitAID(senderUnit);
 									}
 
-								} catch (Codec.CodecException | OntologyException e) {
+								} catch (Exception e) {
 									e.printStackTrace();
 								}
 							

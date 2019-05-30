@@ -3,10 +3,15 @@ package es.upm.woa.group2.agent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Properties;
 import java.util.Random;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
 import es.upm.woa.group2.beans.Tribe;
 import es.upm.woa.group2.beans.Unit;
@@ -15,6 +20,7 @@ import es.upm.woa.group2.behaviours.ExploitResourceBehaviour;
 import es.upm.woa.group2.behaviours.MovementRequestBehaviour;
 import es.upm.woa.group2.behaviours.RegisterTribeBehaviour;
 import es.upm.woa.group2.behaviours.UnitCreationBehaviour;
+import es.upm.woa.group2.common.HttpRequest;
 import es.upm.woa.group2.common.MessageFormatter;
 import es.upm.woa.group2.common.Printer;
 import es.upm.woa.group2.common.WorldTimer;
@@ -77,8 +83,8 @@ public class AgWorld extends Agent {
 	public final static Integer STONES = 500;
 	public final static Integer WOOD = 500;
 
-	public final static int X_BOUNDARY = 64;
-	public final static int Y_BOUNDARY = 64;
+	public int X_BOUNDARY;
+	public int Y_BOUNDARY;
 
 	// -----------------------------------------------------------------
 	// Building Constants
@@ -170,7 +176,7 @@ public class AgWorld extends Agent {
 		CreateBuildingBehaviour createBuildingBehaviour = new CreateBuildingBehaviour(this);
 		MovementRequestBehaviour movementRequestBehaviour = new MovementRequestBehaviour(this);
 		ExploitResourceBehaviour exploitRequestBehaviour = new ExploitResourceBehaviour(this);
-		
+
 		addBehaviour(registerTribeBehaviour);
 		addBehaviour(unitTribeBehaviour);
 		addBehaviour(createBuildingBehaviour);
@@ -212,17 +218,63 @@ public class AgWorld extends Agent {
 	}
 
 	private void initializeMap() {
-		map = new Cell[X_BOUNDARY+1][Y_BOUNDARY+1];
-		for (int i = 1; i <= X_BOUNDARY; i++) {
-			for (int j = 1; j <= Y_BOUNDARY; j++) {
-				map[i][j] = new Cell();
-				//map[i][j].setContent(new Ground());
-				Resource resource = new Resource();
-				resource.setGoldPercentage(10);
-				map[i][j].setContent(resource);
-				map[i][j].setX(i);
-				map[i][j].setY(j);
+
+		JSONParser parser = new JSONParser();
+		try (FileReader reader = new FileReader("map.json")) {
+
+			JSONObject mapObj = (JSONObject) parser.parse(reader);
+			
+			// Iterate over employee array
+			JSONArray initialPositions = (JSONArray) mapObj.get("initialPositions");
+			JSONObject initialResources = (JSONObject) mapObj.get("initialResources");
+			Long mapWidth = (Long) mapObj.get("mapWidth");
+			Long mapHeight = (Long) mapObj.get("mapHeight");
+			JSONArray tiles = (JSONArray) mapObj.get("tiles");
+
+			if (tiles != null && tiles.size() > 0) {
+				X_BOUNDARY = mapHeight.intValue();
+				Y_BOUNDARY = mapWidth.intValue();
+				map = new Cell[X_BOUNDARY + 2][Y_BOUNDARY + 2];
+
+				for (int i = 0; i < tiles.size(); i++) {
+					JSONObject tile = (JSONObject) tiles.get(i);
+					Long xLong = (Long) tile.get("x");
+					Long yLong = (Long) tile.get("y");
+					String resourceType = (String) tile.get("resource");
+
+					int x = xLong.intValue();
+					int y = yLong.intValue();
+					map[x][y] = new Cell();
+					Resource resource = new Resource();
+					resource.setResourceType(resourceType);
+
+					if (tile.containsKey("resource_amount")) {
+						Long resource_amount = (Long) tile.get("resource_amount");
+						resource.setResourceAmount(resource_amount.intValue());
+					}
+					if (tile.containsKey("gold_percentage")) {
+						Long gold_percentage = (Long) tile.get("gold_percentage");
+						resource.setGoldPercentage(gold_percentage.intValue());
+					}
+					System.out.println();
+					map[x][y].setContent(resource);
+					map[x][y].setX(x);
+					map[x][y].setY(y);
+				}
+
 			}
+			System.out.println("mapObj.toString();"+mapObj.toString());
+			JSONArray players = new JSONArray();
+			players.add(2);
+			
+			JSONObject parameters = new JSONObject();
+			parameters.put("players",players);
+			parameters.put("map",mapObj );
+			
+			HttpRequest.sendPost("/start", parameters);
+
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -280,7 +332,7 @@ public class AgWorld extends Agent {
 		return 1;
 	}
 
-	public Unit createUnit(boolean isFirst, String nickname, Tribe tribe,Cell initialPosition) {
+	public Unit createUnit(boolean isFirst, String nickname, Tribe tribe, Cell initialPosition) {
 
 		ContainerController cc = getContainerController();
 
@@ -289,14 +341,15 @@ public class AgWorld extends Agent {
 			/*
 			 * if(isFirst) position = tribe.getTownhall(); else
 			 */
-			if(initialPosition!=null)
+			if (initialPosition != null)
 				position = initialPosition;
 			else
 				position = tribe.getTownhall();
 
-			/*Object[] args = new Object[2];
-			args[0] = position.getX();
-			args[1] = position.getY();*/
+			/*
+			 * Object[] args = new Object[2]; args[0] = position.getX(); args[1] =
+			 * position.getY();
+			 */
 			long waitTime = worldTimer.getCreationTime();
 
 			// there should be implemented a FSM behavior here
@@ -304,11 +357,21 @@ public class AgWorld extends Agent {
 			doWait(waitTime);
 
 			if (!isGameOver()) {
-				AgentController ac = cc.createNewAgent(nickname, AgUnit.class.getName(),null);
+				AgentController ac = cc.createNewAgent(nickname, AgUnit.class.getName(), null);
 				ac.start();
 				// TODO: CHECK IF WE NEED TO ADD THE UNIT AS A CONTENT FOR THE CELL
 				Unit newUnit = new Unit(getAID(nickname), position);
 				// map[position.getX()][position.getY()].setOwner(tribe.getId());
+				
+				JSONObject parameters = new JSONObject();
+				parameters.put("player_id",2);
+				parameters.put("agent_id",getAID(nickname).getLocalName());
+				JSONObject tile = new JSONObject();
+				tile.put("x",position.getX());
+				tile.put("y",position.getY());
+				parameters.put("tile", tile);
+				
+				HttpRequest.sendPost("/agent/create", parameters);
 
 				if (tribe != null) {
 					AID ag = tribe.getId();
@@ -334,6 +397,9 @@ public class AgWorld extends Agent {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (OntologyException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -431,10 +497,9 @@ public class AgWorld extends Agent {
 		switch (nextMove) {
 		case 1:
 			tempTarget = getMirrorCellX(currentPosition);
-			if (tempTarget!=null) {
-				targetPosition= tempTarget;
-			}
-			else {
+			if (tempTarget != null) {
+				targetPosition = tempTarget;
+			} else {
 				targetPosition = map[x - 2][y];
 			}
 			break;
@@ -448,10 +513,9 @@ public class AgWorld extends Agent {
 			break;
 		case 4:
 			tempTarget = getMirrorCellX(currentPosition);
-			if (tempTarget!=null) {
-				targetPosition= tempTarget;
-			}
-			else {
+			if (tempTarget != null) {
+				targetPosition = tempTarget;
+			} else {
 				targetPosition = map[x + 2][y];
 			}
 			break;
@@ -471,7 +535,7 @@ public class AgWorld extends Agent {
 	public Cell getMirrorCellX(Cell position) {
 		int x = position.getX();
 		int y = position.getY();
-		
+
 		// validates that a position is even, else it is odd
 		if (x % 2 == 0) {
 			// up
@@ -518,7 +582,7 @@ public class AgWorld extends Agent {
 	public Cell moveUnitToPosition(Unit unit, Cell cell) {
 		map[cell.getX()][cell.getY()] = cell;
 		// TODO: UPDATE WITH THE NEW ONTOLOGY
-		//map[cell.getX()][cell.getY()].setContent(new Ground());
+		// map[cell.getX()][cell.getY()].setContent(new Ground());
 
 		updateUnitInTribeByUnitAID(unit);
 
@@ -577,8 +641,8 @@ public class AgWorld extends Agent {
 	}
 
 	/*
-	 * 100 × cells_explored(i) + 500 × cities_owned(i) + 250 × stores_owned(i) +
-	 * 300 × farms_owned(i) + 400 × units_owned(i) + 10 × gold_owned(i) + 2 ×
+	 * 100 × cells_explored(i) + 500 × cities_owned(i) + 250 × stores_owned(i) + 300
+	 * × farms_owned(i) + 400 × units_owned(i) + 10 × gold_owned(i) + 2 ×
 	 * stone_owned(i) + 1 × wood_owned(i) + 5 × food_owned(i)
 	 */
 	public int calculateScore(Tribe tribe) {

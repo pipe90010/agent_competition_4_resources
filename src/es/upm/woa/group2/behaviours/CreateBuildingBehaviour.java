@@ -1,8 +1,11 @@
 package es.upm.woa.group2.behaviours;
 
+import org.json.simple.JSONObject;
+
 import es.upm.woa.group2.agent.AgWorld;
 import es.upm.woa.group2.beans.Tribe;
 import es.upm.woa.group2.beans.Unit;
+import es.upm.woa.group2.common.HttpRequest;
 import es.upm.woa.group2.common.MessageFormatter;
 import es.upm.woa.group2.common.Printer;
 import es.upm.woa.group2.rules.AgWorldRules;
@@ -259,7 +262,10 @@ public class CreateBuildingBehaviour extends CyclicBehaviour{
 							}
 						}
 						
-						
+						JSONObject parameters = new JSONObject();
+						parameters.put("agent_id",unit.getId().getLocalName());
+						parameters.put("type", buildingType);
+						HttpRequest.sendPost("/building/create",parameters);
 					}
 					else
 					{
