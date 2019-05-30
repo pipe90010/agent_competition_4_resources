@@ -504,13 +504,23 @@ public class AgWorld extends Agent {
 			}
 			break;
 		case 2:
-			if (x-- >= 1 && y++ <= Y_BOUNDARY)
-				targetPosition = map[x][y];
+			tempTarget = getMirrorCellY(currentPosition,nextMove);
+			if (tempTarget!=null) {
+				targetPosition= tempTarget;
+			}
+			else {
+				targetPosition = map[x-1][ y+1];
+			}
 			break;
 		case 3:
-			if (x++ <= X_BOUNDARY && y++ <= Y_BOUNDARY)
-				targetPosition = map[x][y];
-			break;
+			
+			tempTarget = getMirrorCellY(currentPosition,nextMove);
+			if (tempTarget!=null) {
+				targetPosition= tempTarget;
+			}
+			else {
+				targetPosition = map[x+1][ y+1];
+			}			
 		case 4:
 			tempTarget = getMirrorCellX(currentPosition);
 			if (tempTarget != null) {
@@ -520,15 +530,25 @@ public class AgWorld extends Agent {
 			}
 			break;
 		case 5:
-			if (x++ <= X_BOUNDARY && y-- >= 1)
-				targetPosition = map[x][y];
+			
+			tempTarget = getMirrorCellY(currentPosition,nextMove);
+			if (tempTarget!=null) {
+				targetPosition= tempTarget;
+			}
+			else {
+				targetPosition = map[x+1][y-1];
+			}
 			break;
 		default:
-			if (x-- >= 1 && y-- >= 1)
-				targetPosition = map[x][y];
+			tempTarget = getMirrorCellY(currentPosition,6);
+			if (tempTarget!=null) {
+				targetPosition= tempTarget;
+			}
+			else {
+				targetPosition = map[x-1][ y-1];
+			}
 			break;
 		}
-
 		return targetPosition;
 	}
 
@@ -557,6 +577,50 @@ public class AgWorld extends Agent {
 				return null;
 		}
 	}
+	
+	public Cell getMirrorCellY(Cell position,int coordinate) {
+		int x = position.getX();
+		int y = position.getY();
+		
+		// validates that a position is even, else it is odd
+		if (y % 2 == 0) {
+			// right
+			if (y == Y_BOUNDARY  && coordinate==2)
+				if(x-2==0)
+					return map[1][1];
+				else
+					return map[x-1][1];
+			else if (y == Y_BOUNDARY && coordinate==3)
+				if (x == X_BOUNDARY)
+					return map[1][1];
+				else
+					return map[x+1][1];
+			else if (y == Y_BOUNDARY &&  coordinate==5)
+				if (x == X_BOUNDARY)
+					return map[1][y-1];
+				else
+					return map[x-1][1];
+			else
+				return null;
+		} else {
+			// coordinate 2
+			if (x - 1 <= 0 && coordinate ==2)
+					return map[X_BOUNDARY][y +1];
+			
+			else 
+				if (x - 1 <=0 && coordinate==5)
+					return map[x-1][Y_BOUNDARY];
+			else 
+				if(x - 1 <= 0 && coordinate ==6)
+					if(y-1==0)
+						return map [X_BOUNDARY][Y_BOUNDARY];
+					else
+						return map[X_BOUNDARY][y-1];
+			else
+				return null;
+		}
+	}
+	
 
 	// TODO: Move to another class
 	@SuppressWarnings("BooleanMethodIsAlwaysInverted")

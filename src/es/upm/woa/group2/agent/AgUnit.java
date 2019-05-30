@@ -17,7 +17,8 @@ import java.util.Random;
 
 import es.upm.woa.group2.beans.Tribe;
 import es.upm.woa.group2.beans.Unit;
-import es.upm.woa.group2.behaviours.MovementRequestBehaviour;
+import es.upm.woa.group2.ontology.AssignRole;
+import es.upm.woa.group2.ontology.NewResourceDiscovery;
 import es.upm.woa.group2.common.MessageFormatter;
 import es.upm.woa.group2.common.Printer;
 import es.upm.woa.group2.util.Moving;
@@ -151,6 +152,10 @@ public class AgUnit extends Agent {
 			}
 
 		};
+		
+		
+		
+		
 
 		// Behavior for requesting BUILDINGS
 		createBuilding = new SimpleBehaviour(this) {
@@ -364,7 +369,7 @@ public class AgUnit extends Agent {
 
 		});
 
-		// Adds a behavior to process the answer to a movement request
+		// Adds a behavior to process the answer to a create building request
 		addBehaviour(new SimpleBehaviour(this) {
 
 			@Override
@@ -405,7 +410,8 @@ public class AgUnit extends Agent {
 								MessageTemplate.or(MessageTemplate.MatchProtocol("NotifyCellDetail"),
 										MessageTemplate.or(MessageTemplate.MatchProtocol("InformOriginPosition"),
 												MessageTemplate.or(MessageTemplate.MatchProtocol("informMove"),
-														MessageTemplate.MatchProtocol("ExploitResources")))),
+														MessageTemplate.or(MessageTemplate.MatchProtocol("ExploitResources"),
+																MessageTemplate.MatchProtocol("AssignRole"))))),
 								MessageTemplate.MatchProtocol("CreateBuilding"))));
 
 				if (msg != null) {
@@ -518,6 +524,27 @@ public class AgUnit extends Agent {
 									getContentManager().fillContent(informUnit, explotationResources);
 									send(informUnit);
 
+								}
+								else if(conc instanceof AssignRole) {
+									
+									AssignRole agActionN = (AssignRole) agAction.getAction();
+									
+									unit.setRole(agActionN.getRole());
+									
+									ACLMessage reply = msg.createReply();
+									reply.setLanguage(codec.getName());
+									reply.setOntology(ontology.getName());
+
+									Action explotationResources = new Action(tribe.getId(), agActionN);
+
+									ACLMessage informUnit = MessageFormatter.createMessage(getLocalName(),
+											ACLMessage.INFORM, "informExploitResources", msg.getSender());
+
+									Printer.printSuccess(getLocalName(), "The role" + unit.getRole() + "has been assigned to unit:" + unit.getId());
+
+									getContentManager().fillContent(informUnit, explotationResources);
+									send(informUnit);
+									
 								}
 
 							}
