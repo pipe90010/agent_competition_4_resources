@@ -67,4 +67,16 @@ public class CellGroup2 implements Concept {
      return this.resourceAmount;
    }
 
+   
+   //NEW
+   /**
+   * Protege name: buildType
+      */
+      private String buildType;
+      public void setBuildType(String value) { 
+       this.buildType=value;
+      }
+      public String getBuildType() {
+        return this.buildType;
+      }
 }

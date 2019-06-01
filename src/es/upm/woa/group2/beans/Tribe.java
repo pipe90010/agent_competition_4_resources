@@ -36,7 +36,7 @@ public class Tribe {
 	private int memberSize;
 	private AID id;
 	private ArrayList<Cell> discoveredCells;
-	private ArrayList<Cell> availableResources;
+	private ArrayList<Cell> newResourcesDiscovery;
 	private int teamNumber;
 	private int x_boundary;
 	public int getX_boundary() {
@@ -91,12 +91,14 @@ public class Tribe {
 		this.teamNumber = teamNumber;
 		this.unitsCollecters = new ArrayList<Unit>();
 		this.unitsExplorers = new ArrayList<Unit>();
-		this.availableResources = new ArrayList<Cell>();
+		this.newResourcesDiscovery = new ArrayList<Cell>();
 	}
 	
 	public Tribe(AID id) {
 		this.units = new ArrayList<Unit>();
 		this.discoveredCells = new ArrayList<Cell>();
+		this.newResourcesDiscovery = new ArrayList<Cell>();
+		this.cities = new ArrayList<Building>();
 		this.memberSize = 0;
 		this.id= id;
 	}
@@ -104,6 +106,8 @@ public class Tribe {
 	public Tribe() {
 		this.units = new ArrayList<Unit>();
 		this.discoveredCells = new ArrayList<Cell>();
+		this.newResourcesDiscovery = new ArrayList<Cell>();
+		this.cities = new ArrayList<Building>();
 		this.memberSize = 0;
 	}
 	
@@ -325,17 +329,27 @@ public class Tribe {
 		this.unitsExplorers = unitsExplorers;
 	}
 
-	public ArrayList<Cell> getAvailableResources() {
-		return availableResources;
+	public ArrayList<Cell> getNewResourcesDiscovery() {
+		return newResourcesDiscovery;
 	}
 
-	public void setAvailableResources(ArrayList<Cell> availableReources) {
-		this.availableResources = availableReources;
+	public void setNewResourcesDiscovery(ArrayList<Cell> availableReources) {
+		this.newResourcesDiscovery = availableReources;
 	}
 	
-	public void addAvailableResources(Cell u)
+	public void addNewResourcesDiscovery(Cell u)
 	{
-		this.availableResources.add(u);
+		boolean exists = false;
+		for (int i = 0; i < newResourcesDiscovery.size(); i++) {
+			Cell cell = newResourcesDiscovery.get(i);
+			if(cell.getX()==u.getX() && cell.getY()==cell.getY())
+			{
+				newResourcesDiscovery.set(i, u);
+				exists= true;
+			}
+		}
+		if(!exists)
+			this.newResourcesDiscovery.add(u);
 	}
 	
 }

@@ -90,6 +90,7 @@ public class CreateBuildingBehaviour extends CyclicBehaviour{
 								Cell currentPosition = unit.getPosition();
 								Building townHall = new Building();
 								townHall.setType(AgWorldInstance.TOWNHALL);
+								townHall.setOwner(tribeSender.getId());
 								map[currentPosition.getX()][currentPosition.getY()].setContent(townHall);
 								tribeSender.addNewCity(townHall);
 								
@@ -154,6 +155,7 @@ public class CreateBuildingBehaviour extends CyclicBehaviour{
 								Cell currentPosition = unit.getPosition();
 								Building farm = new Building();
 								farm.setType(AgWorldInstance.FARM);
+								farm.setOwner(tribeSender.getId());
 								map[currentPosition.getX()][currentPosition.getY()].setContent(farm);
 								tribeSender.addNewCity(farm);
 								
@@ -218,6 +220,7 @@ public class CreateBuildingBehaviour extends CyclicBehaviour{
 								Cell currentPosition = unit.getPosition();
 								Building store = new Building();
 								store.setType(AgWorldInstance.STORE);
+								store.setOwner(tribeSender.getId());
 								map[currentPosition.getX()][currentPosition.getY()].setContent(store);
 								tribeSender.addNewCity(store);
 								

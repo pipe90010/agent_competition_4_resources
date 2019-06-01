@@ -9,7 +9,11 @@ import es.upm.woa.group2.beans.Unit;
 import es.upm.woa.group2.common.MessageFormatter;
 import es.upm.woa.group2.common.Printer;
 import es.upm.woa.group2.ontology.AssignRole;
+import es.upm.woa.group2.ontology.CellGroup2;
+import es.upm.woa.group2.ontology.NewResourceDiscovery;
+import es.upm.woa.group2.ontology.NotifyBoundaries;
 import es.upm.woa.group2.ontology.NotifyNewBuilding;
+import es.upm.woa.group2.util.Format;
 import es.upm.woa.ontology.Building;
 import es.upm.woa.ontology.Cell;
 import es.upm.woa.ontology.CreateBuilding;
@@ -149,6 +153,7 @@ public class AgTribe extends Agent {
 									NotifyNewUnit agActionN = (NotifyNewUnit)agAction.getAction();
 
 									Cell cell= agActionN.getLocation();
+									System.out.println("cell to send"+cell);
 									AID aid = agActionN.getNewUnit();
 								
 									Unit u = new Unit(aid, cell);
@@ -177,16 +182,12 @@ public class AgTribe extends Agent {
 										role = Unit.EXPLOITER_ROLE;
 									}
 									
-									//SENDS ORIGIN POSITION TO THE UNIT
-									ACLMessage msgInform2 = MessageFormatter.createMessage(getLocalName(), ACLMessage.INFORM,
-											"InformOriginPosition", aid);
-									
-									Action agActionNotification = new Action(aid, agActionN);
-									getContentManager().fillContent(msgInform2, agActionNotification);
-									send(msgInform2);
-									
 									agActionA.setRole(role);
-									Action agActionRoleAssignation = new Action(aid, agActionA);									
+									CellGroup2 cellGroup2 = Format.turnCellIntoCellGroup2(cell);
+									agActionA.setLocation_Role(cellGroup2);
+									agActionA.setId(aid);
+									Action agActionRoleAssignation = new Action(aid, agActionA);	
+									getContentManager().registerOntology(es.upm.woa.group2.ontology.GameOntology.getInstance());
 									getContentManager().fillContent(msgInform1, agActionRoleAssignation);							
 									send(msgInform1);
 									
@@ -316,7 +317,9 @@ public class AgTribe extends Agent {
 												MessageTemplate.MatchProtocol("informMove"),
 												MessageTemplate.or(
 														MessageTemplate.MatchProtocol("ExploitResources"),
-														MessageTemplate.MatchProtocol("NotifyNewBuilding")
+														MessageTemplate.or(MessageTemplate.MatchProtocol("NotifyNewBuilding"),
+																MessageTemplate.MatchProtocol("NewResourceDiscovery")
+														)
 												)
 												)),
 								MessageTemplate.MatchProtocol("InitalizeTribe")
@@ -376,7 +379,7 @@ public class AgTribe extends Agent {
 								else if(conc instanceof InitalizeTribe)
 								{
 
-
+									getContentManager().registerOntology(es.upm.woa.group2.ontology.GameOntology.getInstance());
 									//casting
 									InitalizeTribe agActionN = (InitalizeTribe)agAction.getAction();
 									
@@ -407,16 +410,6 @@ public class AgTribe extends Agent {
 										AID ag = iterator.next();
 										counter++;
 											
-										NotifyNewUnit notify = new NotifyNewUnit();
-										ACLMessage msgInform = MessageFormatter.createMessage(getLocalName(), ACLMessage.INFORM,
-												"NotifyNewUnit", ag);
-										
-										notify.setLocation(cell);
-										notify.setNewUnit(ag);
-										Action agActionNotification = new Action(ag, notify);
-										getContentManager().fillContent(msgInform, agActionNotification);
-										send(msgInform);
-										
 										AssignRole asignRoleAction = new AssignRole();
 										
 										
@@ -424,7 +417,7 @@ public class AgTribe extends Agent {
 										{
 											role = Unit.BUILDER_ROLE;
 										}
-										else if(counter>1 && counter<3)
+										else if(counter>1 && counter<=3)
 										{
 											if(counter==2)
 												role = Unit.EXPLORER_ROLE_UP;
@@ -436,11 +429,27 @@ public class AgTribe extends Agent {
 											role = Unit.EXPLOITER_ROLE;
 										}
 										
+										NotifyBoundaries notifyBoundaries = new NotifyBoundaries();
+										notifyBoundaries.setX_axis(agActionN.getMapHeight());
+										notifyBoundaries.setY_axis(agActionN.getMapWidth());
+										
+										ACLMessage informBoundaries = MessageFormatter.createMessage(getLocalName(), ACLMessage.INFORM,
+												"NotifyBoundaries", ag);
+										
+										Action notifyBoundariesAction = new Action(ag, notifyBoundaries);
+										
+										getContentManager().fillContent(informBoundaries, notifyBoundariesAction);							
+										send(informBoundaries);
+										
 										ACLMessage msgInform2 = MessageFormatter.createMessage(getLocalName(), ACLMessage.INFORM,
 												"AssignRole", ag);
 										
 										asignRoleAction.setRole(role);
-										Action agActionRoleAssignation = new Action(ag, asignRoleAction);									
+										asignRoleAction.setLocation_Role(Format.turnCellIntoCellGroup2(cell));
+										System.out.println("cell to send"+cell);
+										asignRoleAction.setId(ag);
+										Action agActionRoleAssignation = new Action(ag, asignRoleAction);
+										
 										getContentManager().fillContent(msgInform2, agActionRoleAssignation);							
 										send(msgInform2);
 									}
@@ -491,15 +500,34 @@ public class AgTribe extends Agent {
 									{
 										
 										ACLMessage msgInform = MessageFormatter.createMessage(getLocalName(), ACLMessage.INFORM,
-												"NotifyNewUnit", unit.getId());
+												"NotifyNewBuilding", unit.getId());
 										
 										Action agActionNotification = new Action(unit.getId(), notifyNewBuilding);
+										getContentManager().registerOntology(es.upm.woa.group2.ontology.GameOntology.getInstance());
 										getContentManager().fillContent(msgInform, agActionNotification);
 										send(msgInform);
 									}
 									String type = notifyNewBuilding.getType();
 									Printer.printSuccess(getName(), "TRIBE inform units about the new building "+type);
 									
+								}
+								else if(conc instanceof NewResourceDiscovery)
+								{
+									NewResourceDiscovery newResourceDiscovery = (NewResourceDiscovery) agAction.getAction();
+									
+									for (Unit unit : tribe.getUnits())
+									{
+										
+										ACLMessage msgInform = MessageFormatter.createMessage(getLocalName(), ACLMessage.INFORM,
+												"NewResourceDiscovery", unit.getId());
+										
+										Action agActionNotification = new Action(unit.getId(), newResourceDiscovery);
+										getContentManager().registerOntology(es.upm.woa.group2.ontology.GameOntology.getInstance());
+										getContentManager().fillContent(msgInform, agActionNotification);
+										send(msgInform);
+									}
+									int size = newResourceDiscovery.getCells().size();
+									Printer.printSuccess(getName(), "TRIBE inform units about the new Resource Discovery "+size);
 								}
 							}
 						}
@@ -521,5 +549,4 @@ public class AgTribe extends Agent {
 		
 
 	}
-
 }

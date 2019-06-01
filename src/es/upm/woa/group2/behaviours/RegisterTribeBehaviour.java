@@ -87,17 +87,16 @@ public class RegisterTribeBehaviour extends CyclicBehaviour{
 							 */
 							Cell randomPosition = AgWorldInstance.bookNextRandomCell();
 							Unit u1 = AgWorldInstance.createUnit(true,"UnitX1", tg2,randomPosition);
-							u1.setRole(Unit.BUILDER_ROLE);
+							Unit u2 = AgWorldInstance.createUnit(true,"UnitX2", tg2,randomPosition);
+							Unit u3 = AgWorldInstance.createUnit(true,"UnitX3", tg2,randomPosition);
 							
 							//Unit u2 = AgWorldInstance.createUnit(true,"UnitX2", tg2,randomPosition);
 							//u2.setRole(Unit.EXPLOITER_ROLE);
 														
 							// adds created unit to the tribe and deduct cost of each unit creation
 							tg2.addUnit(u1);
-							tg2.deductCost(150, 50,0,0);
-							
-							//tg2.addUnit(u2);
-							//tg2.deductCost(150, 50,0,0);
+							tg2.addUnit(u2);
+							tg2.addUnit(u3);
 							
 							AgWorldInstance.getTribes().add(tg2);
 							
@@ -114,7 +113,7 @@ public class RegisterTribeBehaviour extends CyclicBehaviour{
 							resource.setWood(AgWorldInstance.WOOD);
 							
 							initTribe.setStartingResources(resource);
-							initTribe.setStartingPosition(AgWorldInstance.bookNextRandomCell());
+							initTribe.setStartingPosition(randomPosition);
 							initTribe.setMapHeight(AgWorldInstance.X_BOUNDARY);
 							initTribe.setMapWidth(AgWorldInstance.Y_BOUNDARY);
 							

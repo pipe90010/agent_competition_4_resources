@@ -46,6 +46,7 @@ public class GameOntology extends jade.content.onto.Ontology  {
     public static final String CELLGROUP2_Y="y";
     public static final String CELLGROUP2_GOLDPERCENTAGE="goldPercentage";
     public static final String CELLGROUP2="CellGroup2";
+    public static final String CELLGROUP2_BUILDTYPE="buildType";
 
   /**
    * Constructor
@@ -76,6 +77,7 @@ public class GameOntology extends jade.content.onto.Ontology  {
 
 
     // adding fields
+    cellGroup2Schema.add(CELLGROUP2_BUILDTYPE, (TermSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
     cellGroup2Schema.add(CELLGROUP2_GOLDPERCENTAGE, (TermSchema)getSchema(BasicOntology.INTEGER), ObjectSchema.OPTIONAL);
     cellGroup2Schema.add(CELLGROUP2_Y, (TermSchema)getSchema(BasicOntology.INTEGER), ObjectSchema.MANDATORY);
     cellGroup2Schema.add(CELLGROUP2_X, (TermSchema)getSchema(BasicOntology.INTEGER), ObjectSchema.MANDATORY);

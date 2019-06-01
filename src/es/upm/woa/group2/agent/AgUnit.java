@@ -18,10 +18,13 @@ import java.util.Random;
 import es.upm.woa.group2.beans.Tribe;
 import es.upm.woa.group2.beans.Unit;
 import es.upm.woa.group2.ontology.AssignRole;
+import es.upm.woa.group2.ontology.CellGroup2;
 import es.upm.woa.group2.ontology.NewResourceDiscovery;
+import es.upm.woa.group2.ontology.NotifyBoundaries;
 import es.upm.woa.group2.ontology.NotifyNewBuilding;
 import es.upm.woa.group2.common.MessageFormatter;
 import es.upm.woa.group2.common.Printer;
+import es.upm.woa.group2.util.Format;
 import es.upm.woa.group2.util.Moving;
 import es.upm.woa.ontology.Building;
 import es.upm.woa.ontology.Cell;
@@ -166,6 +169,7 @@ public class AgUnit extends Agent {
 				ServiceDescription sd = new ServiceDescription();
 				sd.setType(WORLD);
 				dfd.addServices(sd);
+				getContentManager().registerOntology(ontology);
 
 				try {
 					// It finds agents of the required type
@@ -231,12 +235,32 @@ public class AgUnit extends Agent {
 						MoveToCell createAction = new MoveToCell();
 
 						// Moving movement = new Moving();
-						int cellNumber = new Random().nextInt((5) + 1); // [0...6]
+						int cellNumber = -1;// new Random().nextInt((5) + 1); // [0...6]
+
+						if (unit.getRole().equals(Unit.EXPLORER_ROLE_UP)
+								|| unit.getRole().equals(Unit.EXPLORER_ROLE_DOWN)) {
+							cellNumber = explore();
+						} else if (unit.getRole().equals(Unit.EXPLOITER_ROLE)) {
+							cellNumber = getClosestAvailableResourceDirection();
+						} else {
+							if (tribe.getTownhall() != null) {
+								if (tribe.getTownhall().getX() == currentPosition.getX()
+										&& tribe.getTownhall().getY() == currentPosition.getY()) {
+									cellNumber = new Random().nextInt((5) + 1);
+								} else {
+									cellNumber = goToTownHall();
+									System.out.println("GO TO TOWNHALL" + cellNumber);
+								}
+							} else
+								cellNumber = new Random().nextInt((5) + 1);
+
+						}
 
 						createAction.setTargetDirection(cellNumber);
 						Action agAction = new Action(ag, createAction);
 						// Here you pass in arguments the message and the content that it will be filled
 						// with
+						getContentManager().registerOntology(ontology);
 						getContentManager().fillContent(createMsg, agAction);
 						isBusy = true;
 						send(createMsg);
@@ -401,25 +425,19 @@ public class AgUnit extends Agent {
 						MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.INFORM),
 								MessageTemplate.MatchPerformative(ACLMessage.FAILURE)),
 						MessageTemplate.or(
-								MessageTemplate.or(MessageTemplate.MatchProtocol("NotifyCellDetail"),
-										MessageTemplate.or(MessageTemplate.MatchProtocol("InformOriginPosition"),
-												MessageTemplate.or(MessageTemplate.MatchProtocol("informMove"),
-														MessageTemplate.or(MessageTemplate.MatchProtocol("ExploitResources"),
-																MessageTemplate.or(MessageTemplate.MatchProtocol("AssignRole"),
-																		MessageTemplate.or(MessageTemplate.MatchProtocol("informBuildingCreation"),
-																				MessageTemplate.or(MessageTemplate.MatchProtocol("NotifyNewUnit"),
-																						MessageTemplate.MatchProtocol("NotifyNewBuilding"))
-																				)
-																		)
-																)
-														)
-												)
-										),
+								MessageTemplate.or(MessageTemplate.MatchProtocol("NotifyCellDetail"), MessageTemplate
+										.or(MessageTemplate.MatchProtocol("InformOriginPosition"), MessageTemplate.or(
+												MessageTemplate.MatchProtocol("informMove"),
+												MessageTemplate.or(MessageTemplate.MatchProtocol("ExploitResources"),
+														MessageTemplate.or(
+																MessageTemplate.MatchProtocol("informBuildingCreation"),
+																MessageTemplate.MatchProtocol("NotifyNewUnit")))))),
 								MessageTemplate.MatchProtocol("CreateBuilding"))));
 
 				if (msg != null) {
 					if (msg.getPerformative() == ACLMessage.INFORM) {
 						try {
+							getContentManager().registerOntology(ontology);
 							ContentElement ce = getContentManager().extractContent(msg);
 							if (ce instanceof Action) {
 								Action agAction = (Action) ce;
@@ -457,9 +475,44 @@ public class AgUnit extends Agent {
 									Cell newPosition = agActionN.getNewlyArrivedCell();
 									setCurrentPosition(newPosition);
 
+									if (!existsBuildingType(STORE) && newPosition.getContent() instanceof Resource) {
+										NewResourceDiscovery newResource = new NewResourceDiscovery();
+										newResource.addCells(Format.turnCellIntoCellGroup2(newPosition));
+
+										ACLMessage informMsgUnit = MessageFormatter.createMessage(getLocalName(),
+												ACLMessage.INFORM, "NewResourceDiscovery", tribe.getId());
+
+										getContentManager().registerOntology(
+												es.upm.woa.group2.ontology.GameOntology.getInstance());
+
+										Action notifyNewResource = new Action(tribe.getId(), newResource);
+
+										getContentManager().fillContent(informMsgUnit, notifyNewResource);
+										send(informMsgUnit);
+
+									}
+
 									if (unit.getRole().equals(Unit.BUILDER_ROLE)) {
-										typeOfBuildingCreated = "Store";
-										addBehaviour(createBuilding);
+
+										if (currentPosition.getContent() instanceof Ground) {
+
+											String nextBuilding = getNextBuildingToCreate();
+											if (nextBuilding != null) {
+												typeOfBuildingCreated = nextBuilding;
+												addBehaviour(createBuilding);
+											} else
+												addBehaviour(movement);
+
+										} else {
+
+											if (existsBuildingType(FARM) && currentPosition.getContent() instanceof Building
+													&& ((Building) currentPosition.getContent()).getType()
+															.equals(TOWNHALL)) {
+												addBehaviour(createUnit);
+											} else
+												addBehaviour(movement);
+										}
+
 									} else {
 										if (unit.getRole().equals(Unit.EXPLOITER_ROLE)) {
 
@@ -476,6 +529,8 @@ public class AgUnit extends Agent {
 													&& ((Building) newPosition.getContent()).equals(FARM)) {
 												addBehaviour(exploitResource);
 											}
+										} else {
+											addBehaviour(movement);
 										}
 									}
 
@@ -486,28 +541,30 @@ public class AgUnit extends Agent {
 									CreateBuilding agActionN = (CreateBuilding) agAction.getAction();
 									String type = agActionN.getBuildingType();
 									isBusy = false;
-									// setCurrentPosition(cell);
+
+									Building building = new Building();
+									building.setOwner(tribe.getId());
+									building.setType(type);
+									currentPosition.setContent(building);
+
 									Printer.printSuccess(getLocalName(),
 											"New Building: " + type + "  has been created succesfully ");
-									
-									
-									ACLMessage informMsgUnit = MessageFormatter.createMessage(
-											getLocalName(), ACLMessage.INFORM, "NotifyNewBuilding",
-											tribe.getId());
-									
+
+									ACLMessage informMsgUnit = MessageFormatter.createMessage(getLocalName(),
+											ACLMessage.INFORM, "NotifyNewBuilding", tribe.getId());
+
+									getContentManager()
+											.registerOntology(es.upm.woa.group2.ontology.GameOntology.getInstance());
 									NotifyNewBuilding notifyNewBuilding = new NotifyNewBuilding();
 									notifyNewBuilding.setType(type);
-									notifyNewBuilding.setCell(currentPosition);
-									
+									notifyNewBuilding.setCell(Format.turnCellIntoCellGroup2(currentPosition));
+
 									Action notifyCreateBuilding = new Action(tribe.getId(), notifyNewBuilding);
+
 									getContentManager().fillContent(informMsgUnit, notifyCreateBuilding);
 									send(informMsgUnit);
-									
-									
-									if (type.equals(TOWNHALL)) {
-										// addBehaviour(createUnit);
-										addBehaviour(movement);
-									}
+
+									addBehaviour(movement);
 
 								} else if (conc instanceof NotifyNewUnit) {
 									NotifyNewUnit agActionN = (NotifyNewUnit) agAction.getAction();
@@ -517,17 +574,7 @@ public class AgUnit extends Agent {
 									Cell cell = agActionN.getLocation();
 
 									setCurrentPosition(cell);
-									
-									
-									if (unit.getRole().equals(Unit.BUILDER_ROLE) && cell.getContent() instanceof Ground) {
-										typeOfBuildingCreated = TOWNHALL;
-										addBehaviour(createBuilding);
-									}
-									else
-									{
-										addBehaviour(movement);
-									}
-									
+
 									Printer.printSuccess(getLocalName(),
 											"Origin Position has been set: " + cell.getX() + ", " + cell.getY());
 								}
@@ -551,28 +598,6 @@ public class AgUnit extends Agent {
 									getContentManager().fillContent(informUnit, explotationResources);
 									send(informUnit);
 
-								} else if (conc instanceof AssignRole) {
-
-									AssignRole agActionN = (AssignRole) agAction.getAction();
-
-									unit.setRole(agActionN.getRole());
-									Printer.printSuccess(getLocalName(), "The assigned role is "+agActionN.getRole());
-								}
-								else if(conc instanceof NotifyNewBuilding) {
-									
-									NotifyNewBuilding agActionN = (NotifyNewBuilding) agAction.getAction();
-									String type = agActionN.getType();
-									Cell buildingPosition = agActionN.getCell();
-									
-									if(type.equals(Tribe.TOWNHALL))
-									{
-										tribe.setTownhall(buildingPosition);
-										
-									}
-									Building build = (Building)buildingPosition.getContent();
-									tribe.addNewCity(build);
-									
-									Printer.printSuccess(getLocalName(), "Unit has been informed about new building "+type);
 								}
 
 							}
@@ -585,6 +610,103 @@ public class AgUnit extends Agent {
 					block();
 			}
 
+		});
+
+		// Adds a behavior after a movement has done
+		addBehaviour(new CyclicBehaviour(this) {
+
+			public void action() {
+				ACLMessage msg = receive(MessageTemplate.and(
+						MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.INFORM),
+								MessageTemplate.MatchPerformative(ACLMessage.FAILURE)),
+						MessageTemplate.or(MessageTemplate.MatchProtocol("AssignRole"),
+								MessageTemplate.or(MessageTemplate.MatchProtocol("NotifyNewBuilding"),
+										MessageTemplate.or(MessageTemplate.MatchProtocol("NotifyBoundaries"),
+												MessageTemplate.MatchProtocol("NewResourceDiscovery"))))));
+
+				if (msg != null) {
+					if (msg.getPerformative() == ACLMessage.INFORM) {
+						try {
+							getContentManager().registerOntology(es.upm.woa.group2.ontology.GameOntology.getInstance());
+							ContentElement ce = getContentManager().extractContent(msg);
+							if (ce instanceof Action) {
+								Action agAction = (Action) ce;
+								Concept conc = agAction.getAction();
+								// casting
+
+								if (conc instanceof AssignRole) {
+
+									getContentManager().registerOntology(ontology);
+									AssignRole agActionN = (AssignRole) agAction.getAction();
+
+									unit.setRole(agActionN.getRole());
+									tribe.setId(msg.getSender());
+
+									getContentManager().registerOntology(ontology);
+									Cell cell = Format.turnCellGroup2IntoCell(agActionN.getLocation_Role(),
+											tribe.getId());
+
+									System.out.println("cell" + cell);
+
+									setCurrentPosition(cell);
+
+									if (unit.getRole().equals(Unit.BUILDER_ROLE)
+											&& cell.getContent() instanceof Ground) {
+										typeOfBuildingCreated = TOWNHALL;
+										addBehaviour(createBuilding);
+									} else {
+										addBehaviour(movement);
+									}
+									Printer.printSuccess(getLocalName(), "The assigned role is " + agActionN.getRole());
+								} else if (conc instanceof NotifyNewBuilding) {
+
+									NotifyNewBuilding agActionN = (NotifyNewBuilding) agAction.getAction();
+									String type = agActionN.getType();
+									Cell buildingPosition = Format.turnCellGroup2IntoCell(agActionN.getCell(),
+											tribe.getId());
+
+									if (type.equals(Tribe.TOWNHALL)) {
+										tribe.setTownhall(buildingPosition);
+									}
+									getContentManager().registerOntology(ontology);
+									Building build = (Building) buildingPosition.getContent();
+									tribe.addNewCity(build);
+
+									Printer.printSuccess(getLocalName(),
+											"Unit has been informed about new building " + type);
+
+								} else if (conc instanceof NewResourceDiscovery) {
+
+									NewResourceDiscovery newResourceDiscovery = (NewResourceDiscovery) agAction
+											.getAction();
+
+									Iterator<CellGroup2> cellsDiscovery = newResourceDiscovery.getAllCells();
+									while (cellsDiscovery.hasNext()) {
+										Cell newCellD = Format.turnCellGroup2IntoCell(cellsDiscovery.next(),
+												tribe.getId());
+										tribe.addNewResourcesDiscovery(newCellD);
+									}
+
+									Printer.printSuccess(getLocalName(),
+											"Unit has receive total new Resource Discovery of "
+													+ tribe.getNewResourcesDiscovery().size());
+
+								} else if (conc instanceof NotifyBoundaries) {
+									NotifyBoundaries notifyBoundaries = (NotifyBoundaries) agAction.getAction();
+
+									X_BOUNDARY = notifyBoundaries.getX_axis();
+									Y_BOUNDARY = notifyBoundaries.getY_axis();
+									System.out.println(
+											"=============================X_BOUNDARY Y_BOUNDARY==========================");
+
+								}
+							}
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				}
+			}
 		});
 	}
 
@@ -615,66 +737,84 @@ public class AgUnit extends Agent {
 		if (!found)
 			discoveredCells.add(cell);
 	}
-	
-	public int getClosestAvailableResourceDirection()
-	{
-		ArrayList<Cell> availableResources = tribe.getAvailableResources();
-		
+
+	public int getClosestAvailableResourceDirection() {
+		ArrayList<Cell> availableResources = tribe.getNewResourcesDiscovery();
+
 		Cell nextClosestCell = null;
 		for (Cell cell : availableResources) {
-			if(nextClosestCell!=null)
-			{
-				int xDifferenceNextClosest = java.lang.Math.abs(currentPosition.getX()-nextClosestCell.getX());
-				int yDifferenceNextClosest = java.lang.Math.abs(currentPosition.getY()-nextClosestCell.getY());
-				
-				int xDifferenceCell = java.lang.Math.abs(currentPosition.getX()-cell.getX());
-				int yDifferenceCell = java.lang.Math.abs(currentPosition.getY()-cell.getY());
-				
-				if(xDifferenceCell<xDifferenceNextClosest)
-				{
-					if(yDifferenceCell<=yDifferenceNextClosest)
-					{
+			if (nextClosestCell != null) {
+				int xDifferenceNextClosest = java.lang.Math.abs(currentPosition.getX() - nextClosestCell.getX());
+				int yDifferenceNextClosest = java.lang.Math.abs(currentPosition.getY() - nextClosestCell.getY());
+
+				int xDifferenceCell = java.lang.Math.abs(currentPosition.getX() - cell.getX());
+				int yDifferenceCell = java.lang.Math.abs(currentPosition.getY() - cell.getY());
+
+				if (xDifferenceCell < xDifferenceNextClosest) {
+					if (yDifferenceCell <= yDifferenceNextClosest) {
 						nextClosestCell = cell;
 					}
 
-				}
-				else if(yDifferenceCell<yDifferenceNextClosest)
-				{
-					if(xDifferenceCell<=xDifferenceNextClosest)
-					{
+				} else if (yDifferenceCell < yDifferenceNextClosest) {
+					if (xDifferenceCell <= xDifferenceNextClosest) {
 						nextClosestCell = cell;
 					}
 				}
-			}
-			else
-			{
+			} else {
 				nextClosestCell = cell;
 			}
 		}
-		
+
+		int direction = new Random().nextInt((5) + 1);
+		if (nextClosestCell != null) {
+			int xDifferenceNextClosest = currentPosition.getX() - nextClosestCell.getX();
+			int yDifferenceNextClosest = currentPosition.getY() - nextClosestCell.getY();
+
+			// move left
+			if (yDifferenceNextClosest > 0) {
+				if (xDifferenceNextClosest > 0)
+					direction = 6;
+				else
+					direction = 5;
+
+			} // move right
+			else if (yDifferenceNextClosest < 0) {
+				if (xDifferenceNextClosest > 0)
+					direction = 2;
+				else
+					direction = 3;
+			} else if (yDifferenceNextClosest == 0) {
+				if (xDifferenceNextClosest > 0)
+					direction = 1;
+				else
+					direction = 4;
+			}
+		}
+		return direction;
+	}
+
+	public int goToTownHall() {
+		Cell townHall = tribe.getTownhall();
+
 		int direction = -1;
-		int xDifferenceNextClosest = currentPosition.getX()-nextClosestCell.getX();
-		int yDifferenceNextClosest = currentPosition.getY()-nextClosestCell.getY();
-		
-		//move left
-		if(yDifferenceNextClosest>0)
-		{
-			if(xDifferenceNextClosest>0)
+		int xDifferenceNextClosest = currentPosition.getX() - townHall.getX();
+		int yDifferenceNextClosest = currentPosition.getY() - townHall.getY();
+
+		// move left
+		if (yDifferenceNextClosest > 0) {
+			if (xDifferenceNextClosest > 0)
 				direction = 6;
 			else
 				direction = 5;
-				
-		}//move right
-		else if(yDifferenceNextClosest<0)
-		{
-			if(xDifferenceNextClosest>0)
-				direction= 2;
+
+		} // move right
+		else if (yDifferenceNextClosest < 0) {
+			if (xDifferenceNextClosest > 0)
+				direction = 2;
 			else
 				direction = 3;
-		}
-		else if(yDifferenceNextClosest==0)
-		{
-			if(xDifferenceNextClosest>0)
+		} else if (yDifferenceNextClosest == 0) {
+			if (xDifferenceNextClosest > 0)
 				direction = 1;
 			else
 				direction = 4;
@@ -692,11 +832,12 @@ public class AgUnit extends Agent {
 					return 2;
 				else
 					return 4;
+			} else {
+				if (x >= X_BOUNDARY)
+					return 2;
+				else
+					return 1;
 			}
-			if (x >= X_BOUNDARY)
-				return 2;
-			else
-				return 1;
 		} else {
 			if (unit.getRole().equals(Unit.EXPLORER_ROLE_UP)) {
 				// up
@@ -712,6 +853,26 @@ public class AgUnit extends Agent {
 					return 1;
 			}
 		}
+	}
+
+	public boolean existsBuildingType(String type) {
+		ArrayList<Building> townHallBuildings = tribe.getBuildingsByType(type);
+		return townHallBuildings.size() > 0;
+	}
+
+	public String getNextBuildingToCreate() {
+		if (existsBuildingType(TOWNHALL)) {
+			if (existsBuildingType(STORE)) {
+				if (existsBuildingType(FARM)) {
+					return null;
+				} else {
+					return FARM;
+				}
+			} else {
+				return STORE;
+			}
+		} else
+			return TOWNHALL;
 	}
 
 }

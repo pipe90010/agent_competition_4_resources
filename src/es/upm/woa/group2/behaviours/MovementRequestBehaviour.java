@@ -119,7 +119,7 @@ public class MovementRequestBehaviour extends CyclicBehaviour {
 									
 									if (!AgWorldInstance.isGameOver()) {
 										// Move the unit
-										
+										unit.setPosition(requestedPosition);
 										Cell cell = AgWorldInstance.moveUnitToPosition(unit, requestedPosition);
 										movementAction.setNewlyArrivedCell(cell);
 										Action agActionMovement = new Action(sender, movementAction);
