@@ -167,7 +167,10 @@ public class AgTribe extends Agent {
 									}
 									else if(tribe.getUnits().size()>1 && tribe.getUnits().size()<3)
 									{
-										role = Unit.EXPLORER_ROLE;
+										if(tribe.getUnits().size()==2)
+											role = Unit.EXPLORER_ROLE_UP;
+										else
+											role = Unit.EXPLORER_ROLE_DOWN;
 									}
 									else
 									{
@@ -423,7 +426,10 @@ public class AgTribe extends Agent {
 										}
 										else if(counter>1 && counter<3)
 										{
-											role = Unit.EXPLORER_ROLE;
+											if(counter==2)
+												role = Unit.EXPLORER_ROLE_UP;
+											else
+												role = Unit.EXPLORER_ROLE_DOWN;
 										}
 										else
 										{

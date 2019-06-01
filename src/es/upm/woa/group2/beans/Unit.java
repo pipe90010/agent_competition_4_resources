@@ -12,7 +12,8 @@ public class Unit {
 	public static final String UNIT="Unit";
 	public static final String BUILDER_ROLE="Builder";
 	public static final String EXPLOITER_ROLE="Exploiter";
-	public static final String EXPLORER_ROLE="Explorer";
+	public static final String EXPLORER_ROLE_UP="Explorer up";
+	public static final String EXPLORER_ROLE_DOWN="Explorer down";
 	
 	// -----------------------------------------------------------------
     // Atributes
