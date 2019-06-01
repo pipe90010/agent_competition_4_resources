@@ -8,7 +8,7 @@ import jade.core.*;
 /**
 * Protege name: AssignRole
 * @author ontology bean generator
-* @version 2019/06/1, 18:10:16
+* @version 2019/06/1, 18:14:18
 */
 public class AssignRole implements AgentAction {
 
@@ -35,14 +35,14 @@ public class AssignRole implements AgentAction {
    }
 
    /**
-* Protege name: locaton
+* Protege name: location_Role
    */
-   private Cell locaton;
-   public void setLocaton(Cell value) { 
-    this.locaton=value;
+   private Cell location_Role;
+   public void setLocation_Role(Cell value) { 
+    this.location_Role=value;
    }
-   public Cell getLocaton() {
-     return this.locaton;
+   public Cell getLocation_Role() {
+     return this.location_Role;
    }
 
    /**
