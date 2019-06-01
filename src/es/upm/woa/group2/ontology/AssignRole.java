@@ -1,6 +1,6 @@
 package es.upm.woa.group2.ontology;
 
-import es.upm.woa.ontology.Cell;
+
 import jade.content.*;
 import jade.util.leap.*;
 import jade.core.*;
@@ -8,7 +8,7 @@ import jade.core.*;
 /**
 * Protege name: AssignRole
 * @author ontology bean generator
-* @version 2019/06/1, 18:14:18
+* @version 2019/06/1, 19:01:09
 */
 public class AssignRole implements AgentAction {
 
@@ -37,11 +37,11 @@ public class AssignRole implements AgentAction {
    /**
 * Protege name: location_Role
    */
-   private Cell location_Role;
-   public void setLocation_Role(Cell value) { 
+   private CellGroup2 location_Role;
+   public void setLocation_Role(CellGroup2 value) { 
     this.location_Role=value;
    }
-   public Cell getLocation_Role() {
+   public CellGroup2 getLocation_Role() {
      return this.location_Role;
    }
 

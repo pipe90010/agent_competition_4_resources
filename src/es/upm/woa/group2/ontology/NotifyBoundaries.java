@@ -8,7 +8,7 @@ import jade.core.*;
 /**
 * Protege name: NotifyBoundaries
 * @author ontology bean generator
-* @version 2019/06/1, 15:28:22
+* @version 2019/06/1, 19:01:09
 */
 public class NotifyBoundaries implements AgentAction {
 

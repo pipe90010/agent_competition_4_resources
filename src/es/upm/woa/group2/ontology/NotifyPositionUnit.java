@@ -1,6 +1,6 @@
 package es.upm.woa.group2.ontology;
 
-import es.upm.woa.ontology.Cell;
+
 import jade.content.*;
 import jade.util.leap.*;
 import jade.core.*;
@@ -8,18 +8,18 @@ import jade.core.*;
 /**
 * Protege name: NotifyPositionUnit
 * @author ontology bean generator
-* @version 2019/06/1, 15:28:22
+* @version 2019/06/1, 19:01:09
 */
 public class NotifyPositionUnit implements AgentAction {
 
    /**
 * Protege name: cell_position
    */
-   private Cell cell_position;
-   public void setCell_position(Cell value) { 
+   private CellGroup2 cell_position;
+   public void setCell_position(CellGroup2 value) { 
     this.cell_position=value;
    }
-   public Cell getCell_position() {
+   public CellGroup2 getCell_position() {
      return this.cell_position;
    }
 
