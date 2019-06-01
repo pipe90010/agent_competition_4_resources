@@ -63,10 +63,12 @@ public class AgUnit extends Agent {
 	private Codec codec = new SLCodec();
 	private Ontology ontology = GameOntology.getInstance();
 
+	private Cell map;
 	private Cell currentPosition;
+	int X_BOUNDARY;
+	int Y_BOUNDARY;
 
 	private Unit unit;
-
 	private Tribe tribe;
 
 	private ArrayList<Cell> discoveredCells;
@@ -87,7 +89,7 @@ public class AgUnit extends Agent {
 		isBusy = false;
 		discoveredCells = new ArrayList<Cell>();
 		tribe = new Tribe();
-		
+
 		Printer.printSuccess(getLocalName(), "has entered into the system ");
 		// Register of the codec and the ontology to be used in the ContentManager
 		// Register language and ontology this part always goes
@@ -152,10 +154,6 @@ public class AgUnit extends Agent {
 			}
 
 		};
-		
-		
-		
-		
 
 		// Behavior for requesting BUILDINGS
 		createBuilding = new SimpleBehaviour(this) {
@@ -403,16 +401,20 @@ public class AgUnit extends Agent {
 
 			public void action() {
 
-				ACLMessage msg = receive(MessageTemplate.and(
-						MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.INFORM),
-								MessageTemplate.MatchPerformative(ACLMessage.FAILURE)),
-						MessageTemplate.or(
-								MessageTemplate.or(MessageTemplate.MatchProtocol("NotifyCellDetail"),
-										MessageTemplate.or(MessageTemplate.MatchProtocol("InformOriginPosition"),
-												MessageTemplate.or(MessageTemplate.MatchProtocol("informMove"),
-														MessageTemplate.or(MessageTemplate.MatchProtocol("ExploitResources"),
-																MessageTemplate.MatchProtocol("AssignRole"))))),
-								MessageTemplate.MatchProtocol("CreateBuilding"))));
+				ACLMessage msg = receive(
+						MessageTemplate.and(
+								MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.INFORM),
+										MessageTemplate.MatchPerformative(ACLMessage.FAILURE)),
+								MessageTemplate.or(
+										MessageTemplate.or(MessageTemplate.MatchProtocol("NotifyCellDetail"),
+												MessageTemplate.or(
+														MessageTemplate.MatchProtocol("InformOriginPosition"),
+														MessageTemplate.or(MessageTemplate.MatchProtocol("informMove"),
+																MessageTemplate.or(
+																		MessageTemplate
+																				.MatchProtocol("ExploitResources"),
+																		MessageTemplate.MatchProtocol("AssignRole"))))),
+										MessageTemplate.MatchProtocol("CreateBuilding"))));
 
 				if (msg != null) {
 					if (msg.getPerformative() == ACLMessage.INFORM) {
@@ -464,8 +466,7 @@ public class AgUnit extends Agent {
 												Resource resource = (Resource) newPosition.getContent();
 												if (resource.getGoldPercentage() > 0) {
 													addBehaviour(exploitResource);
-												}
-												else if (resource.getResourceType()
+												} else if (resource.getResourceType()
 														.equals(GameOntology.RESOURCEACCOUNT_WOOD)) {
 													addBehaviour(exploitResource);
 												}
@@ -488,7 +489,7 @@ public class AgUnit extends Agent {
 									Printer.printSuccess(getLocalName(),
 											"New Building: " + type + "  has been created succesfully ");
 									if (type.equals(TOWNHALL)) {
-										//addBehaviour(createUnit);
+										// addBehaviour(createUnit);
 										addBehaviour(movement);
 									}
 
@@ -524,13 +525,12 @@ public class AgUnit extends Agent {
 									getContentManager().fillContent(informUnit, explotationResources);
 									send(informUnit);
 
-								}
-								else if(conc instanceof AssignRole) {
-									
+								} else if (conc instanceof AssignRole) {
+
 									AssignRole agActionN = (AssignRole) agAction.getAction();
-									
+
 									unit.setRole(agActionN.getRole());
-									
+
 									ACLMessage reply = msg.createReply();
 									reply.setLanguage(codec.getName());
 									reply.setOntology(ontology.getName());
@@ -540,11 +540,12 @@ public class AgUnit extends Agent {
 									ACLMessage informUnit = MessageFormatter.createMessage(getLocalName(),
 											ACLMessage.INFORM, "informExploitResources", msg.getSender());
 
-									Printer.printSuccess(getLocalName(), "The role" + unit.getRole() + "has been assigned to unit:" + unit.getId());
+									Printer.printSuccess(getLocalName(),
+											"The role" + unit.getRole() + "has been assigned to unit:" + unit.getId());
 
 									getContentManager().fillContent(informUnit, explotationResources);
 									send(informUnit);
-									
+
 								}
 
 							}
@@ -558,12 +559,11 @@ public class AgUnit extends Agent {
 			}
 
 		});
-		if (tribe.getUnits().size()==0) {
+		if (tribe.getUnits().size() == 0) {
 			unit.setRole(Unit.EXPLOITER_ROLE);
 			addBehaviour(createBuilding);
-			
-		}
-		else {
+
+		} else {
 			unit.setRole(Unit.EXPLOITER_ROLE);
 			addBehaviour(movement);
 		}
@@ -596,4 +596,37 @@ public class AgUnit extends Agent {
 		if (!found)
 			discoveredCells.add(cell);
 	}
+
+	public int explore() {
+		int x = currentPosition.getX();
+
+		// validates that a position is even, else it is odd
+		if (x % 2 == 0) {
+			if (unit.getRole().equals(Unit.EXPLORER_ROLE_UP)) {
+				if (x - 2 <= 0)
+					return 2;
+				else
+					return 4;
+			}
+			if (x >= X_BOUNDARY)
+				return 2;
+			else
+				return 1;
+		} else {
+			if (unit.getRole().equals(Unit.EXPLORER_ROLE_UP)) {
+				// up
+				if (x - 1 <= 0)
+					return 5;
+				else
+					return 4;
+			} else {
+				// down
+				if (x + 1 >= X_BOUNDARY)
+					return 5;
+				else
+					return 1;
+			}
+		}
+	}
+
 }
