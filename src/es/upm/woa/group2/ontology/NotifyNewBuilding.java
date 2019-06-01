@@ -1,7 +1,6 @@
 package es.upm.woa.group2.ontology;
 
 
-import es.upm.woa.ontology.Cell;
 import jade.content.*;
 import jade.util.leap.*;
 import jade.core.*;
@@ -9,18 +8,18 @@ import jade.core.*;
 /**
 * Protege name: NotifyNewBuilding
 * @author ontology bean generator
-* @version 2019/06/1, 12:40:50
+* @version 2019/06/1, 19:01:09
 */
 public class NotifyNewBuilding implements AgentAction {
 
    /**
 * Protege name: cell
    */
-   private Cell cell;
-   public void setCell(Cell value) { 
+   private CellGroup2 cell;
+   public void setCell(CellGroup2 value) { 
     this.cell=value;
    }
-   public Cell getCell() {
+   public CellGroup2 getCell() {
      return this.cell;
    }
 
