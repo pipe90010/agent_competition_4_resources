@@ -36,6 +36,7 @@ public class Tribe {
 	private int memberSize;
 	private AID id;
 	private ArrayList<Cell> discoveredCells;
+	private ArrayList<Cell> availableResources;
 	private int teamNumber;
 	private int x_boundary;
 	public int getX_boundary() {
@@ -90,6 +91,7 @@ public class Tribe {
 		this.teamNumber = teamNumber;
 		this.unitsCollecters = new ArrayList<Unit>();
 		this.unitsExplorers = new ArrayList<Unit>();
+		this.availableResources = new ArrayList<Cell>();
 	}
 	
 	public Tribe(AID id) {
@@ -322,6 +324,18 @@ public class Tribe {
 	public void setUnitsExplorers(ArrayList<Unit> unitsExplorers) {
 		this.unitsExplorers = unitsExplorers;
 	}
+
+	public ArrayList<Cell> getAvailableResources() {
+		return availableResources;
+	}
+
+	public void setAvailableResources(ArrayList<Cell> availableReources) {
+		this.availableResources = availableReources;
+	}
 	
+	public void addAvailableResources(Cell u)
+	{
+		this.availableResources.add(u);
+	}
 	
 }

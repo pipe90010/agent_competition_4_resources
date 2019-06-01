@@ -19,6 +19,7 @@ import es.upm.woa.group2.beans.Tribe;
 import es.upm.woa.group2.beans.Unit;
 import es.upm.woa.group2.ontology.AssignRole;
 import es.upm.woa.group2.ontology.NewResourceDiscovery;
+import es.upm.woa.group2.ontology.NotifyNewBuilding;
 import es.upm.woa.group2.common.MessageFormatter;
 import es.upm.woa.group2.common.Printer;
 import es.upm.woa.group2.util.Moving;
@@ -231,11 +232,6 @@ public class AgUnit extends Agent {
 								"MoveToCell", ag);
 						MoveToCell createAction = new MoveToCell();
 
-						Cell targetPosition = new Cell();
-						targetPosition.setX(currentPosition.getX() + 1);
-						targetPosition.setY(currentPosition.getY() + 1);
-						targetPosition.setContent(new Ground());
-
 						// Moving movement = new Moving();
 						int cellNumber = new Random().nextInt((5) + 1); // [0...6]
 
@@ -411,7 +407,16 @@ public class AgUnit extends Agent {
 										MessageTemplate.or(MessageTemplate.MatchProtocol("InformOriginPosition"),
 												MessageTemplate.or(MessageTemplate.MatchProtocol("informMove"),
 														MessageTemplate.or(MessageTemplate.MatchProtocol("ExploitResources"),
-																MessageTemplate.MatchProtocol("AssignRole"))))),
+																MessageTemplate.or(MessageTemplate.MatchProtocol("AssignRole"),
+																		MessageTemplate.or(MessageTemplate.MatchProtocol("informBuildingCreation"),
+																				MessageTemplate.or(MessageTemplate.MatchProtocol("NotifyNewUnit"),
+																						MessageTemplate.MatchProtocol("NotifyNewBuilding"))
+																				)
+																		)
+																)
+														)
+												)
+										),
 								MessageTemplate.MatchProtocol("CreateBuilding"))));
 
 				if (msg != null) {
@@ -487,6 +492,21 @@ public class AgUnit extends Agent {
 									// setCurrentPosition(cell);
 									Printer.printSuccess(getLocalName(),
 											"New Building: " + type + "  has been created succesfully ");
+									
+									
+									ACLMessage informMsgUnit = MessageFormatter.createMessage(
+											getLocalName(), ACLMessage.INFORM, "NotifyNewBuilding",
+											tribe.getId());
+									
+									NotifyNewBuilding notifyNewBuilding = new NotifyNewBuilding();
+									notifyNewBuilding.setType(type);
+									notifyNewBuilding.setCell(currentPosition);
+									
+									Action notifyCreateBuilding = new Action(tribe.getId(), notifyNewBuilding);
+									getContentManager().fillContent(informMsgUnit, notifyCreateBuilding);
+									send(informMsgUnit);
+									
+									
 									if (type.equals(TOWNHALL)) {
 										//addBehaviour(createUnit);
 										addBehaviour(movement);
@@ -500,7 +520,17 @@ public class AgUnit extends Agent {
 									Cell cell = agActionN.getLocation();
 
 									setCurrentPosition(cell);
-									addBehaviour(movement);
+									
+									
+									if (unit.getRole().equals(Unit.BUILDER_ROLE) && cell.getContent() instanceof Ground) {
+										typeOfBuildingCreated = TOWNHALL;
+										addBehaviour(createBuilding);
+									}
+									else
+									{
+										addBehaviour(movement);
+									}
+									
 									Printer.printSuccess(getLocalName(),
 											"Origin Position has been set: " + cell.getX() + ", " + cell.getY());
 								}
@@ -530,21 +560,23 @@ public class AgUnit extends Agent {
 									AssignRole agActionN = (AssignRole) agAction.getAction();
 									
 									unit.setRole(agActionN.getRole());
+									Printer.printSuccess(getLocalName(), "The assigned role is "+agActionN.getRole());
+								}
+								else if(conc instanceof NotifyNewBuilding) {
 									
-									ACLMessage reply = msg.createReply();
-									reply.setLanguage(codec.getName());
-									reply.setOntology(ontology.getName());
-
-									Action explotationResources = new Action(tribe.getId(), agActionN);
-
-									ACLMessage informUnit = MessageFormatter.createMessage(getLocalName(),
-											ACLMessage.INFORM, "informExploitResources", msg.getSender());
-
-									Printer.printSuccess(getLocalName(), "The role" + unit.getRole() + "has been assigned to unit:" + unit.getId());
-
-									getContentManager().fillContent(informUnit, explotationResources);
-									send(informUnit);
+									NotifyNewBuilding agActionN = (NotifyNewBuilding) agAction.getAction();
+									String type = agActionN.getType();
+									Cell buildingPosition = agActionN.getCell();
 									
+									if(type.equals(Tribe.TOWNHALL))
+									{
+										tribe.setTownhall(buildingPosition);
+										
+									}
+									Building build = (Building)buildingPosition.getContent();
+									tribe.addNewCity(build);
+									
+									Printer.printSuccess(getLocalName(), "Unit has been informed about new building "+type);
 								}
 
 							}
@@ -558,15 +590,6 @@ public class AgUnit extends Agent {
 			}
 
 		});
-		if (tribe.getUnits().size()==0) {
-			unit.setRole(Unit.EXPLOITER_ROLE);
-			addBehaviour(createBuilding);
-			
-		}
-		else {
-			unit.setRole(Unit.EXPLOITER_ROLE);
-			addBehaviour(movement);
-		}
 	}
 
 	protected void takeDown() {
@@ -595,5 +618,71 @@ public class AgUnit extends Agent {
 		}
 		if (!found)
 			discoveredCells.add(cell);
+	}
+	
+	public int getClosestAvailableResourceDirection()
+	{
+		ArrayList<Cell> availableResources = tribe.getAvailableResources();
+		
+		Cell nextClosestCell = null;
+		for (Cell cell : availableResources) {
+			if(nextClosestCell!=null)
+			{
+				int xDifferenceNextClosest = java.lang.Math.abs(currentPosition.getX()-nextClosestCell.getX());
+				int yDifferenceNextClosest = java.lang.Math.abs(currentPosition.getY()-nextClosestCell.getY());
+				
+				int xDifferenceCell = java.lang.Math.abs(currentPosition.getX()-cell.getX());
+				int yDifferenceCell = java.lang.Math.abs(currentPosition.getY()-cell.getY());
+				
+				if(xDifferenceCell<xDifferenceNextClosest)
+				{
+					if(yDifferenceCell<=yDifferenceNextClosest)
+					{
+						nextClosestCell = cell;
+					}
+
+				}
+				else if(yDifferenceCell<yDifferenceNextClosest)
+				{
+					if(xDifferenceCell<=xDifferenceNextClosest)
+					{
+						nextClosestCell = cell;
+					}
+				}
+			}
+			else
+			{
+				nextClosestCell = cell;
+			}
+		}
+		
+		int direction = -1;
+		int xDifferenceNextClosest = currentPosition.getX()-nextClosestCell.getX();
+		int yDifferenceNextClosest = currentPosition.getY()-nextClosestCell.getY();
+		
+		//move left
+		if(yDifferenceNextClosest>0)
+		{
+			if(xDifferenceNextClosest>0)
+				direction = 6;
+			else
+				direction = 5;
+				
+		}//move right
+		else if(yDifferenceNextClosest<0)
+		{
+			if(xDifferenceNextClosest>0)
+				direction= 2;
+			else
+				direction = 3;
+		}
+		else if(yDifferenceNextClosest==0)
+		{
+			if(xDifferenceNextClosest>0)
+				direction = 1;
+			else
+				direction = 4;
+		}
+		return direction;
 	}
 }

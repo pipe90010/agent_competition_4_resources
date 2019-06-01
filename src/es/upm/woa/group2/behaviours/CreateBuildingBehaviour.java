@@ -69,6 +69,7 @@ public class CreateBuildingBehaviour extends CyclicBehaviour{
 						
 						boolean oneUnitBilding = tribeSender.isAnyUnitBuilding()!=null;
 						
+						boolean built= false;
 						
 						if(buildingType.equals(AgWorldInstance.TOWNHALL)) {
 							
@@ -123,12 +124,12 @@ public class CreateBuildingBehaviour extends CyclicBehaviour{
 								//UPDATES TRIBES ARRAY
 								AgWorldInstance.updateUnitInTribeByUnitAID(unit);
 								AgWorldInstance.updateTribeByTribeAID(tribeSender);		
-								
+								built = true;
 							}
 							else
 							{
 								Printer.printSuccess(AgWorldInstance.getLocalName(),
-										"Unit " + senderName + " CANNOT CREATE BUILDING");
+										"Unit " + senderName + " CANNOT CREATE BUILDING: "+buildingType);
 								reply = MessageFormatter.createReplyMessage(AgWorldInstance.getLocalName(), msg,
 										ACLMessage.REFUSE, "CreateBuilding");
 								AgWorldInstance.send(reply);
@@ -186,7 +187,7 @@ public class CreateBuildingBehaviour extends CyclicBehaviour{
 								//UPDATES TRIBES ARRAY
 								AgWorldInstance.updateUnitInTribeByUnitAID(unit);
 								AgWorldInstance.updateTribeByTribeAID(tribeSender);		
-								
+								built=true;
 							}
 							else
 							{
@@ -250,7 +251,7 @@ public class CreateBuildingBehaviour extends CyclicBehaviour{
 								//UPDATES TRIBES ARRAY
 								AgWorldInstance.updateUnitInTribeByUnitAID(unit);
 								AgWorldInstance.updateTribeByTribeAID(tribeSender);		
-								
+								built=true;
 							}
 							else
 							{
@@ -262,10 +263,14 @@ public class CreateBuildingBehaviour extends CyclicBehaviour{
 							}
 						}
 						
-						JSONObject parameters = new JSONObject();
-						parameters.put("agent_id",unit.getId().getLocalName());
-						parameters.put("type", buildingType);
-						HttpRequest.sendPost("/building/create",parameters);
+						if(built)
+						{
+							JSONObject parameters = new JSONObject();
+							parameters.put("agent_id",unit.getId().getLocalName());
+							parameters.put("type", buildingType);
+							HttpRequest.sendPost("/building/create",parameters);
+						}
+							
 					}
 					else
 					{

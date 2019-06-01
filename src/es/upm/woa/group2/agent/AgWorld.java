@@ -245,19 +245,26 @@ public class AgWorld extends Agent {
 					int x = xLong.intValue();
 					int y = yLong.intValue();
 					map[x][y] = new Cell();
-					Resource resource = new Resource();
-					resource.setResourceType(resourceType);
+					
+					
+					if(!resourceType.equals(GameOntology.GROUND))
+					{
+						Resource resource = new Resource();
+						resource.setResourceType(resourceType);
 
-					if (tile.containsKey("resource_amount")) {
-						Long resource_amount = (Long) tile.get("resource_amount");
-						resource.setResourceAmount(resource_amount.intValue());
+						if (tile.containsKey("resource_amount")) {
+							Long resource_amount = (Long) tile.get("resource_amount");
+							resource.setResourceAmount(resource_amount.intValue());
+						}
+						if (tile.containsKey("gold_percentage")) {
+							Long gold_percentage = (Long) tile.get("gold_percentage");
+							resource.setGoldPercentage(gold_percentage.intValue());
+						}
+						map[x][y].setContent(resource);
 					}
-					if (tile.containsKey("gold_percentage")) {
-						Long gold_percentage = (Long) tile.get("gold_percentage");
-						resource.setGoldPercentage(gold_percentage.intValue());
-					}
-					System.out.println();
-					map[x][y].setContent(resource);
+					else
+						map[x][y].setContent(new Ground());
+					
 					map[x][y].setX(x);
 					map[x][y].setY(y);
 				}
@@ -292,6 +299,12 @@ public class AgWorld extends Agent {
 
 		int x = new Random().nextInt((X_BOUNDARY - 1)) + 1;
 		int y = new Random().nextInt((Y_BOUNDARY - 1)) + 1;
+		
+		while(map[x][y]==null)
+		{
+			x = new Random().nextInt((X_BOUNDARY - 1)) + 1;
+			y = new Random().nextInt((Y_BOUNDARY - 1)) + 1;
+		}
 
 		return map[x][y];
 	}
@@ -354,6 +367,7 @@ public class AgWorld extends Agent {
 
 			// there should be implemented a FSM behavior here
 			// to refuse incoming request messages while the agent is in waiting state
+			if(!isFirst)
 			doWait(waitTime);
 
 			if (!isGameOver()) {
@@ -377,7 +391,7 @@ public class AgWorld extends Agent {
 					AID ag = tribe.getId();
 
 					ACLMessage msgInform = MessageFormatter.createMessage(getLocalName(), ACLMessage.INFORM,
-							"CreateUnit", ag);
+							"NotifyNewUnit", ag);
 					// Creates a notifyNewUnit action
 					NotifyNewUnit notify = new NotifyNewUnit();
 
