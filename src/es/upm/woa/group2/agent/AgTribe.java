@@ -318,7 +318,9 @@ public class AgTribe extends Agent {
 												MessageTemplate.or(
 														MessageTemplate.MatchProtocol("ExploitResources"),
 														MessageTemplate.or(MessageTemplate.MatchProtocol("NotifyNewBuilding"),
-																MessageTemplate.MatchProtocol("NewResourceDiscovery")
+																MessageTemplate.or(MessageTemplate.MatchProtocol("RegisterTribe"),
+																		MessageTemplate.MatchProtocol("NewResourceDiscovery")
+																)
 														)
 												)
 												)),
@@ -375,6 +377,12 @@ public class AgTribe extends Agent {
 										else
 											Printer.printSuccess(getLocalName(), "New cell's content is unknown");
 									}
+								}
+								else if(conc instanceof RegisterTribe)
+								{
+									RegisterTribe agActionN = (RegisterTribe)agAction.getAction();
+									int teamNumber = agActionN.getTeamNumber();
+									tribe.setTeamNumber(teamNumber);
 								}
 								else if(conc instanceof InitalizeTribe)
 								{

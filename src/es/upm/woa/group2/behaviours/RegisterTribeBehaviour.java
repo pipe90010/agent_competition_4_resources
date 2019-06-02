@@ -73,10 +73,17 @@ public class RegisterTribeBehaviour extends CyclicBehaviour{
 						{
 							Printer.printSuccess(AgWorldInstance.getLocalName(),"TRIBE REGISTERED!");	
 							
+							Action agAction = new Action(sender, registeredTribeAction);
 							ACLMessage reply = MessageFormatter.createReplyMessage(AgWorldInstance.getLocalName(), msg,
 									ACLMessage.AGREE, "RegisterTribe");
-							AgWorldInstance.getContentManager().fillContent(reply, registeredTribeAction);
+							AgWorldInstance.getContentManager().fillContent(reply, agAction);
 							AgWorldInstance.send(reply);
+							
+							ACLMessage initializeInform = MessageFormatter.createMessage(AgWorldInstance.getLocalName(), ACLMessage.INFORM,
+									"RegisterTribe", sender);
+							Action initializeActionInform = new Action(sender, registeredTribeAction);									
+							AgWorldInstance.getContentManager().fillContent(initializeInform, initializeActionInform);
+							AgWorldInstance.send(initializeInform);
 							
 							//Create Tribe
 							

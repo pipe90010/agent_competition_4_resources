@@ -113,6 +113,7 @@ public class UnitCreationBehaviour extends CyclicBehaviour {
 
 							ACLMessage reply = MessageFormatter.createReplyMessage(AgWorldInstance.getLocalName(), msg,
 									performative, "createUnit");
+							AgWorldInstance.getContentManager().fillContent(reply, agAction);
 							myAgent.send(reply);
 
 							if (code == 1) {

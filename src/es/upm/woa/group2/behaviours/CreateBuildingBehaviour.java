@@ -71,13 +71,14 @@ public class CreateBuildingBehaviour extends CyclicBehaviour{
 						
 						boolean built= false;
 						
+						Action agAction = new Action(sender, createBuildingAction);
+						
 						if(buildingType.equals(AgWorldInstance.TOWNHALL)) {
 							
 							boolean meetConditions = worldRules.meetTownhallCreationCondition(tribeSender.getGold(), tribeSender.getStones(), tribeSender.getWood(),  oneUnitBilding);
 							
 							if(meetConditions && unit.getPosition().getContent() instanceof Ground)
 							{
-								Action agAction = new Action(sender, createBuildingAction);
 								reply = MessageFormatter.createReplyMessage(AgWorldInstance.getLocalName(), msg,
 										ACLMessage.AGREE, "CreateBuilding");
 								AgWorldInstance.getContentManager().fillContent(reply, agAction);
@@ -118,6 +119,7 @@ public class CreateBuildingBehaviour extends CyclicBehaviour{
 								{
 									ACLMessage informMsg = MessageFormatter.createReplyMessage(AgWorldInstance.getLocalName(), msg,
 											ACLMessage.FAILURE, "NotifyCellDetail");
+									AgWorldInstance.getContentManager().fillContent(reply, agAction);
 									AgWorldInstance.send(informMsg);
 								}
 								
@@ -133,6 +135,7 @@ public class CreateBuildingBehaviour extends CyclicBehaviour{
 										"Unit " + senderName + " CANNOT CREATE BUILDING: "+buildingType);
 								reply = MessageFormatter.createReplyMessage(AgWorldInstance.getLocalName(), msg,
 										ACLMessage.REFUSE, "CreateBuilding");
+								AgWorldInstance.getContentManager().fillContent(reply, agAction);
 								AgWorldInstance.send(reply);
 							}
 						}
@@ -142,7 +145,6 @@ public class CreateBuildingBehaviour extends CyclicBehaviour{
 							
 							if(meetConditions && unit.getPosition().getContent() instanceof Ground)
 							{
-								Action agAction = new Action(sender, createBuildingAction);
 								reply = MessageFormatter.createReplyMessage(AgWorldInstance.getLocalName(), msg,
 										ACLMessage.AGREE, "CreateBuilding");
 								AgWorldInstance.getContentManager().fillContent(reply, agAction);
@@ -182,6 +184,7 @@ public class CreateBuildingBehaviour extends CyclicBehaviour{
 								{
 									ACLMessage informMsg = MessageFormatter.createReplyMessage(AgWorldInstance.getLocalName(), msg,
 											ACLMessage.FAILURE, "NotifyCellDetail");
+									AgWorldInstance.getContentManager().fillContent(reply, agAction);
 									AgWorldInstance.send(informMsg);
 								}
 								
@@ -197,6 +200,7 @@ public class CreateBuildingBehaviour extends CyclicBehaviour{
 										"Unit " + senderName + " CANNOT CREATE BUILDING");
 								reply = MessageFormatter.createReplyMessage(AgWorldInstance.getLocalName(), msg,
 										ACLMessage.REFUSE, "CreateBuilding");
+								AgWorldInstance.getContentManager().fillContent(reply, agAction);
 								AgWorldInstance.send(reply);
 							}
 							
@@ -207,7 +211,6 @@ public class CreateBuildingBehaviour extends CyclicBehaviour{
 							
 							if(meetConditions && unit.getPosition().getContent() instanceof Ground)
 							{
-								Action agAction = new Action(sender, createBuildingAction);
 								reply = MessageFormatter.createReplyMessage(AgWorldInstance.getLocalName(), msg,
 										ACLMessage.AGREE, "CreateBuilding");
 								AgWorldInstance.getContentManager().fillContent(reply, agAction);
@@ -247,6 +250,7 @@ public class CreateBuildingBehaviour extends CyclicBehaviour{
 								{
 									ACLMessage informMsg = MessageFormatter.createReplyMessage(AgWorldInstance.getLocalName(), msg,
 											ACLMessage.FAILURE, "NotifyCellDetail");
+									AgWorldInstance.getContentManager().fillContent(reply, agAction);
 									AgWorldInstance.send(informMsg);
 								}
 								
@@ -262,6 +266,7 @@ public class CreateBuildingBehaviour extends CyclicBehaviour{
 										"Unit " + senderName + " CANNOT CREATE BUILDING");
 								reply = MessageFormatter.createReplyMessage(AgWorldInstance.getLocalName(), msg,
 										ACLMessage.REFUSE, "CreateBuilding");
+								AgWorldInstance.getContentManager().fillContent(reply, agAction);
 								AgWorldInstance.send(reply);
 							}
 						}
