@@ -31,6 +31,7 @@ import es.upm.woa.ontology.Building;
 import es.upm.woa.ontology.Cell;
 import es.upm.woa.ontology.CreateBuilding;
 import es.upm.woa.ontology.CreateUnit;
+import es.upm.woa.ontology.EndOfGame;
 import es.upm.woa.ontology.ExploitResource;
 import es.upm.woa.ontology.Ground;
 import es.upm.woa.ontology.GameOntology;
@@ -196,6 +197,8 @@ public class AgWorld extends Agent {
 			// Fill properties
 			this.MAX_REGISTRATION_TIME = Integer.parseInt(properties.getProperty("reg_time"));
 			this.GAME_TIME = Integer.parseInt(properties.getProperty("game_time"));
+			
+			
 		} catch (FileNotFoundException e) {
 			System.err.println("File " + file.getAbsolutePath() + " was not found!");
 		} catch (IOException e) {
@@ -215,6 +218,43 @@ public class AgWorld extends Agent {
 		this.initializeMap();
 		gameOver = false;
 		registrationPeriod = true;
+		worldTimer.setGAME_TIME(this.GAME_TIME);
+		
+		Thread t = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				// Insert some method call here.
+				try {
+					Thread.sleep(worldTimer.getGAME_TIME());
+					for (int i = 0; i < tribes.size(); i++) {
+						Tribe t = tribes.get(i);
+						ACLMessage msgInform = MessageFormatter.createMessage(getLocalName(), ACLMessage.INFORM,
+								"EndOfGame", t.getId());
+						// Creates a notifyNewUnit action
+						EndOfGame notify = new EndOfGame();
+						Action agActionNotification = new Action(t.getId(), notify);
+						getContentManager().fillContent(msgInform, agActionNotification);
+						send(msgInform);
+						
+						for (int j = 0; j < t.getUnits().size(); j++) {
+							Unit u = t.getUnits().get(j);
+							ACLMessage msgInformUnit = MessageFormatter.createMessage(getLocalName(), ACLMessage.INFORM,
+									"EndOfGame", u.getId());
+							// Creates a notifyNewUnit action
+							EndOfGame notifyUnit = new EndOfGame();
+							Action agActionNotificationUnit = new Action(u.getId(), notifyUnit);
+							getContentManager().fillContent(msgInform, agActionNotificationUnit);
+							send(msgInformUnit);
+						}
+					}
+
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+
+			}
+		});
+		//t.start();
 		startRegistrationTime();
 		// registrationPeriod = true;
 	}
@@ -240,8 +280,8 @@ public class AgWorld extends Agent {
 
 				for (int i = 0; i < tiles.size(); i++) {
 					JSONObject tile = (JSONObject) tiles.get(i);
-					Long xLong = (Long) tile.get("x");
-					Long yLong = (Long) tile.get("y");
+					Long xLong = (Long) tile.get("y");
+					Long yLong = (Long) tile.get("x");
 					String resourceType = (String) tile.get("resource");
 
 					int x = xLong.intValue();

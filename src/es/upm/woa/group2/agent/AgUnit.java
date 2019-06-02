@@ -31,6 +31,7 @@ import es.upm.woa.ontology.Cell;
 import es.upm.woa.ontology.CellContent;
 import es.upm.woa.ontology.CreateBuilding;
 import es.upm.woa.ontology.CreateUnit;
+import es.upm.woa.ontology.EndOfGame;
 import es.upm.woa.ontology.ExploitResource;
 import es.upm.woa.ontology.Ground;
 import es.upm.woa.ontology.GameOntology;
@@ -239,7 +240,8 @@ public class AgUnit extends Agent {
 
 						if (unit.getRole().equals(Unit.EXPLORER_ROLE_UP)
 								|| unit.getRole().equals(Unit.EXPLORER_ROLE_DOWN)) {
-							cellNumber = explore();
+							cellNumber = new Random().nextInt((5) + 1);
+							System.out.println("================PRINT MOVEMENT================" + cellNumber);
 						} else if (unit.getRole().equals(Unit.EXPLOITER_ROLE)) {
 							cellNumber = getClosestAvailableResourceDirection();
 						} else {
@@ -431,7 +433,10 @@ public class AgUnit extends Agent {
 												MessageTemplate.or(MessageTemplate.MatchProtocol("ExploitResources"),
 														MessageTemplate.or(
 																MessageTemplate.MatchProtocol("informBuildingCreation"),
-																MessageTemplate.MatchProtocol("NotifyNewUnit")))))),
+																MessageTemplate.or(
+																		MessageTemplate.MatchProtocol("EndOfGame"),
+																		MessageTemplate
+																				.MatchProtocol("NotifyNewUnit"))))))),
 								MessageTemplate.MatchProtocol("CreateBuilding"))));
 
 				if (msg != null) {
@@ -505,10 +510,30 @@ public class AgUnit extends Agent {
 
 										} else {
 
-											if (existsBuildingType(FARM) && currentPosition.getContent() instanceof Building
-													&& ((Building) currentPosition.getContent()).getType()
-															.equals(TOWNHALL)) {
-												addBehaviour(createUnit);
+											if (existsBuildingType(FARM)
+													&& currentPosition.getContent() instanceof Building) {
+
+												if (((Building) currentPosition.getContent()).getType()
+														.equals(TOWNHALL)) {
+													int number = 50;
+													int roll = new Random().nextInt((100 - 1) + 1) + 1;
+
+													if (roll > number)
+														addBehaviour(createUnit);
+													else
+														addBehaviour(movement);
+												} else if (((Building) currentPosition.getContent()).getType()
+														.equals(FARM)) {
+													int number = 50;
+													int roll = new Random().nextInt((100 - 1) + 1) + 1;
+
+													if (roll > number)
+														addBehaviour(exploitResource);
+													else
+														addBehaviour(movement);
+													
+												}
+
 											} else
 												addBehaviour(movement);
 										}
@@ -525,10 +550,12 @@ public class AgUnit extends Agent {
 													addBehaviour(exploitResource);
 												}
 											}
-											if (newPosition.getContent() instanceof Building
+											else if (newPosition.getContent() instanceof Building
 													&& ((Building) newPosition.getContent()).equals(FARM)) {
 												addBehaviour(exploitResource);
 											}
+											else
+												addBehaviour(movement);
 										} else {
 											addBehaviour(movement);
 										}
@@ -597,7 +624,8 @@ public class AgUnit extends Agent {
 
 									getContentManager().fillContent(informUnit, explotationResources);
 									send(informUnit);
-
+								} else if (conc instanceof EndOfGame) {
+									getContainerController().kill();
 								}
 
 							}
@@ -854,6 +882,7 @@ public class AgUnit extends Agent {
 			}
 		}
 	}
+
 
 	public boolean existsBuildingType(String type) {
 		ArrayList<Building> townHallBuildings = tribe.getBuildingsByType(type);

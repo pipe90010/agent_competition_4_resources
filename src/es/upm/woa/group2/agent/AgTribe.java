@@ -17,6 +17,7 @@ import es.upm.woa.group2.util.Format;
 import es.upm.woa.ontology.Building;
 import es.upm.woa.ontology.Cell;
 import es.upm.woa.ontology.CreateBuilding;
+import es.upm.woa.ontology.EndOfGame;
 import es.upm.woa.ontology.ExploitResource;
 import es.upm.woa.ontology.GameOntology;
 import es.upm.woa.ontology.Ground;
@@ -319,7 +320,9 @@ public class AgTribe extends Agent {
 														MessageTemplate.MatchProtocol("ExploitResources"),
 														MessageTemplate.or(MessageTemplate.MatchProtocol("NotifyNewBuilding"),
 																MessageTemplate.or(MessageTemplate.MatchProtocol("RegisterTribe"),
-																		MessageTemplate.MatchProtocol("NewResourceDiscovery")
+																		MessageTemplate.or(MessageTemplate.MatchProtocol("EndOfGame"),
+																				MessageTemplate.MatchProtocol("NewResourceDiscovery")
+																		)
 																)
 														)
 												)
@@ -536,6 +539,9 @@ public class AgTribe extends Agent {
 									}
 									int size = newResourceDiscovery.getCells().size();
 									Printer.printSuccess(getName(), "TRIBE inform units about the new Resource Discovery "+size);
+								}
+								else if (conc instanceof EndOfGame) {
+									getContainerController().kill();
 								}
 							}
 						}

@@ -1,5 +1,10 @@
 package es.upm.woa.group2.common;
 
+import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.util.Calendar;
+import java.util.Date;
+
 public class WorldTimer {
 
 	// -----------------------------------------------------------------
@@ -14,6 +19,10 @@ public class WorldTimer {
 		private final static long EXPLOIT_ORE_TIME = 8;
 		private final static long EXPLOIT_WOOD_TIME = 10;
 		
+		private int GAME_TIME;
+		private int movementsCounter=0;
+		
+		private Date currentTime;
 	// -----------------------------------------------------------------
 	// Atributes
 	// -----------------------------------------------------------------	
@@ -25,6 +34,11 @@ public class WorldTimer {
 	
 	public WorldTimer(long simulationMiliseconds) {
 		this.simulationMiliseconds = simulationMiliseconds;
+		Calendar cal = Calendar.getInstance();
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+        currentTime = cal.getTime();
+        
+		
 	}
 	
 	public long parseTime(long time) {
@@ -32,8 +46,17 @@ public class WorldTimer {
 	}
 	
 	public long getMovementTime() {
+		movementsCounter++;
 		long time = parseTime(MOVE_CELL_TIME);
 		System.out.println("...waiting time for MOVE_CELL_TIME:"+time+"ms");
+		Calendar cal = Calendar.getInstance();
+		
+		Date newDate = cal.getTime();
+		SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+		Date diff = new Date(newDate.getTime() - currentTime.getTime());
+		
+		System.out.println( "TIME DIFFERENCE"+sdf.format(diff) );
+		System.out.println("Movements:"+movementsCounter);
 		return time;
 	}
 	
@@ -72,4 +95,16 @@ public class WorldTimer {
 		System.out.println("...waiting time for EXPOIT_WOOD_TIME:"+time+"ms");
 		return time;
 	}
+
+	public int getGAME_TIME() {
+		long time = parseTime(GAME_TIME);
+		System.out.println("...waiting time for GAME_TIME:"+time+"ms");
+		return GAME_TIME;
+	}
+
+	public void setGAME_TIME(int gAME_TIME) {
+		GAME_TIME = gAME_TIME;
+	}
+	
+	
 }
