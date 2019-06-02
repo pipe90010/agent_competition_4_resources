@@ -347,7 +347,7 @@ public class AgWorld extends Agent {
 		return 1;
 	}
 
-	public Unit createUnit(boolean isFirst, String nickname, Tribe tribe, Cell initialPosition) {
+	public void createUnit(boolean isFirst, String nickname, Tribe tribe, Cell initialPosition) {
 
 		ContainerController cc = getContainerController();
 
@@ -365,12 +365,12 @@ public class AgWorld extends Agent {
 			 * Object[] args = new Object[2]; args[0] = position.getX(); args[1] =
 			 * position.getY();
 			 */
-			long waitTime = worldTimer.getCreationTime();
+			//long waitTime = worldTimer.getCreationTime();
 
 			// there should be implemented a FSM behavior here
 			// to refuse incoming request messages while the agent is in waiting state
-			if(!isFirst)
-			doWait(waitTime);
+			//if(!isFirst)
+			//doWait(waitTime);
 
 			if (!isGameOver()) {
 				AgentController ac = cc.createNewAgent(nickname, AgUnit.class.getName(), null);
@@ -402,10 +402,16 @@ public class AgWorld extends Agent {
 					Action agActionNotification = new Action(ag, notify);
 					getContentManager().fillContent(msgInform, agActionNotification);
 					send(msgInform);
+					
+					tribe.addUnit(newUnit);
+					
+					if(!isFirst)
+					{
+						tribe.deductCost(150, 50,0,0);
+					}
+					
 				}
-				return newUnit;
 			}
-			return null;
 		} catch (StaleProxyException e) {
 			// TODO: handle exception
 			e.printStackTrace();
@@ -419,7 +425,48 @@ public class AgWorld extends Agent {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return null;
+	}
+	public void createUnitAsync(boolean isFirst, String nickname, Tribe tribe, Cell initialPosition) {
+
+		ContainerController cc = getContainerController();
+
+		try {
+			Cell position;
+			/*
+			 * if(isFirst) position = tribe.getTownhall(); else
+			 */
+			if (initialPosition != null)
+				position = initialPosition;
+			else
+				position = tribe.getTownhall();
+
+			long waitTime = worldTimer.getCreationTime();
+
+
+
+			if (!isGameOver()) {
+				
+				Thread t = new Thread(new Runnable() {
+					@Override
+					public void run() {
+						// Insert some method call here.
+						try {
+							Thread.sleep(waitTime);
+							createUnit(isFirst,nickname, tribe, initialPosition);
+							
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+
+					}
+				});
+				t.start();
+				
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public int findTribePositionByUnitAID(AID aid) {

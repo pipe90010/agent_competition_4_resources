@@ -107,75 +107,90 @@ public class MovementRequestBehaviour extends CyclicBehaviour {
 									//sets the waiting time
 									long waitTime = AgWorldInstance.getWorldTimer().getMovementTime();
 
-									AgWorldInstance.doWait(waitTime);
-
-									Printer.printSuccess(AgWorldInstance.getLocalName(),
-											"Unit " + senderName + " WAIT TIME FINISHED");
-
-									// Find the unit based on sender AID
-									Unit unit = AgWorldInstance.findUnitByAID(unitAID, tribeSender);
-									ACLMessage informMsg = null;
+									//AgWorldInstance.doWait(waitTime);
 									
+									Thread t = new Thread(new Runnable() {
+										@Override
+										public void run() {
+											// Insert some method call here.
+											try {
+												Thread.sleep(waitTime);
+												Printer.printSuccess(AgWorldInstance.getLocalName(),
+														"Unit " + senderName + " WAIT TIME FINISHED");
+
+												// Find the unit based on sender AID
+												Unit unit = AgWorldInstance.findUnitByAID(unitAID, tribeSender);
+												ACLMessage informMsg = null;
+												
+												
+												if (!AgWorldInstance.isGameOver()) {
+													// Move the unit
+													unit.setPosition(requestedPosition);
+													Cell cell = AgWorldInstance.moveUnitToPosition(unit, requestedPosition);
+													movementAction.setNewlyArrivedCell(cell);
+													Action agActionMovement = new Action(sender, movementAction);
+													
+													boolean isNew = tribeSender.addDiscoveredCell(cell);
+													
+													
+													Printer.printSuccess(AgWorldInstance.getLocalName(),
+															"Unit " + senderName + "POSITION UPDATED");
+													
+													//INFORMS UNIT WHO REQUESTED THE MOVEMENT
+													informMsg = MessageFormatter.createReplyMessage(AgWorldInstance.getLocalName(), msg,
+															ACLMessage.INFORM, "informMove");
+													
+													
+													AgWorldInstance.getContentManager().fillContent(informMsg, agActionMovement);
+													AgWorldInstance.send(informMsg);
+													
+													
+													NotifyCellDetail notify = new NotifyCellDetail();
+													notify.setNewCell(cell);
+
+													// INFORMS TRIBE ABOUT NEW CELL DISCOVERY
+													ACLMessage informMsgTribe = MessageFormatter.createMessage(
+															AgWorldInstance.getLocalName(), ACLMessage.INFORM, "NotifyCellDetail",
+															tribeSender.getId());
+													Action notifyCellDiscovery = new Action(tribeSender.getId(), notify);
+													AgWorldInstance.getContentManager().fillContent(informMsgTribe, notifyCellDiscovery);
+													AgWorldInstance.send(informMsgTribe);
+
+													ACLMessage informMsgUnit = MessageFormatter.createMessage(
+															AgWorldInstance.getLocalName(), ACLMessage.INFORM, "NotifyCellDetail",
+															senderUnit.getId());
+													Action notifyCellDiscoveryUnit = new Action(senderUnit.getId(), notify);
+													AgWorldInstance.getContentManager().fillContent(informMsgUnit, notifyCellDiscoveryUnit);
+													AgWorldInstance.send(informMsgUnit);
+													
+													senderUnit.setAction(null);
+													AgWorldInstance.updateUnitInTribeByUnitAID(senderUnit);
+													
+													JSONObject parameters = new JSONObject();
+													parameters.put("agent_id",senderUnit.getId().getLocalName());
+													JSONObject tile = new JSONObject();
+													tile.put("x",cell.getX());
+													tile.put("y",cell.getY());
+													parameters.put("tile", tile);
+													HttpRequest.sendPost("/agent/move", parameters);
+													
+												} else {
+													informMsg = MessageFormatter.createReplyMessage(AgWorldInstance.getLocalName(), msg,
+															ACLMessage.FAILURE, "NotifyCellDetail");
+													AgWorldInstance.send(informMsg);
+													
+													senderUnit.setAction(null);
+													AgWorldInstance.updateUnitInTribeByUnitAID(senderUnit);
+												}
+
+											} catch (Exception e) {
+												e.printStackTrace();
+											}
+
+										}
+									});
+									t.start();
 									
-									if (!AgWorldInstance.isGameOver()) {
-										// Move the unit
-										unit.setPosition(requestedPosition);
-										Cell cell = AgWorldInstance.moveUnitToPosition(unit, requestedPosition);
-										movementAction.setNewlyArrivedCell(cell);
-										Action agActionMovement = new Action(sender, movementAction);
-										
-										boolean isNew = tribeSender.addDiscoveredCell(cell);
-										
-										
-										Printer.printSuccess(AgWorldInstance.getLocalName(),
-												"Unit " + senderName + "POSITION UPDATED");
-										
-										//INFORMS UNIT WHO REQUESTED THE MOVEMENT
-										informMsg = MessageFormatter.createReplyMessage(AgWorldInstance.getLocalName(), msg,
-												ACLMessage.INFORM, "informMove");
-										
-										
-										AgWorldInstance.getContentManager().fillContent(informMsg, agActionMovement);
-										AgWorldInstance.send(informMsg);
-										
-										
-										NotifyCellDetail notify = new NotifyCellDetail();
-										notify.setNewCell(cell);
-
-										// INFORMS TRIBE ABOUT NEW CELL DISCOVERY
-										ACLMessage informMsgTribe = MessageFormatter.createMessage(
-												AgWorldInstance.getLocalName(), ACLMessage.INFORM, "NotifyCellDetail",
-												tribeSender.getId());
-										Action notifyCellDiscovery = new Action(tribeSender.getId(), notify);
-										AgWorldInstance.getContentManager().fillContent(informMsgTribe, notifyCellDiscovery);
-										AgWorldInstance.send(informMsgTribe);
-
-										ACLMessage informMsgUnit = MessageFormatter.createMessage(
-												AgWorldInstance.getLocalName(), ACLMessage.INFORM, "NotifyCellDetail",
-												senderUnit.getId());
-										Action notifyCellDiscoveryUnit = new Action(senderUnit.getId(), notify);
-										AgWorldInstance.getContentManager().fillContent(informMsgUnit, notifyCellDiscoveryUnit);
-										AgWorldInstance.send(informMsgUnit);
-										
-										senderUnit.setAction(null);
-										AgWorldInstance.updateUnitInTribeByUnitAID(senderUnit);
-										
-										JSONObject parameters = new JSONObject();
-										parameters.put("agent_id",senderUnit.getId().getLocalName());
-										JSONObject tile = new JSONObject();
-										tile.put("x",cell.getX());
-										tile.put("y",cell.getY());
-										parameters.put("tile", tile);
-										HttpRequest.sendPost("/agent/move", parameters);
-										
-									} else {
-										informMsg = MessageFormatter.createReplyMessage(AgWorldInstance.getLocalName(), msg,
-												ACLMessage.FAILURE, "NotifyCellDetail");
-										AgWorldInstance.send(informMsg);
-										
-										senderUnit.setAction(null);
-										AgWorldInstance.updateUnitInTribeByUnitAID(senderUnit);
-									}
 
 								} catch (Exception e) {
 									e.printStackTrace();

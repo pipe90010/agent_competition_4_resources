@@ -6,11 +6,11 @@ public class WorldTimer {
 	// Constants
 	// -----------------------------------------------------------------
 		//REAL HOURS
-		private final static long MOVE_CELL_TIME = 60; 
-		private final static long CREATE_UNIT_TIME = 150; 
-		private final static long BUILD_TOWN_HALL_TIME = 250;
-		private final static long BUILD_FARM_TIME = 120;
-		private final static long BUILD_STORE_TIME  = 120;
+		private final static long MOVE_CELL_TIME = 6; 
+		private final static long CREATE_UNIT_TIME = 15; 
+		private final static long BUILD_TOWN_HALL_TIME = 25;
+		private final static long BUILD_FARM_TIME = 12;
+		private final static long BUILD_STORE_TIME  = 12;
 		private final static long EXPLOIT_ORE_TIME = 8;
 		private final static long EXPLOIT_WOOD_TIME = 10;
 		
