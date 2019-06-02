@@ -13,8 +13,8 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
-import es.upm.woa.group5.agent.AgTribe;
-import es.upm.woa.group5.agent.AgUnit;
+import es.upm.woa.group2.agent.AgTribe;
+import es.upm.woa.group2.agent.AgUnit;
 import es.upm.woa.group2.beans.Tribe;
 import es.upm.woa.group2.beans.Unit;
 import es.upm.woa.group2.behaviours.CreateBuildingBehaviour;
