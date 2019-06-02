@@ -83,6 +83,7 @@ public class AgUnit extends Agent {
 	private SimpleBehaviour exploitResource;
 	private SimpleBehaviour createBuilding;
 	private SimpleBehaviour createUnit;
+	private int retornar;
 
 	public AgUnit() {
 		// TODO Auto-generated constructor stub
@@ -239,7 +240,8 @@ public class AgUnit extends Agent {
 
 						if (unit.getRole().equals(Unit.EXPLORER_ROLE_UP)
 								|| unit.getRole().equals(Unit.EXPLORER_ROLE_DOWN)) {
-							cellNumber = explore();
+							explore();
+							cellNumber = retornar;
 						} else if (unit.getRole().equals(Unit.EXPLOITER_ROLE)) {
 							cellNumber = getClosestAvailableResourceDirection();
 						} else {
@@ -505,7 +507,8 @@ public class AgUnit extends Agent {
 
 										} else {
 
-											if (existsBuildingType(FARM) && currentPosition.getContent() instanceof Building
+											if (existsBuildingType(FARM)
+													&& currentPosition.getContent() instanceof Building
 													&& ((Building) currentPosition.getContent()).getType()
 															.equals(TOWNHALL)) {
 												addBehaviour(createUnit);
@@ -640,6 +643,15 @@ public class AgUnit extends Agent {
 									AssignRole agActionN = (AssignRole) agAction.getAction();
 
 									unit.setRole(agActionN.getRole());
+
+									if (unit.getRole().equals(Unit.EXPLORER_ROLE_DOWN))
+										unit.setWay(Unit.BAJANDO);
+									else {
+										if (unit.getRole().equals(Unit.EXPLORER_ROLE_UP)) {
+											unit.setWay(Unit.SUBIENDO);
+										}
+									}
+
 									tribe.setId(msg.getSender());
 
 									getContentManager().registerOntology(ontology);
@@ -822,35 +834,86 @@ public class AgUnit extends Agent {
 		return direction;
 	}
 
-	public int explore() {
-		int x = currentPosition.getX();
-
-		// validates that a position is even, else it is odd
+	public int subir1(int x) {
 		if (x % 2 == 0) {
-			if (unit.getRole().equals(Unit.EXPLORER_ROLE_UP)) {
-				if (x - 2 <= 0)
-					return 2;
-				else
-					return 4;
-			} else {
-				if (x >= X_BOUNDARY)
-					return 2;
-				else
-					return 1;
-			}
+			if (x - 2 <= 0) {
+				unit.setWay(Unit.BAJANDO);
+				return 6;
+			} else
+				return 1;
 		} else {
-			if (unit.getRole().equals(Unit.EXPLORER_ROLE_UP)) {
-				// up
-				if (x - 1 <= 0)
-					return 5;
+			if (x - 1 <= 0) {
+				unit.setWay(Unit.BAJANDO);
+				return 5;
+			} else
+				return 1;
+		}
+	}
+
+	public int bajar1(int x) {
+		if (x % 2 == 0) {
+			if (x + 1 >= X_BOUNDARY) {
+				unit.setWay(Unit.SUBIENDO);
+				return 2;
+			} else
+				return 4;
+		} else {
+			if (x + 2 >= X_BOUNDARY) {
+				unit.setWay(Unit.SUBIENDO);
+				return 3;
+			} else
+				return 4;
+		}
+	}
+
+	public int subir2(int x) {
+		if (x % 2 == 0) {
+			if (x - 2 <= 0) {
+				unit.setWay(Unit.BAJANDO);
+				return 6;
+			} else
+				return 1;
+		} else {
+			if (x - 1 <= 0) {
+				unit.setWay(Unit.BAJANDO);
+				return 5;
+			} else
+				return 1;
+		}
+	}
+
+	public int bajar2(int x) {
+		if (x % 2 == 0) {
+			if (x + 1 >= X_BOUNDARY) {
+				unit.setWay(Unit.SUBIENDO);
+				return 2;
+			} else
+				return 4;
+		} else {
+			if (x + 2 >= X_BOUNDARY) {
+				unit.setWay(Unit.SUBIENDO);
+				return 3;
+			} else
+				return 4;
+		}
+	}
+
+	public void explore() {
+		int x = currentPosition.getX();
+		if (unit.getRole().equals(Unit.EXPLORER_ROLE_UP)) {
+			if (unit.getWay().equals(Unit.SUBIENDO))
+				retornar = subir1(x);
+			else
+				if(unit.getWay().equals(Unit.BAJANDO))
+				retornar = bajar1(x);
+
+		} else {
+			if (unit.getRole().equals(Unit.EXPLORER_ROLE_DOWN)) {
+				if (unit.getWay().equals(Unit.BAJANDO))
+					retornar = bajar2(x);
 				else
-					return 4;
-			} else {
-				// down
-				if (x + 1 >= X_BOUNDARY)
-					return 5;
-				else
-					return 1;
+					if(unit.getWay().equals(Unit.BAJANDO))
+					retornar = subir2(x);
 			}
 		}
 	}

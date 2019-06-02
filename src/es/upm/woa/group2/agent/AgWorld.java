@@ -240,8 +240,8 @@ public class AgWorld extends Agent {
 
 				for (int i = 0; i < tiles.size(); i++) {
 					JSONObject tile = (JSONObject) tiles.get(i);
-					Long xLong = (Long) tile.get("x");
-					Long yLong = (Long) tile.get("y");
+					Long xLong = (Long) tile.get("y");
+					Long yLong = (Long) tile.get("x");
 					String resourceType = (String) tile.get("resource");
 
 					int x = xLong.intValue();
@@ -589,7 +589,7 @@ public class AgWorld extends Agent {
 			if (tempTarget != null) {
 				targetPosition = tempTarget;
 			} else {
-				targetPosition = map[x + 2][y];
+				targetPosition = map[x - 1][y];
 			}
 			break;
 		case 5:
@@ -667,8 +667,11 @@ public class AgWorld extends Agent {
 				return null;
 		} else {
 			// coordinate 2
-			if (x - 1 <= 0 && coordinate ==2)
-					return map[X_BOUNDARY][y +1];
+			if (x + 1 >= Y_BOUNDARY && coordinate ==2)
+					return map[1][y + 1];			
+			else
+				if (x + 1 <= Y_BOUNDARY && coordinate ==3)
+					return map[X_BOUNDARY][y + 1];
 			
 			else 
 				if (x - 1 <=0 && coordinate==5)
