@@ -14,7 +14,17 @@ public class Unit {
 	public static final String EXPLOITER_ROLE="Exploiter";
 	public static final String EXPLORER_ROLE_UP="Explorer up";
 	public static final String EXPLORER_ROLE_DOWN="Explorer down";
+	public static final String SUBIENDO = "Subiendo";
+	public static final String BAJANDO = "Bajando";
 	
+	public String getWay() {
+		return way;
+	}
+
+	public void setWay(String way) {
+		this.way = way;
+	}
+
 	// -----------------------------------------------------------------
     // Atributes
     // -----------------------------------------------------------------
@@ -22,6 +32,7 @@ public class Unit {
 	private Cell position;
 	private String action;
 	private String role;
+	public String way;
 	
 	// -----------------------------------------------------------------
     // Constructor

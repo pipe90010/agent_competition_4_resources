@@ -1,28 +1,28 @@
 {
     "initialPositions": [
         {
-            "x": 4,
-            "y": 4
-        },
-        {
             "x": 7,
-            "y": 5
+            "y": 1
         },
         {
-            "x": 8,
+            "x": 10,
             "y": 6
-        },
-        {
-            "x": 8,
-            "y": 2
         },
         {
             "x": 9,
             "y": 5
         },
         {
-            "x": 6,
-            "y": 2
+            "x": 1,
+            "y": 5
+        },
+        {
+            "x": 2,
+            "y": 6
+        },
+        {
+            "x": 8,
+            "y": 10
         }
     ],
     "initialResources": {
@@ -42,13 +42,13 @@
         {
             "x": 3,
             "y": 1,
-            "resource": "Forest",
-            "resource_amount": 200
+            "resource": "Ground"
         },
         {
             "x": 5,
             "y": 1,
-            "resource": "Ground"
+            "resource": "Forest",
+            "resource_amount": 200
         },
         {
             "x": 7,
@@ -68,8 +68,7 @@
         {
             "x": 4,
             "y": 2,
-            "resource": "Forest",
-            "resource_amount": 200
+            "resource": "Ground"
         },
         {
             "x": 6,
@@ -104,8 +103,7 @@
         {
             "x": 7,
             "y": 3,
-            "resource": "Forest",
-            "resource_amount": 200
+            "resource": "Ground"
         },
         {
             "x": 9,
@@ -115,9 +113,7 @@
         {
             "x": 2,
             "y": 4,
-            "resource": "Ore",
-            "resource_amount": 100,
-            "gold_percentage": 20
+            "resource": "Ground"
         },
         {
             "x": 4,
@@ -132,29 +128,22 @@
         {
             "x": 8,
             "y": 4,
-            "resource": "Forest",
-            "resource_amount": 200
+            "resource": "Ground"
         },
         {
             "x": 10,
             "y": 4,
-            "resource": "Ore",
-            "resource_amount": 100,
-            "gold_percentage": 20
+            "resource": "Ground"
         },
         {
             "x": 1,
             "y": 5,
-            "resource": "Ore",
-            "resource_amount": 100,
-            "gold_percentage": 20
+            "resource": "Ground"
         },
         {
             "x": 3,
             "y": 5,
-            "resource": "Ore",
-            "resource_amount": 100,
-            "gold_percentage": 20
+            "resource": "Ground"
         },
         {
             "x": 5,
@@ -169,7 +158,9 @@
         {
             "x": 9,
             "y": 5,
-            "resource": "Ground"
+            "resource": "Ore",
+            "resource_amount": 100,
+            "gold_percentage": 30
         },
         {
             "x": 2,
@@ -210,8 +201,7 @@
         {
             "x": 5,
             "y": 7,
-            "resource": "Forest",
-            "resource_amount": 200
+            "resource": "Ground"
         },
         {
             "x": 7,
@@ -221,13 +211,13 @@
         {
             "x": 9,
             "y": 7,
-            "resource": "Forest",
-            "resource_amount": 200
+            "resource": "Ground"
         },
         {
             "x": 2,
             "y": 8,
-            "resource": "Ground"
+            "resource": "Forest",
+            "resource_amount": 200
         },
         {
             "x": 4,
@@ -242,13 +232,13 @@
         {
             "x": 8,
             "y": 8,
-            "resource": "Ground"
+            "resource": "Forest",
+            "resource_amount": 200
         },
         {
             "x": 10,
             "y": 8,
-            "resource": "Forest",
-            "resource_amount": 200
+            "resource": "Ground"
         },
         {
             "x": 1,
@@ -258,7 +248,9 @@
         {
             "x": 3,
             "y": 9,
-            "resource": "Ground"
+            "resource": "Ore",
+            "resource_amount": 100,
+            "gold_percentage": 30
         },
         {
             "x": 5,
@@ -268,9 +260,7 @@
         {
             "x": 7,
             "y": 9,
-            "resource": "Ore",
-            "resource_amount": 100,
-            "gold_percentage": 20
+            "resource": "Ground"
         },
         {
             "x": 9,
@@ -280,9 +270,7 @@
         {
             "x": 2,
             "y": 10,
-            "resource": "Ore",
-            "resource_amount": 100,
-            "gold_percentage": 20
+            "resource": "Ground"
         },
         {
             "x": 4,

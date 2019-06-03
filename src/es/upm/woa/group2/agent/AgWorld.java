@@ -599,7 +599,7 @@ public class AgWorld extends Agent {
 		int y = currentPosition.getY();
 		switch (nextMove) {
 		case 1:
-			tempTarget = getMirrorCellX(currentPosition);
+			tempTarget = getMirrorCellX(currentPosition,nextMove);
 			if (tempTarget != null) {
 				targetPosition = tempTarget;
 			} else {
@@ -625,11 +625,11 @@ public class AgWorld extends Agent {
 				targetPosition = map[x+1][ y+1];
 			}			
 		case 4:
-			tempTarget = getMirrorCellX(currentPosition);
+			tempTarget = getMirrorCellX(currentPosition,nextMove);
 			if (tempTarget != null) {
 				targetPosition = tempTarget;
 			} else {
-				targetPosition = map[x + 2][y];
+				targetPosition = map[x - 1][y];
 			}
 			break;
 		case 5:
@@ -655,26 +655,26 @@ public class AgWorld extends Agent {
 		return targetPosition;
 	}
 
-	public Cell getMirrorCellX(Cell position) {
+	public Cell getMirrorCellX(Cell position, int coordinate) {
 		int x = position.getX();
 		int y = position.getY();
 
 		// validates that a position is even, else it is odd
 		if (x % 2 == 0) {
 			// up
-			if (x - 2 <= 0)
+			if (x - 2 <= 0 && coordinate==1)
 				return map[X_BOUNDARY][y];
 			// down
-			if (x >= X_BOUNDARY)
+			if (x >= X_BOUNDARY && coordinate==4)
 				return map[2][y];
 			else
 				return null;
 		} else {
 			// up
-			if (x - 1 <= 0)
+			if (x - 1 <= 0 && coordinate==1)
 				return map[X_BOUNDARY - 1][y];
 			// down
-			if (x + 1 >= X_BOUNDARY)
+			if (x + 1 >= X_BOUNDARY && coordinate==4)
 				return map[1][y];
 			else
 				return null;
@@ -707,8 +707,11 @@ public class AgWorld extends Agent {
 				return null;
 		} else {
 			// coordinate 2
-			if (x - 1 <= 0 && coordinate ==2)
-					return map[X_BOUNDARY][y +1];
+			if (x + 1 >= Y_BOUNDARY && coordinate ==2)
+					return map[1][y + 1];			
+			else
+				if (x + 1 <= Y_BOUNDARY && coordinate ==3)
+					return map[X_BOUNDARY][y + 1];
 			
 			else 
 				if (x - 1 <=0 && coordinate==5)
