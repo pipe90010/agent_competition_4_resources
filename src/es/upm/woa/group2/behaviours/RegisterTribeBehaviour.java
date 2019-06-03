@@ -93,9 +93,9 @@ public class RegisterTribeBehaviour extends CyclicBehaviour{
 							 * TEST UNIT IS CREATED FROM THE WORLD
 							 */
 							Cell randomPosition = AgWorldInstance.bookNextRandomCell();
-							AgWorldInstance.createUnit(true,"UnitX1", tg2,randomPosition);
-							AgWorldInstance.createUnit(true,"UnitX2", tg2,randomPosition);
-							AgWorldInstance.createUnit(true,"UnitX3", tg2,randomPosition);
+							AgWorldInstance.createUnit(true,"Unit"+teamNumber+"X1", tg2,randomPosition);
+							AgWorldInstance.createUnit(true,"Unit"+teamNumber+"X2", tg2,randomPosition);
+							AgWorldInstance.createUnit(true,"Unit"+teamNumber+"X3", tg2,randomPosition);
 							
 							//Unit u2 = AgWorldInstance.createUnit(true,"UnitX2", tg2,randomPosition);
 							//u2.setRole(Unit.EXPLOITER_ROLE);
