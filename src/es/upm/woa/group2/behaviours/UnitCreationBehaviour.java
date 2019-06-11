@@ -5,6 +5,7 @@ import java.util.Properties;
 import java.util.Random;
 
 import es.upm.woa.group2.agent.AgUnit;
+import es.upm.woa.group5.ontology.*;
 import es.upm.woa.group2.agent.AgWorld;
 import es.upm.woa.group2.beans.Tribe;
 import es.upm.woa.group2.beans.Unit;
@@ -76,7 +77,7 @@ public class UnitCreationBehaviour extends CyclicBehaviour {
 							// Validate unit creation
 							Integer code = AgWorldInstance.canCreateUnit(tribeSender, senderUnit.getPosition(), indexTribe);
 							String newUnitName = "Unit-" + tribeSender.getId().getName()
-									+ tribeSender.getMemberSize();
+									+ tribeSender.getMemberSize()+1;
 							int performative;
 							switch (code) {
 							case 1:

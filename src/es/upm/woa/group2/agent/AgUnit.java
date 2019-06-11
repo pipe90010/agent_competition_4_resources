@@ -432,7 +432,7 @@ public class AgUnit extends Agent {
 						MessageTemplate.or(
 								MessageTemplate.or(MessageTemplate.MatchProtocol("NotifyCellDetail"), MessageTemplate
 										.or(MessageTemplate.MatchProtocol("InformOriginPosition"), MessageTemplate.or(
-												MessageTemplate.MatchProtocol("informMove"),
+												MessageTemplate.MatchProtocol("MoveToCell"),
 												MessageTemplate.or(MessageTemplate.MatchProtocol("ExploitResources"),
 														MessageTemplate.or(
 																MessageTemplate.MatchProtocol("informBuildingCreation"),

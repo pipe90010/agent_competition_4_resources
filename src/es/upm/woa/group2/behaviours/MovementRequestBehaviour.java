@@ -86,12 +86,10 @@ public class MovementRequestBehaviour extends CyclicBehaviour {
 
 								//creates and sends a reply to the unit that requested the movement
 								
-								MoveToCell movementAction = new MoveToCell();
-								
 								//TODO: new logic to be fixed --> getTargetDirection
 								//createAction.setTarget(requestedPosition);
 								
-								Action agAction = new Action(sender, movementAction);
+								Action agAction = new Action(sender, moveAction);
 								reply = MessageFormatter.createReplyMessage(AgWorldInstance.getLocalName(), msg,
 										ACLMessage.AGREE, "MoveToCell");
 								AgWorldInstance.getContentManager().fillContent(reply, agAction);
@@ -127,8 +125,8 @@ public class MovementRequestBehaviour extends CyclicBehaviour {
 													// Move the unit
 													unit.setPosition(requestedPosition);
 													Cell cell = AgWorldInstance.moveUnitToPosition(unit, requestedPosition);
-													movementAction.setNewlyArrivedCell(cell);
-													Action agActionMovement = new Action(sender, movementAction);
+													moveAction.setNewlyArrivedCell(cell);
+													Action agActionMovement = new Action(sender, moveAction);
 													
 													boolean isNew = tribeSender.addDiscoveredCell(cell);
 													
@@ -138,7 +136,7 @@ public class MovementRequestBehaviour extends CyclicBehaviour {
 													
 													//INFORMS UNIT WHO REQUESTED THE MOVEMENT
 													informMsg = MessageFormatter.createReplyMessage(AgWorldInstance.getLocalName(), msg,
-															ACLMessage.INFORM, "informMove");
+															ACLMessage.INFORM, "MoveToCell");
 													
 													
 													AgWorldInstance.getContentManager().fillContent(informMsg, agActionMovement);
@@ -177,6 +175,7 @@ public class MovementRequestBehaviour extends CyclicBehaviour {
 												} else {
 													informMsg = MessageFormatter.createReplyMessage(AgWorldInstance.getLocalName(), msg,
 															ACLMessage.FAILURE, "NotifyCellDetail");
+													AgWorldInstance.getContentManager().fillContent(informMsg, agAction);
 													AgWorldInstance.send(informMsg);
 													
 													senderUnit.setAction(null);

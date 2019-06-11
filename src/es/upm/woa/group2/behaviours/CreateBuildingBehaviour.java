@@ -112,7 +112,7 @@ public class CreateBuildingBehaviour extends CyclicBehaviour {
 											// updateTribeByTribeAID(tribeSender);
 
 											Unit unitUpdated = AgWorldInstance.findUnitByAID(unitAID, tribeSender);
-											if (unitUpdated.getAction().equals("BUILDING")) {
+											if (unitUpdated.getAction()!=null && unitUpdated.getAction().equals("BUILDING")) {
 												// INFORMS TRIBE ABOUT CELL UPDATE WITH TOWNHALL
 												ACLMessage informMsgTribe = MessageFormatter.createMessage(
 														AgWorldInstance.getLocalName(), ACLMessage.INFORM, "informBuildingCreation",
@@ -124,8 +124,8 @@ public class CreateBuildingBehaviour extends CyclicBehaviour {
 											} else {
 												ACLMessage informMsg = MessageFormatter.createReplyMessage(
 														AgWorldInstance.getLocalName(), msg, ACLMessage.FAILURE,
-														"NotifyCellDetail");
-												AgWorldInstance.getContentManager().fillContent(reply, agAction);
+														"CreateBuilding");
+												AgWorldInstance.getContentManager().fillContent(informMsg, agAction);
 												AgWorldInstance.send(informMsg);
 											}
 
@@ -174,7 +174,7 @@ public class CreateBuildingBehaviour extends CyclicBehaviour {
 											// updateTribeByTribeAID(tribeSender);
 
 											Unit unitUpdated = AgWorldInstance.findUnitByAID(unitAID, tribeSender);
-											if (unitUpdated.getAction().equals("BUILDING")) {
+											if (unitUpdated.getAction()!=null && unitUpdated.getAction().equals("BUILDING")) {
 												// INFORMS TRIBE ABOUT CELL UPDATE WITH TOWNHALL
 												ACLMessage informMsgTribe = MessageFormatter.createMessage(
 														AgWorldInstance.getLocalName(), ACLMessage.INFORM, "informBuildingCreation",

@@ -60,20 +60,20 @@ public class RegisterTribeBehaviour extends CyclicBehaviour{
 					if (conc instanceof RegisterTribe) {
 						RegisterTribe registeredTribeAction = ((RegisterTribe) conc);
 						int teamNumber = registeredTribeAction.getTeamNumber();
-						
+						Action agAction = new Action(sender, registeredTribeAction);
 						if (!AgWorldInstance.isRegistrationPeriod() || AgWorldInstance.findTribePositionByTeamNumber(teamNumber) != -1) {
 							Printer.printSuccess(AgWorldInstance.getLocalName(),"CANNOT REGISTER TRIBE");	
 							
 							ACLMessage reply = MessageFormatter.createReplyMessage(AgWorldInstance.getLocalName(), msg,
 									ACLMessage.REFUSE, "RegisterTribe");
-							AgWorldInstance.getContentManager().fillContent(reply, registeredTribeAction);
+							AgWorldInstance.getContentManager().fillContent(reply, agAction);
 							AgWorldInstance.send(reply);									
 						}
 						else
 						{
 							Printer.printSuccess(AgWorldInstance.getLocalName(),"TRIBE REGISTERED!");	
 							
-							Action agAction = new Action(sender, registeredTribeAction);
+							
 							ACLMessage reply = MessageFormatter.createReplyMessage(AgWorldInstance.getLocalName(), msg,
 									ACLMessage.AGREE, "RegisterTribe");
 							AgWorldInstance.getContentManager().fillContent(reply, agAction);
@@ -93,9 +93,9 @@ public class RegisterTribeBehaviour extends CyclicBehaviour{
 							 * TEST UNIT IS CREATED FROM THE WORLD
 							 */
 							Cell randomPosition = AgWorldInstance.bookNextRandomCell();
-							AgWorldInstance.createUnit(true,"Unit"+teamNumber+"X1", tg2,randomPosition);
-							AgWorldInstance.createUnit(true,"Unit"+teamNumber+"X2", tg2,randomPosition);
-							AgWorldInstance.createUnit(true,"Unit"+teamNumber+"X3", tg2,randomPosition);
+							AgWorldInstance.createUnit(true,"Unit"+teamNumber+"X1", tg2,randomPosition,"es.upm.woa.group"+teamNumber+".agent.AgUnit");
+							AgWorldInstance.createUnit(true,"Unit"+teamNumber+"X2", tg2,randomPosition,"es.upm.woa.group"+teamNumber+".agent.AgUnit");
+							AgWorldInstance.createUnit(true,"Unit"+teamNumber+"X3", tg2,randomPosition,"es.upm.woa.group"+teamNumber+".agent.AgUnit");
 							
 							//Unit u2 = AgWorldInstance.createUnit(true,"UnitX2", tg2,randomPosition);
 							//u2.setRole(Unit.EXPLOITER_ROLE);

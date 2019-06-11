@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Properties;
 import java.util.Random;
-
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -274,7 +273,7 @@ public class AgWorld extends Agent {
 			if (tiles != null && tiles.size() > 0) {
 				X_BOUNDARY = mapHeight.intValue();
 				Y_BOUNDARY = mapWidth.intValue();
-				map = new Cell[X_BOUNDARY + 2][Y_BOUNDARY + 2];
+				map = new Cell[X_BOUNDARY + 1][Y_BOUNDARY + 1];
 
 				for (int i = 0; i < tiles.size(); i++) {
 					JSONObject tile = (JSONObject) tiles.get(i);
@@ -371,7 +370,7 @@ public class AgWorld extends Agent {
 	 */
 
 	public Integer canCreateUnit(Tribe t, Cell position, Integer index) {
-		if (!worldRules.isItsOwnTownhall(t.getTownhall(), tribes.get(index).getTownhall())) {
+		if (t.getTownhall()==null || (t.getTownhall()!=null && !worldRules.isItsOwnTownhall(t.getTownhall(), tribes.get(index).getTownhall()))) {
 			return 2;
 		}
 		if (!worldRules.isInTownhall(t.getTownhall().getX(), t.getTownhall().getY(), position)) {
@@ -388,7 +387,7 @@ public class AgWorld extends Agent {
 		return 1;
 	}
 
-	public void createUnit(boolean isFirst, String nickname, Tribe tribe, Cell initialPosition) {
+	public void createUnit(boolean isFirst, String nickname, Tribe tribe, Cell initialPosition,String className) {
 
 		ContainerController cc = getContainerController();
 
@@ -414,7 +413,7 @@ public class AgWorld extends Agent {
 			//doWait(waitTime);
 
 			if (!isGameOver()) {
-				AgentController ac = cc.createNewAgent(nickname, AgUnit.class.getName(), null);
+				AgentController ac = cc.createNewAgent(nickname, className, null);
 				ac.start();
 				// TODO: CHECK IF WE NEED TO ADD THE UNIT AS A CONTENT FOR THE CELL
 				Unit newUnit = new Unit(getAID(nickname), position);
@@ -431,23 +430,25 @@ public class AgWorld extends Agent {
 				HttpRequest.sendPost("/agent/create", parameters);
 
 				if (tribe != null) {
-					AID ag = tribe.getId();
-
-					ACLMessage msgInform = MessageFormatter.createMessage(getLocalName(), ACLMessage.INFORM,
-							"NotifyNewUnit", ag);
-					// Creates a notifyNewUnit action
-					NotifyNewUnit notify = new NotifyNewUnit();
-
-					notify.setLocation(position);
-					notify.setNewUnit(getAID(nickname));
-					Action agActionNotification = new Action(ag, notify);
-					getContentManager().fillContent(msgInform, agActionNotification);
-					send(msgInform);
+					
 					
 					tribe.addUnit(newUnit);
 					
 					if(!isFirst)
 					{
+						AID ag = tribe.getId();
+
+						ACLMessage msgInform = MessageFormatter.createMessage(getLocalName(), ACLMessage.INFORM,
+								"CreateUnit", ag);
+						// Creates a notifyNewUnit action
+						NotifyNewUnit notify = new NotifyNewUnit();
+
+						notify.setLocation(position);
+						notify.setNewUnit(getAID(nickname));
+						Action agActionNotification = new Action(ag, notify);
+						getContentManager().registerOntology(ontology);
+						getContentManager().fillContent(msgInform, agActionNotification);
+						send(msgInform);
 						tribe.deductCost(150, 50,0,0);
 					}
 					
@@ -493,7 +494,7 @@ public class AgWorld extends Agent {
 						// Insert some method call here.
 						try {
 							Thread.sleep(waitTime);
-							createUnit(isFirst,nickname, tribe, initialPosition);
+							createUnit(isFirst,nickname, tribe, initialPosition,"es.upm.woa.group"+tribe.getTeamNumber()+".agent.AgUnit");
 							
 						} catch (Exception e) {
 							e.printStackTrace();
@@ -624,7 +625,8 @@ public class AgWorld extends Agent {
 			}
 			else {
 				targetPosition = map[x+1][ y+1];
-			}			
+			}
+			break;
 		case 4:
 			tempTarget = getMirrorCellX(currentPosition,nextMove);
 			if (tempTarget != null) {
@@ -659,14 +661,17 @@ public class AgWorld extends Agent {
 	public Cell getMirrorCellX(Cell position, int coordinate) {
 		int x = position.getX();
 		int y = position.getY();
-
+		
+		System.out.println("GOINGX FROM X:"+x);
+		System.out.println("GOINGX FROM Y:"+y);
+		System.out.println("GOINGX TO:"+coordinate);
 		// validates that a position is even, else it is odd
 		if (x % 2 == 0) {
 			// up
 			if (x - 2 <= 0 && coordinate==1)
 				return map[X_BOUNDARY][y];
 			// down
-			if (x >= X_BOUNDARY && coordinate==4)
+			if (x + 2 >= X_BOUNDARY && coordinate==4)
 				return map[2][y];
 			else
 				return null;
@@ -686,6 +691,9 @@ public class AgWorld extends Agent {
 		int x = position.getX();
 		int y = position.getY();
 		
+		System.out.println("GOINGY FROM X:"+x);
+		System.out.println("GOINGY FROM Y:"+y);
+		System.out.println("GOINGY TO:"+coordinate);
 		// validates that a position is even, else it is odd
 		if (y % 2 == 0) {
 			// right
@@ -697,8 +705,10 @@ public class AgWorld extends Agent {
 			else if (y == Y_BOUNDARY && coordinate==3)
 				if (x == X_BOUNDARY)
 					return map[1][1];
-				else
+				else if(x+1<=X_BOUNDARY)
 					return map[x+1][1];
+				else
+					return map[x][y+1];
 			else if (y == Y_BOUNDARY &&  coordinate==5)
 				if (x == X_BOUNDARY)
 					return map[1][y-1];
@@ -712,8 +722,11 @@ public class AgWorld extends Agent {
 					return map[X_BOUNDARY][y +1];
 			
 			else
-				if (x - 1 <= 0 && coordinate ==2)
-					return map[X_BOUNDARY][y +1];
+				if (x - 1 <= 0 && coordinate ==3)
+					if(y +1 <=Y_BOUNDARY)
+						return map[X_BOUNDARY][y +1];
+					else
+						return map[1][1];
 			
 			else 
 				if (x - 1 <=0 && coordinate==5)
