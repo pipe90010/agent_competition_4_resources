@@ -85,7 +85,7 @@ public class AgUnit extends Agent {
 	private SimpleBehaviour createBuilding;
 	private SimpleBehaviour createUnit;
 	
-	private int retornar;
+	
 
 	public AgUnit() {
 		// TODO Auto-generated constructor stub
@@ -216,6 +216,10 @@ public class AgUnit extends Agent {
 
 		movement = new SimpleBehaviour(this) {
 
+		
+
+			private int cellNumber;
+
 			@Override
 			public void action() {
 
@@ -238,12 +242,12 @@ public class AgUnit extends Agent {
 						MoveToCell createAction = new MoveToCell();
 
 						// Moving movement = new Moving();
-						int cellNumber = -1;// new Random().nextInt((5) + 1); // [0...6]
+						//int cellNumber = -1;// new Random().nextInt((5) + 1); // [0...6]
 
 						if (unit.getRole().equals(Unit.EXPLORER_ROLE_UP)
 								|| unit.getRole().equals(Unit.EXPLORER_ROLE_DOWN)) {
-							explore();
-							cellNumber = retornar;
+							
+							cellNumber = explore();
 							System.out.println("================PRINT MOVEMENT================" + cellNumber);
 						} else if (unit.getRole().equals(Unit.EXPLOITER_ROLE)) {
 							cellNumber = getClosestAvailableResourceDirection();
@@ -876,17 +880,18 @@ public class AgUnit extends Agent {
 		}
 	}
 
+		
 	public int bajar1(int x) {
 		if (x % 2 == 0) {
 			if (x + 1 >= X_BOUNDARY) {
 				unit.setWay(Unit.SUBIENDO);
-				return 2;
+				return 6;
 			} else
 				return 4;
 		} else {
 			if (x + 2 >= X_BOUNDARY) {
 				unit.setWay(Unit.SUBIENDO);
-				return 3;
+				return 5;
 			} else
 				return 4;
 		}
@@ -896,18 +901,18 @@ public class AgUnit extends Agent {
 		if (x % 2 == 0) {
 			if (x - 2 <= 0) {
 				unit.setWay(Unit.BAJANDO);
-				return 6;
+				return 2;
 			} else
 				return 1;
 		} else {
 			if (x - 1 <= 0) {
 				unit.setWay(Unit.BAJANDO);
-				return 5;
+				return 3;
 			} else
 				return 1;
 		}
 	}
-
+	
 	public int bajar2(int x) {
 		if (x % 2 == 0) {
 			if (x + 1 >= X_BOUNDARY) {
@@ -923,12 +928,15 @@ public class AgUnit extends Agent {
 				return 4;
 		}
 	}
+	
+	
 
-	public void explore() {
+	public int explore() {
+		int retornar = 0;
 		int x = currentPosition.getX();
 		if (unit.getRole().equals(Unit.EXPLORER_ROLE_UP)) {
 			if (unit.getWay().equals(Unit.SUBIENDO))
-				retornar = subir1(x);
+				retornar = subir1(x);				
 			else
 				if(unit.getWay().equals(Unit.BAJANDO))
 				retornar = bajar1(x);
@@ -938,10 +946,11 @@ public class AgUnit extends Agent {
 				if (unit.getWay().equals(Unit.BAJANDO))
 					retornar = bajar2(x);
 				else
-					if(unit.getWay().equals(Unit.BAJANDO))
+					if(unit.getWay().equals(Unit.SUBIENDO))
 					retornar = subir2(x);
 			}
 		}
+		return retornar;
 	}
 
 

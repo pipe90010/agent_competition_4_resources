@@ -593,7 +593,7 @@ public class AgWorld extends Agent {
 		return (deltaX <= 2 && deltaY <= 1);
 	}
 
-	public Cell getTargetPosition(Cell currentPosition, int nextMove) {
+/*	public Cell getTargetPosition(Cell currentPosition, int nextMove) {
 
 		Cell targetPosition = null;
 		Cell tempTarget = null;
@@ -741,7 +741,7 @@ public class AgWorld extends Agent {
 				return null;
 		}
 	}
-	
+	*/
 
 	// TODO: Move to another class
 	@SuppressWarnings("BooleanMethodIsAlwaysInverted")
