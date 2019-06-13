@@ -351,7 +351,7 @@ public class MovementRequestBehaviour extends CyclicBehaviour {
 			else 
 				if  (coordinate==5) {
 					if(y - 1 ==0) { 
-						return map[x+1][Y_BOUNDARY-1];
+						return map[x+1][Y_BOUNDARY];
 					}
 					else 
 						return null; 
@@ -359,9 +359,9 @@ public class MovementRequestBehaviour extends CyclicBehaviour {
 				if(coordinate ==6)
 					if(y - 1 == 0)
 						if(x-1==0)
-							return map [X_BOUNDARY][Y_BOUNDARY-1];
+							return map [X_BOUNDARY][Y_BOUNDARY];
 						else
-							return map [x-1][Y_BOUNDARY-1];
+							return map [x-1][Y_BOUNDARY];
 					else
 						return map[X_BOUNDARY][y-1];
 			else
